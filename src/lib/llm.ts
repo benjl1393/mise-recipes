@@ -11,10 +11,18 @@ function getClient(): Anthropic {
   return _client;
 }
 
-export function buildSystemPrompt(units: UnitPreference): string {
+export function buildSystemPrompt(units: UnitPreference, servings?: number | null): string {
+  const unitInstruction = units === "both"
+    ? "Provide all measurements in BOTH metric and imperial units. Format as: \"200g (7oz)\" or \"180°C (350°F)\"."
+    : `All measurements must be in ${units} units. Convert if necessary.`;
+
+  const servingsInstruction = servings
+    ? `\nAdjust the recipe to serve ${servings} people. Scale all ingredient quantities accordingly and set servings to "${servings}".`
+    : "";
+
   return `You are a recipe extraction assistant. Extract the recipe from the provided content and return it as JSON.
 
-All measurements must be in ${units} units. Convert if necessary.
+${unitInstruction}${servingsInstruction}
 
 Return ONLY valid JSON matching this exact schema (no markdown, no explanation):
 {
@@ -43,14 +51,21 @@ export function buildUserPrompt(text: string): string {
   return `Extract the recipe from the following content:\n\n${truncated}`;
 }
 
+function extractJson(text: string): string {
+  const fenced = text.match(/```(?:json)?\s*([\s\S]*?)```/);
+  if (fenced) return fenced[1].trim();
+  return text.trim();
+}
+
 export async function parseRecipeFromText(
   text: string,
-  units: UnitPreference
+  units: UnitPreference,
+  servings?: number | null
 ): Promise<Recipe> {
   const response = await getClient().messages.create({
     model: "claude-haiku-4-5-20251001",
     max_tokens: 2048,
-    system: buildSystemPrompt(units),
+    system: buildSystemPrompt(units, servings),
     messages: [{ role: "user", content: buildUserPrompt(text) }],
   });
 
@@ -59,18 +74,19 @@ export async function parseRecipeFromText(
     throw new Error("Unexpected response type from Claude");
   }
 
-  return JSON.parse(content.text) as Recipe;
+  return JSON.parse(extractJson(content.text)) as Recipe;
 }
 
 export async function parseRecipeFromImage(
   imageBase64: string,
   mediaType: "image/jpeg" | "image/png" | "image/webp" | "image/gif",
-  units: UnitPreference
+  units: UnitPreference,
+  servings?: number | null
 ): Promise<Recipe> {
   const response = await getClient().messages.create({
     model: "claude-haiku-4-5-20251001",
     max_tokens: 2048,
-    system: buildSystemPrompt(units),
+    system: buildSystemPrompt(units, servings),
     messages: [
       {
         role: "user",
@@ -93,5 +109,5 @@ export async function parseRecipeFromImage(
     throw new Error("Unexpected response type from Claude");
   }
 
-  return JSON.parse(content.text) as Recipe;
+  return JSON.parse(extractJson(content.text)) as Recipe;
 }

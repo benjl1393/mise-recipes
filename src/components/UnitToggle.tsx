@@ -9,24 +9,24 @@ interface UnitToggleProps {
 
 export function UnitToggle({ value, onChange }: UnitToggleProps) {
   return (
-    <div className="flex items-center border border-border">
+    <div className="inline-flex items-center border border-black">
       <button
         onClick={() => onChange("metric")}
-        className={`px-3 py-1 text-[10px] uppercase tracking-[0.12em] font-[family-name:var(--font-open-gorton)] transition-colors ${
+        className={`px-3 py-1 text-[10px] font-[family-name:var(--font-pixel)] uppercase tracking-[0.12em] transition-colors ${
           value === "metric"
-            ? "bg-navy text-white"
-            : "bg-transparent text-text-secondary hover:text-navy"
+            ? "bg-black text-white"
+            : "bg-transparent text-gray hover:text-black"
         }`}
       >
         Metric
       </button>
-      <div className="w-px h-4 bg-border" />
+
       <button
         onClick={() => onChange("imperial")}
-        className={`px-3 py-1 text-[10px] uppercase tracking-[0.12em] font-[family-name:var(--font-open-gorton)] transition-colors ${
+        className={`px-3 py-1 text-[10px] font-[family-name:var(--font-pixel)] uppercase tracking-[0.12em] transition-colors ${
           value === "imperial"
-            ? "bg-navy text-white"
-            : "bg-transparent text-text-secondary hover:text-navy"
+            ? "bg-black text-white"
+            : "bg-transparent text-gray hover:text-black"
         }`}
       >
         Imperial

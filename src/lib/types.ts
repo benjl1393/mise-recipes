@@ -11,13 +11,17 @@ export interface Recipe {
 
 export type SourceType = "youtube" | "instagram" | "web";
 
-export type UnitPreference = "metric" | "imperial";
+export type UnitPreference = "metric" | "imperial" | "both";
+
+export const SERVING_OPTIONS = [2, 4, 6, 8, 12] as const;
+export type ServingCount = (typeof SERVING_OPTIONS)[number] | null;
 
 export interface ExtractionRequest {
   url?: string;
   image?: string; // base64
   text?: string; // manual paste
   units: UnitPreference;
+  servings?: number | null;
 }
 
 export interface ExtractionHistoryEntry {

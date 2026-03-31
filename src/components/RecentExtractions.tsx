@@ -18,12 +18,12 @@ export function RecentExtractions({
   return (
     <div className="w-full">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-[10px] font-[family-name:var(--font-open-gorton)] text-text-secondary uppercase tracking-[0.2em]">
+        <h2 className="text-[10px] font-[family-name:var(--font-pixel)] text-gray uppercase tracking-[0.2em]">
           Recent
         </h2>
         <button
           onClick={onClear}
-          className="text-[10px] text-text-secondary/40 hover:text-led uppercase tracking-[0.12em] font-[family-name:var(--font-open-gorton)] transition-colors"
+          className="text-[10px] font-[family-name:var(--font-pixel)] text-gray-light hover:text-led uppercase tracking-[0.12em] transition-colors"
         >
           Clear
         </button>
@@ -35,8 +35,8 @@ export function RecentExtractions({
               onClick={() => onSelect(entry)}
               className="w-full text-left px-3 py-2.5 hover:bg-surface-cold text-[13px] transition-colors flex items-baseline justify-between gap-4"
             >
-              <span className="text-navy truncate">{entry.title}</span>
-              <span className="text-text-secondary/50 text-[11px] shrink-0">
+              <span className="text-black truncate">{entry.title}</span>
+              <span className="text-gray text-[11px] shrink-0">
                 {new Date(entry.date).toLocaleDateString()}
               </span>
             </button>

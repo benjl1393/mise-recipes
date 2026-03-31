@@ -27,8 +27,8 @@ export function validateRequest(body: Record<string, unknown>): ValidationResult
     return { valid: false, error: "Must provide url, image, or text" };
   }
 
-  if (units !== "metric" && units !== "imperial") {
-    return { valid: false, error: "units must be 'metric' or 'imperial'" };
+  if (units !== "metric" && units !== "imperial" && units !== "both") {
+    return { valid: false, error: "units must be 'metric', 'imperial', or 'both'" };
   }
 
   if (typeof image === "string" && image.length > MAX_IMAGE_SIZE) {
@@ -54,6 +54,7 @@ export async function POST(request: NextRequest) {
   }
 
   const units: UnitPreference = body.units;
+  const servings: number | null = body.servings ?? null;
 
   try {
     // Image path
@@ -66,7 +67,7 @@ export async function POST(request: NextRequest) {
       const mediaType = base64Match[1] as "image/jpeg" | "image/png" | "image/webp" | "image/gif";
       const imageData = base64Match[2];
 
-      const recipe = await parseRecipeFromImage(imageData, mediaType, units);
+      const recipe = await parseRecipeFromImage(imageData, mediaType, units, servings);
       recipe.source = "Photo upload";
       const markdown = recipeToMarkdown(recipe);
       return NextResponse.json({ recipe, markdown });
@@ -74,7 +75,7 @@ export async function POST(request: NextRequest) {
 
     // Text paste path
     if (body.text) {
-      const recipe = await parseRecipeFromText(body.text as string, units);
+      const recipe = await parseRecipeFromText(body.text as string, units, servings);
       recipe.source = "Manual paste";
       const markdown = recipeToMarkdown(recipe);
       return NextResponse.json({ recipe, markdown });
@@ -116,7 +117,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Could not extract any content from this URL." }, { status: 422 });
     }
 
-    const recipe = await parseRecipeFromText(rawText, units);
+    const recipe = await parseRecipeFromText(rawText, units, servings);
     recipe.source = url;
     const markdown = recipeToMarkdown(recipe);
 

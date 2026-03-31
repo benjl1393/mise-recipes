@@ -1,35 +1,43 @@
 @import "tailwindcss";
 
 @theme inline {
-  /* Navy — the apron */
-  --color-navy: #1b2d4f;
-  --color-navy-light: #2a4270;
-  --color-navy-dark: #0f1a2e;
+  /* Black & white */
+  --color-black: #000000;
+  --color-white: #ffffff;
+  --color-gray: #888888;
+  --color-gray-light: #cccccc;
+  --color-gray-dark: #333333;
 
-  /* Cold whites — fluorescent-lit stainless steel */
-  --color-bg: #f4f5f7;
-  --color-surface: #ffffff;
-  --color-surface-cold: #ebedf1;
+  /* Surfaces */
+  --color-bg: #ffffff;
+  --color-surface: #f5f5f5;
+  --color-surface-cold: #ebebeb;
 
-  /* LED red — the digital clock */
+  /* LED red — accent */
   --color-led: #e02020;
   --color-led-dim: #ff3b3b;
 
-  /* Steel & text */
-  --color-text: #1b2d4f;
-  --color-text-secondary: #6b7a8d;
-  --color-border: #d0d5dd;
-  --color-border-light: #e4e7ec;
+  /* Borders */
+  --color-border: #000000;
+  --color-border-light: #cccccc;
 
   /* Fonts */
-  --font-gorton: var(--font-open-gorton);
-  --font-body: "IBM Plex Mono", "Courier New", monospace;
+  --font-pixel: var(--font-geist-pixel-square);
+  --font-body: var(--font-geist-mono), "Courier New", monospace;
 }
 
 body {
-  background-color: #f4f5f7;
-  color: #1b2d4f;
+  background-color: #ffffff;
+  color: #000000;
   font-family: var(--font-body);
   font-size: 14px;
   line-height: 1.6;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+  }
 }
