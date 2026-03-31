@@ -117,7 +117,8 @@ export function ExtractForm({
           value={url}
           onChange={(e) => setUrl(e.target.value)}
           placeholder="Paste a recipe URL..."
-          className="flex-1 px-4 py-3 bg-surface border border-border text-navy placeholder-text-secondary text-[14px] focus:outline-none focus:border-navy transition-colors"
+          aria-label="Recipe URL"
+          className="flex-1 px-4 py-3 bg-surface border border-border text-navy placeholder-text-secondary text-[14px] focus:outline-none focus:border-navy focus-visible:ring-2 focus-visible:ring-navy/30 transition-colors"
           onKeyDown={(e) => e.key === "Enter" && handleSubmitUrl()}
           disabled={loading}
         />
@@ -135,7 +136,7 @@ export function ExtractForm({
         <button
           onClick={() => fileInputRef.current?.click()}
           disabled={loading}
-          className="px-4 py-2 text-[11px] uppercase tracking-[0.12em] font-[family-name:var(--font-open-gorton)] border border-border text-text-secondary hover:text-navy hover:border-navy disabled:opacity-40 transition-colors"
+          className="px-4 py-3 text-[11px] uppercase tracking-[0.12em] font-[family-name:var(--font-open-gorton)] border border-border text-text-secondary hover:text-navy hover:border-navy disabled:opacity-40 transition-colors"
         >
           Upload photo
         </button>
@@ -161,7 +162,8 @@ export function ExtractForm({
             value={pasteText}
             onChange={(e) => setPasteText(e.target.value)}
             rows={6}
-            className="w-full px-4 py-3 bg-surface border border-border text-navy placeholder-text-secondary text-[14px] focus:outline-none focus:border-navy resize-y transition-colors"
+            aria-label="Recipe text"
+          className="w-full px-4 py-3 bg-surface border border-border text-navy placeholder-text-secondary text-[14px] focus:outline-none focus:border-navy focus-visible:ring-2 focus-visible:ring-navy/30 resize-y transition-colors"
             placeholder="Paste recipe text here..."
           />
           <button

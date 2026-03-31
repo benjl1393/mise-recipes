@@ -43,7 +43,7 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen">
+    <main className="min-h-screen bg-bg">
       <div className="max-w-2xl mx-auto px-4 py-16 space-y-10">
         {/* Header — Gorton embossed label */}
         <header>
@@ -76,8 +76,8 @@ export default function Home() {
 
         {/* Error — LED red */}
         {error && (
-          <div className="px-4 py-3 border-l-2 border-led bg-led/5 text-led text-[13px]">
-            {error}
+          <div className="px-4 py-3 border-l-2 border-led bg-led/5 text-led text-[13px]" role="alert">
+            <span className="font-semibold">Error:</span> {error}
           </div>
         )}
 
