@@ -24,7 +24,7 @@ export function DownloadButton({ markdown, title }: DownloadButtonProps) {
   return (
     <button
       onClick={handleDownload}
-      className="px-6 py-3 bg-accent text-text font-semibold text-[13px] uppercase tracking-[0.08em] hover:bg-accent-hover transition-colors"
+      className="px-6 py-3 bg-navy text-white font-[family-name:var(--font-open-gorton)] text-[12px] uppercase tracking-[0.12em] hover:bg-navy-light transition-colors"
     >
       Download .md
     </button>

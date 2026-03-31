@@ -12,10 +12,10 @@ export function UnitToggle({ value, onChange }: UnitToggleProps) {
     <div className="flex items-center border border-border">
       <button
         onClick={() => onChange("metric")}
-        className={`px-3 py-1 text-[11px] uppercase tracking-[0.1em] transition-colors ${
+        className={`px-3 py-1 text-[10px] uppercase tracking-[0.12em] font-[family-name:var(--font-open-gorton)] transition-colors ${
           value === "metric"
-            ? "bg-accent text-text font-semibold"
-            : "bg-transparent text-text-secondary hover:text-text"
+            ? "bg-navy text-white"
+            : "bg-transparent text-text-secondary hover:text-navy"
         }`}
       >
         Metric
@@ -23,10 +23,10 @@ export function UnitToggle({ value, onChange }: UnitToggleProps) {
       <div className="w-px h-4 bg-border" />
       <button
         onClick={() => onChange("imperial")}
-        className={`px-3 py-1 text-[11px] uppercase tracking-[0.1em] transition-colors ${
+        className={`px-3 py-1 text-[10px] uppercase tracking-[0.12em] font-[family-name:var(--font-open-gorton)] transition-colors ${
           value === "imperial"
-            ? "bg-accent text-text font-semibold"
-            : "bg-transparent text-text-secondary hover:text-text"
+            ? "bg-navy text-white"
+            : "bg-transparent text-text-secondary hover:text-navy"
         }`}
       >
         Imperial

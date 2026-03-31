@@ -117,14 +117,14 @@ export function ExtractForm({
           value={url}
           onChange={(e) => setUrl(e.target.value)}
           placeholder="Paste a recipe URL..."
-          className="flex-1 px-4 py-3 bg-surface border border-border text-text placeholder-text-secondary text-[14px] focus:outline-none focus:border-accent transition-colors"
+          className="flex-1 px-4 py-3 bg-surface border border-border text-navy placeholder-text-secondary text-[14px] focus:outline-none focus:border-navy transition-colors"
           onKeyDown={(e) => e.key === "Enter" && handleSubmitUrl()}
           disabled={loading}
         />
         <button
           onClick={handleSubmitUrl}
           disabled={loading || !url.trim()}
-          className="px-6 py-3 bg-accent text-text font-semibold text-[13px] uppercase tracking-[0.08em] hover:bg-accent-hover disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          className="px-6 py-3 bg-navy text-white font-[family-name:var(--font-open-gorton)] text-[12px] uppercase tracking-[0.12em] hover:bg-navy-light disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
         >
           {loading ? "..." : "Extract"}
         </button>
@@ -135,7 +135,7 @@ export function ExtractForm({
         <button
           onClick={() => fileInputRef.current?.click()}
           disabled={loading}
-          className="px-4 py-2 text-[12px] uppercase tracking-[0.1em] border border-border text-text-secondary hover:text-text hover:border-accent disabled:opacity-40 transition-colors"
+          className="px-4 py-2 text-[11px] uppercase tracking-[0.12em] font-[family-name:var(--font-open-gorton)] border border-border text-text-secondary hover:text-navy hover:border-navy disabled:opacity-40 transition-colors"
         >
           Upload photo
         </button>
@@ -154,20 +154,20 @@ export function ExtractForm({
       {/* Manual Paste */}
       {showPaste && (
         <div className="space-y-3">
-          <p className="text-[12px] text-text-secondary uppercase tracking-[0.1em]">
-            Paste the recipe text or Instagram caption below:
+          <p className="text-[11px] text-text-secondary uppercase tracking-[0.15em] font-[family-name:var(--font-open-gorton)]">
+            Paste the recipe text or caption below
           </p>
           <textarea
             value={pasteText}
             onChange={(e) => setPasteText(e.target.value)}
             rows={6}
-            className="w-full px-4 py-3 bg-surface border border-border text-text placeholder-text-secondary text-[14px] focus:outline-none focus:border-accent resize-y transition-colors"
+            className="w-full px-4 py-3 bg-surface border border-border text-navy placeholder-text-secondary text-[14px] focus:outline-none focus:border-navy resize-y transition-colors"
             placeholder="Paste recipe text here..."
           />
           <button
             onClick={handleSubmitPaste}
             disabled={loading || !pasteText.trim()}
-            className="px-6 py-2 bg-accent text-text font-semibold text-[13px] uppercase tracking-[0.08em] hover:bg-accent-hover disabled:opacity-40 transition-colors"
+            className="px-6 py-2 bg-navy text-white font-[family-name:var(--font-open-gorton)] text-[12px] uppercase tracking-[0.12em] hover:bg-navy-light disabled:opacity-40 transition-colors"
           >
             {loading ? "..." : "Extract from text"}
           </button>
@@ -177,7 +177,7 @@ export function ExtractForm({
       {!showPaste && (
         <button
           onClick={() => setShowPaste(true)}
-          className="text-[12px] text-text-secondary hover:text-accent transition-colors"
+          className="text-[12px] text-text-secondary hover:text-navy transition-colors"
         >
           Or paste text manually
         </button>

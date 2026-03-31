@@ -35,7 +35,7 @@ Single Next.js application deployed to Vercel. One API route handles all extract
 
 ### API Route: `POST /api/extract`
 
-**Input:** `{ url: string }` or `{ image: base64 string }`
+**Input:** `{ url: string }` or `{ image: base64 string }` or `{ text: string }` (manual paste fallback)
 
 **Processing:**
 1. Determine source type
@@ -67,7 +67,7 @@ Fields that can't be determined are returned as `null` and omitted from the mark
 |---|---|---|
 | Web/blog | Default URL | Fetch HTML, strip to main content via readability |
 | YouTube | `youtube.com`, `youtu.be` | Fetch description + captions via `youtube-transcript` |
-| Instagram | `instagram.com` | Fetch post page, extract caption text (note: Instagram aggressively blocks scraping — may require fallback to user pasting caption text manually) |
+| Instagram | `instagram.com` | Extract caption via oEmbed API (free, no auth needed for public posts). Falls back to prompting user to paste caption text manually if oEmbed fails. |
 | Image upload | File input (jpg/png/heic) | Send image to Claude vision API |
 | Generic URL | Fallthrough | Attempt page scrape |
 

@@ -45,20 +45,22 @@ export default function Home() {
   return (
     <main className="min-h-screen">
       <div className="max-w-2xl mx-auto px-4 py-16 space-y-10">
-        {/* Header */}
-        <header className="space-y-2">
-          <div className="flex items-end justify-between">
-            <h1 className="font-display text-[38px] leading-[1.1] tracking-tight text-text">
+        {/* Header — Gorton embossed label */}
+        <header>
+          <div className="flex items-end justify-between mb-3">
+            <h1
+              className="font-[family-name:var(--font-open-gorton)] text-[32px] md:text-[40px] uppercase tracking-[0.12em] leading-none text-navy"
+            >
               Recipe Archiver
             </h1>
             <UnitToggle value={units} onChange={setUnits} />
           </div>
-          <p className="text-text-secondary text-[12px] uppercase tracking-[0.15em]">
+          <p className="text-[11px] text-text-secondary uppercase tracking-[0.2em] font-medium">
             Paste a URL. Upload a photo. Get the recipe.
           </p>
         </header>
 
-        {/* Divider */}
+        {/* Steel divider */}
         <div className="h-px bg-border" />
 
         {/* Extract Form */}
@@ -72,9 +74,9 @@ export default function Home() {
           onInstagramPaste={() => setError(null)}
         />
 
-        {/* Error */}
+        {/* Error — LED red */}
         {error && (
-          <div className="px-4 py-3 border border-error-border bg-error/5 text-error text-[13px]">
+          <div className="px-4 py-3 border-l-2 border-led bg-led/5 text-led text-[13px]">
             {error}
           </div>
         )}
