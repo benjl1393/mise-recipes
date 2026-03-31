@@ -12,6 +12,10 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+      "youtube-transcript": path.resolve(
+        __dirname,
+        "node_modules/youtube-transcript/dist/youtube-transcript.esm.js"
+      ),
     },
   },
 });
