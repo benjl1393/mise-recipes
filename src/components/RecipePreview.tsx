@@ -6,8 +6,8 @@ interface RecipePreviewProps {
 
 export function RecipePreview({ markdown }: RecipePreviewProps) {
   return (
-    <div className="w-full border border-gray-700 rounded p-6 bg-gray-900/50">
-      <pre className="whitespace-pre-wrap font-mono text-sm text-gray-200 leading-relaxed">
+    <div className="w-full border border-border bg-surface p-6 md:p-8">
+      <pre className="whitespace-pre-wrap font-body text-[14px] text-text leading-[1.6]">
         {markdown}
       </pre>
     </div>

@@ -5,12 +5,20 @@ import { UnitPreference } from "@/lib/types";
 
 interface ExtractFormProps {
   units: UnitPreference;
-  onExtract: (result: { recipe: Record<string, unknown>; markdown: string }) => void;
+  onExtract: (result: {
+    recipe: Record<string, unknown>;
+    markdown: string;
+  }) => void;
   onError: (error: string) => void;
   onInstagramPaste: () => void;
 }
 
-export function ExtractForm({ units, onExtract, onError, onInstagramPaste }: ExtractFormProps) {
+export function ExtractForm({
+  units,
+  onExtract,
+  onError,
+  onInstagramPaste,
+}: ExtractFormProps) {
   const [url, setUrl] = useState("");
   const [pasteText, setPasteText] = useState("");
   const [loading, setLoading] = useState(false);
@@ -64,7 +72,9 @@ export function ExtractForm({ units, onExtract, onError, onInstagramPaste }: Ext
     }
   };
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -100,34 +110,38 @@ export function ExtractForm({ units, onExtract, onError, onInstagramPaste }: Ext
 
   return (
     <div className="w-full space-y-4">
-      <div className="flex gap-2">
+      {/* URL Input */}
+      <div className="flex gap-3">
         <input
           type="url"
           value={url}
           onChange={(e) => setUrl(e.target.value)}
           placeholder="Paste a recipe URL..."
-          className="flex-1 px-4 py-3 bg-transparent border border-gray-600 rounded text-white placeholder-gray-500 focus:outline-none focus:border-white"
+          className="flex-1 px-4 py-3 bg-surface border border-border text-text placeholder-text-secondary text-[14px] focus:outline-none focus:border-accent transition-colors"
           onKeyDown={(e) => e.key === "Enter" && handleSubmitUrl()}
           disabled={loading}
         />
         <button
           onClick={handleSubmitUrl}
           disabled={loading || !url.trim()}
-          className="px-6 py-3 bg-white text-black font-bold rounded hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-6 py-3 bg-accent text-text font-semibold text-[13px] uppercase tracking-[0.08em] hover:bg-accent-hover disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
         >
           {loading ? "..." : "Extract"}
         </button>
       </div>
 
+      {/* Image Upload */}
       <div className="flex items-center gap-4">
         <button
           onClick={() => fileInputRef.current?.click()}
           disabled={loading}
-          className="px-4 py-2 text-sm border border-gray-600 rounded text-gray-300 hover:text-white hover:border-white disabled:opacity-50"
+          className="px-4 py-2 text-[12px] uppercase tracking-[0.1em] border border-border text-text-secondary hover:text-text hover:border-accent disabled:opacity-40 transition-colors"
         >
           Upload photo
         </button>
-        <span className="text-xs text-gray-500">JPG, PNG, or HEIC — max 5MB</span>
+        <span className="text-[11px] text-text-secondary">
+          JPG, PNG, or HEIC — max 5MB
+        </span>
         <input
           ref={fileInputRef}
           type="file"
@@ -137,20 +151,23 @@ export function ExtractForm({ units, onExtract, onError, onInstagramPaste }: Ext
         />
       </div>
 
+      {/* Manual Paste */}
       {showPaste && (
-        <div className="space-y-2">
-          <p className="text-sm text-gray-400">Paste the recipe text or Instagram caption below:</p>
+        <div className="space-y-3">
+          <p className="text-[12px] text-text-secondary uppercase tracking-[0.1em]">
+            Paste the recipe text or Instagram caption below:
+          </p>
           <textarea
             value={pasteText}
             onChange={(e) => setPasteText(e.target.value)}
             rows={6}
-            className="w-full px-4 py-3 bg-transparent border border-gray-600 rounded text-white placeholder-gray-500 focus:outline-none focus:border-white resize-y"
+            className="w-full px-4 py-3 bg-surface border border-border text-text placeholder-text-secondary text-[14px] focus:outline-none focus:border-accent resize-y transition-colors"
             placeholder="Paste recipe text here..."
           />
           <button
             onClick={handleSubmitPaste}
             disabled={loading || !pasteText.trim()}
-            className="px-6 py-2 bg-white text-black font-bold rounded hover:bg-gray-200 disabled:opacity-50"
+            className="px-6 py-2 bg-accent text-text font-semibold text-[13px] uppercase tracking-[0.08em] hover:bg-accent-hover disabled:opacity-40 transition-colors"
           >
             {loading ? "..." : "Extract from text"}
           </button>
@@ -160,7 +177,7 @@ export function ExtractForm({ units, onExtract, onError, onInstagramPaste }: Ext
       {!showPaste && (
         <button
           onClick={() => setShowPaste(true)}
-          className="text-sm text-gray-500 hover:text-gray-300 underline"
+          className="text-[12px] text-text-secondary hover:text-accent transition-colors"
         >
           Or paste text manually
         </button>
