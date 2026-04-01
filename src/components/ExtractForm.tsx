@@ -61,6 +61,21 @@ export function ExtractForm({
 
   const handleSubmit = async () => {
     if (!canSubmit()) return;
+
+    // Instagram doesn't allow automatic extraction — skip the API call
+    if (sourceMode === "url") {
+      try {
+        const hostname = new URL(url.trim()).hostname.replace("www.", "");
+        if (hostname === "instagram.com") {
+          setSourceMode("paste");
+          onInstagramPaste();
+          return;
+        }
+      } catch {
+        // Invalid URL — let the API handle validation
+      }
+    }
+
     setLoading(true);
 
     try {
@@ -242,7 +257,7 @@ export function ExtractForm({
         disabled={!canSubmit()}
         className="w-full py-4 bg-black text-white font-[family-name:var(--font-pixel)] text-[14px] uppercase tracking-[0.15em] hover:bg-gray-dark disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
       >
-        {loadingState ? "..." : "Extract Recipe"}
+        {loadingState ? "..." : "Print Recipe"}
       </button>
     </div>
   );

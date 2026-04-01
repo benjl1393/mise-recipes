@@ -14,6 +14,7 @@ export default function Home() {
   const [currentMarkdown, setCurrentMarkdown] = useState<string | null>(null);
   const [currentTitle, setCurrentTitle] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
+  const [info, setInfo] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   const handleExtract = (result: {
@@ -23,6 +24,7 @@ export default function Home() {
     setCurrentMarkdown(result.markdown);
     setCurrentTitle(result.recipe.title as string);
     setError(null);
+    setInfo(null);
 
     addEntry({
       title: result.recipe.title as string,
@@ -58,14 +60,25 @@ export default function Home() {
           onExtract={handleExtract}
           onError={(msg) => {
             setError(msg);
+            setInfo(null);
             setCurrentMarkdown(null);
           }}
-          onInstagramPaste={() => setError(null)}
+          onInstagramPaste={() => {
+            setError(null);
+            setInfo("Instagram doesn\u2019t allow automatic extraction. Paste the recipe caption or text below.");
+          }}
           onLoadingChange={setLoading}
         />
 
         {/* Processing animation */}
         {loading && <ProcessingAnimation />}
+
+        {/* Info */}
+        {info && (
+          <div className="mt-6 px-4 py-3 border-l-2 border-black bg-black/5 text-black text-[13px]" role="status">
+            {info}
+          </div>
+        )}
 
         {/* Error */}
         {error && (
