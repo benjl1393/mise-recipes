@@ -52,14 +52,32 @@ function extractReadableText(html: string): string {
 }
 
 export async function fetchAndExtract(url: string): Promise<WebExtraction> {
-  const response = await fetch(url, {
-    headers: {
-      "User-Agent": "Mozilla/5.0 (compatible; RecipeArchiver/1.0)",
-    },
-  });
+  let response: Response;
+  try {
+    response = await fetch(url, {
+      headers: {
+        "User-Agent": "Mozilla/5.0 (compatible; RecipeArchiver/1.0)",
+      },
+      signal: AbortSignal.timeout(15000),
+    });
+  } catch (error) {
+    if (error instanceof DOMException && error.name === "TimeoutError") {
+      throw new Error("The site took too long to respond. Try again, or paste the recipe text instead.");
+    }
+    throw new Error("Couldn't reach that site. Check the URL and try again.");
+  }
 
   if (!response.ok) {
-    throw new Error(`Failed to fetch URL: ${response.status}`);
+    if (response.status === 403 || response.status === 401) {
+      throw new Error("This site blocked automatic access. Try copying the recipe text from the page and pasting it instead.");
+    }
+    if (response.status === 404) {
+      throw new Error("Page not found. The recipe may have been moved or deleted.");
+    }
+    if (response.status >= 500) {
+      throw new Error("That site seems to be having issues right now. Try again later, or paste the recipe text instead.");
+    }
+    throw new Error(`Failed to fetch URL (${response.status}). Try pasting the recipe text instead.`);
   }
 
   const html = await response.text();
