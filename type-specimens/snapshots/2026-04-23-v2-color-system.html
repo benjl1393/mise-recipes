@@ -1,0 +1,1461 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Mise — Type specimen v2</title>
+
+    <style>
+      @font-face {
+        font-family: "Departure Mono";
+        src: url("./fonts/DepartureMono-Regular.woff2") format("woff2");
+        font-weight: 400;
+        font-style: normal;
+        font-display: swap;
+      }
+      @font-face {
+        font-family: "Commit Mono";
+        src: url("./fonts/CommitMono-400-Regular.otf") format("opentype");
+        font-weight: 400;
+        font-style: normal;
+        font-display: swap;
+      }
+      @font-face {
+        font-family: "Commit Mono";
+        src: url("./fonts/CommitMono-400-Italic.otf") format("opentype");
+        font-weight: 400;
+        font-style: italic;
+        font-display: swap;
+      }
+
+      :root {
+        /* families — two-font system, all-monospace ticket */
+        --font-display: "Departure Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+        --font-body: "Commit Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+        --font-mono: "Commit Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+        /* ══════ Base surfaces ══════ */
+        --ink-900: #0c0805;
+        --ink-800: #141010;
+        --ink-700: #1a1613;  /* primary dark bg */
+        --ink-600: #231d18;  /* raised dark panel */
+
+        --paper-50:  #faf4ea;  /* brightest cream, PDF page */
+        --paper-100: #f3ede3;  /* primary card bg */
+        --paper-200: #e7ded0;  /* subtle cream shift */
+
+        /* ══════ Ink on paper (warm dark text on cream) ══════ */
+        --ink-primary:   #181310;  /* body */
+        --ink-secondary: #3a3028;  /* heading rule */
+        --ink-dim:       #6b5f54;  /* dim body */
+        --ink-muted-v2:  #998475;  /* placeholder */
+        --rule-cream:    #d6ccbd;  /* hairline on cream */
+
+        /* ══════ Paper on ink (warm light text on dark) ══════ */
+        --paper-primary: #f3ede3;
+        --paper-dim:     #c0b4a5;
+        --paper-muted:   #9a8c7c;
+        --rule-ink:      #3a3028;
+
+        /* ══════ Heat (warm accents) ══════ */
+        --flame:        #d8451e;  /* primary accent — Fire, brand ✶, service heat */
+        --flame-bright: #e85c32;  /* hover */
+        --flame-deep:   #b13818;  /* pressed */
+        --ember:        #8a2f16;  /* extraction-badge bg */
+        --copper:       #c67a3c;  /* tag highlights on dark */
+        --copper-deep:  #955a2b;  /* links on cream */
+
+        /* ══════ Cool complements ══════ */
+        --steel: #1e272e;  /* deep teal, shadow base */
+        --slate: #7e858c;  /* cool mid-gray */
+
+        /* ══════ Functional ══════ */
+        --error:        #c52e14;
+        --error-soft:   #f7dad3;
+        --success:      #6a7846;
+        --success-soft: #e3e5da;
+        --warning:      #d69c2f;
+
+        /* ══════ Depth ══════ */
+        --shadow:      rgba(30, 39, 46, 0.5);
+        --shadow-soft: rgba(30, 39, 46, 0.25);
+
+        /* ══════ Legacy aliases (existing selectors) ══════ */
+        --bg-page:       var(--ink-700);
+        --bg-panel:      var(--ink-600);
+        --bg-card:       var(--paper-100);
+        --bg-pdf:        var(--paper-50);
+        --ink:           var(--ink-primary);
+        --ink-paper:     var(--paper-primary);
+        --ink-paper-dim: var(--paper-muted);
+        --rule:          var(--rule-cream);
+        --rule-dark:     var(--rule-ink);
+      }
+
+      * { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+
+      body {
+        background: var(--bg-page);
+        color: var(--ink-paper);
+        font-family: var(--font-body);
+        font-synthesis: none;
+        font-size: 14px;
+        line-height: 1.55;
+        -webkit-font-smoothing: antialiased;
+        text-rendering: optimizeLegibility;
+        padding: 48px 32px 120px;
+      }
+
+      /* ─── Page header ──────────────────────────────────────────── */
+
+      .page-header {
+        max-width: 1440px;
+        margin: 0 auto 56px;
+        border-bottom: 1px solid var(--rule-dark);
+        padding-bottom: 24px;
+      }
+
+      .page-header h1 {
+        font-family: var(--font-display);
+        font-weight: 400;
+        font-size: 42px;
+        line-height: 1;
+        letter-spacing: 0;
+        text-transform: uppercase;
+        margin: 0 0 10px;
+        color: var(--ink-paper);
+      }
+
+      .page-header .meta {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        color: var(--ink-paper-dim);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+
+      /* ─── Section headers ──────────────────────────────────────── */
+
+      .section-header {
+        max-width: 1440px;
+        margin: 80px auto 28px;
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        border-bottom: 1px solid var(--rule-dark);
+        padding-bottom: 12px;
+      }
+
+      .section-header h2 {
+        font-family: var(--font-display);
+        font-weight: 400;
+        font-size: 22px;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+        margin: 0;
+        color: var(--ink-paper);
+      }
+
+      .section-header .tag {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        color: var(--ink-paper-dim);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+      }
+
+      .section-intro {
+        max-width: 1440px;
+        margin: 0 auto 40px;
+        font-size: 13px;
+        line-height: 1.6;
+        color: var(--paper-dim);
+        max-width: 760px;
+      }
+
+      .section-intro strong {
+        color: var(--ink-paper);
+      }
+
+      .section-intro code {
+        font-family: var(--font-mono);
+        font-size: 11.5px;
+        background: var(--rule-dark);
+        padding: 1px 5px;
+        color: var(--ink-paper);
+      }
+
+      /* ─── Three-panel layout ───────────────────────────────────── */
+
+      .three-panel {
+        max-width: 1440px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: 440px 400px 440px;
+        gap: 48px;
+        justify-content: center;
+        align-items: start;
+      }
+
+      @media (max-width: 1400px) {
+        .three-panel {
+          grid-template-columns: 1fr;
+          gap: 64px;
+          max-width: 600px;
+        }
+      }
+
+      .panel-label {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        color: var(--ink-paper-dim);
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        margin: 0 0 14px;
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        gap: 12px;
+      }
+
+      .panel-label .caption {
+        color: var(--paper-dim);
+        text-transform: none;
+        letter-spacing: 0;
+        font-size: 11px;
+      }
+
+      /* ─── Panel A — raw .md ────────────────────────────────────── */
+
+      .raw-md {
+        background: var(--bg-panel);
+        padding: 28px 24px;
+        font-family: var(--font-mono);
+        font-size: 11.5px;
+        line-height: 1.75;
+        color: var(--ink-paper);
+        white-space: pre-wrap;
+        overflow-x: auto;
+        border: 1px solid var(--rule-dark);
+        tab-size: 2;
+      }
+
+      .raw-md .fm-fence,
+      .raw-md .hr,
+      .raw-md .dim {
+        color: var(--ink-paper-dim);
+      }
+
+      .raw-md .key {
+        color: var(--copper);
+      }
+
+      .raw-md .heading {
+        color: var(--flame);
+      }
+
+      .raw-md .tag {
+        color: var(--copper);
+      }
+
+      .raw-md .footer-glyph {
+        color: var(--flame);
+      }
+
+      /* ─── Panel B — popup mock ─────────────────────────────────── */
+
+      .popup-frame {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .popup {
+        width: 400px;
+        background: var(--bg-card);
+        color: var(--ink);
+        border: 1px solid var(--rule);
+        box-shadow: 0 20px 60px -20px var(--shadow);
+      }
+
+      /* ticket-top */
+      .popup .ticket-top {
+        padding: 14px 18px;
+        border-bottom: 1px dashed var(--rule);
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+      }
+
+      .popup .ticket-top .brand {
+        font-family: var(--font-display);
+        font-weight: 400;
+        font-size: 10px;
+        letter-spacing: 0.08em;
+        line-height: 1.2;
+        text-transform: uppercase;
+        color: var(--ink);
+      }
+
+      .popup .ticket-top .captured {
+        font-family: var(--font-display);
+        font-size: 10px;
+        line-height: 1.2;
+        color: var(--ink-dim);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+
+      /* source + via */
+      .popup .source {
+        padding: 12px 18px;
+        border-bottom: 1px dashed var(--rule);
+        font-family: var(--font-mono);
+        font-size: 10px;
+        color: var(--ink-dim);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        letter-spacing: 0.02em;
+      }
+
+      .popup .source .badge {
+        background: var(--ember);
+        color: var(--bg-card);
+        padding: 3px 7px 2px;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+
+      /* title + subtitle */
+      .popup h2.title {
+        font-family: var(--font-display);
+        font-weight: 400;
+        font-size: 24px;
+        line-height: 1.1;
+        letter-spacing: 0;
+        text-transform: uppercase;
+        margin: 16px 18px 6px;
+        color: var(--ink);
+      }
+
+      .popup .subtitle {
+        margin: 0 18px 14px;
+        font-family: var(--font-body);
+        font-weight: 400;
+        font-style: italic;
+        font-size: 12px;
+        line-height: 1.45;
+        color: var(--ink-dim);
+      }
+
+      /* facts */
+      .popup .facts {
+        display: flex;
+        gap: 18px;
+        padding: 10px 18px;
+        border-top: 1px solid var(--rule);
+        border-bottom: 1px solid var(--rule);
+        font-family: var(--font-mono);
+        font-size: 10px;
+        color: var(--ink-dim);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+
+      .popup .facts .fact {
+        display: flex;
+        align-items: baseline;
+        gap: 6px;
+      }
+
+      .popup .facts .fact strong {
+        color: var(--ink);
+        font-weight: 400;
+        font-size: 11px;
+        letter-spacing: 0.02em;
+      }
+
+      /* section heading */
+      .popup h3.section {
+        font-family: var(--font-display);
+        font-weight: 400;
+        font-size: 13px;
+        line-height: 1.2;
+        margin: 18px 18px 10px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--ink);
+        border-bottom: 1px solid var(--ink);
+        padding-bottom: 6px;
+      }
+
+      /* ingredients */
+      .popup ul.ingredients {
+        list-style: none;
+        padding: 0;
+        margin: 0 18px 18px;
+        font-size: 13px;
+        line-height: 1.5;
+      }
+
+      .popup ul.ingredients li {
+        display: grid;
+        grid-template-columns: 78px 1fr;
+        gap: 8px;
+        align-items: baseline;
+        padding: 4px 0;
+        border-bottom: 1px dotted var(--rule);
+      }
+
+      .popup ul.ingredients li .qty {
+        font-family: var(--font-mono);
+        font-size: 11.5px;
+        color: var(--ink);
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+      }
+
+      /* method */
+      .popup ol.method {
+        padding: 0;
+        margin: 0 18px 18px;
+        list-style: none;
+        counter-reset: step;
+      }
+
+      .popup ol.method li {
+        counter-increment: step;
+        display: grid;
+        grid-template-columns: 32px 1fr;
+        gap: 10px;
+        padding: 9px 0;
+        border-bottom: 1px solid var(--rule);
+        font-size: 13px;
+        line-height: 1.55;
+      }
+
+      .popup ol.method li::before {
+        content: counter(step, decimal-leading-zero);
+        font-family: var(--font-mono);
+        font-size: 11px;
+        color: var(--ink-dim);
+        letter-spacing: 0.06em;
+        padding-top: 3px;
+      }
+
+      /* tag line */
+      .popup .tags {
+        padding: 12px 18px 8px;
+        border-top: 1px dashed var(--rule);
+        font-family: var(--font-mono);
+        font-size: 10.5px;
+        color: var(--ink-dim);
+        letter-spacing: 0.04em;
+        word-spacing: 0.15em;
+      }
+
+      .popup .tags .tag {
+        color: var(--ember);
+      }
+
+      /* ticket-bottom */
+      .popup .ticket-bottom {
+        padding: 8px 18px 12px;
+        font-family: var(--font-display);
+        font-size: 10px;
+        color: var(--ink-dim);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        display: flex;
+        justify-content: space-between;
+      }
+
+      .popup .ticket-bottom .glyph {
+        color: var(--flame);
+      }
+
+      /* popup chrome — extension actions, NOT .md content */
+      .popup-actions {
+        width: 400px;
+        background: var(--bg-panel);
+        border: 1px solid var(--rule-dark);
+        padding: 12px 14px;
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
+
+      .popup-actions .fire-btn {
+        flex: 1;
+        background: var(--flame);
+        color: var(--bg-card);
+        border: none;
+        padding: 10px 14px;
+        font-family: var(--font-body);
+        font-weight: 400;
+        font-size: 12px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+      }
+
+      .popup-actions .fire-btn .kbd {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        letter-spacing: 0.08em;
+        border: 1px solid var(--bg-card);
+        padding: 1px 5px;
+        opacity: 0.7;
+      }
+
+      .popup-actions .secondary-btn {
+        background: transparent;
+        border: 1px solid var(--rule-dark);
+        color: var(--ink-paper);
+        padding: 10px 12px;
+        font-family: var(--font-body);
+        font-weight: 400;
+        font-size: 10.5px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        cursor: pointer;
+      }
+
+      .chrome-caption {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        color: var(--ink-paper-dim);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        text-align: center;
+      }
+
+      /* ─── Panel C — PDF export ─────────────────────────────────── */
+
+      .pdf-frame {
+        display: flex;
+        justify-content: flex-start;
+      }
+
+      .pdf-page {
+        width: 440px;
+        min-height: 623px;
+        background: var(--bg-pdf);
+        color: var(--ink);
+        padding: 52px 44px;
+        box-shadow: 0 30px 80px -20px var(--shadow);
+        border: 1px solid var(--rule);
+        font-size: 10.5px;
+      }
+
+      .pdf-page .brand-line {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        border-bottom: 1px solid var(--ink);
+        padding-bottom: 8px;
+      }
+
+      .pdf-page .brand-line .brand {
+        font-family: var(--font-display);
+        font-weight: 400;
+        font-size: 9px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--ink);
+      }
+
+      .pdf-page .brand-line .captured {
+        font-family: var(--font-display);
+        font-size: 9px;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--ink-dim);
+      }
+
+      .pdf-page .source-line {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 0 14px;
+        border-bottom: 1px dashed var(--rule);
+        font-family: var(--font-mono);
+        font-size: 9px;
+        color: var(--ink-dim);
+        letter-spacing: 0.02em;
+      }
+
+      .pdf-page .source-line .badge {
+        background: var(--ember);
+        color: var(--bg-pdf);
+        padding: 2px 6px 1px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .pdf-page h1 {
+        font-family: var(--font-display);
+        font-weight: 400;
+        font-size: 26px;
+        line-height: 1.1;
+        letter-spacing: 0;
+        text-transform: uppercase;
+        margin: 32px 0 8px;
+      }
+
+      .pdf-page .pdf-subtitle {
+        font-family: var(--font-body);
+        font-weight: 400;
+        font-style: italic;
+        font-size: 10.5px;
+        color: var(--ink-dim);
+        line-height: 1.5;
+        margin: 0 0 24px;
+        max-width: 360px;
+      }
+
+      .pdf-page .pdf-facts {
+        display: flex;
+        gap: 24px;
+        border-top: 1px solid var(--rule);
+        border-bottom: 1px solid var(--rule);
+        padding: 10px 0;
+        margin-bottom: 24px;
+        font-family: var(--font-mono);
+        font-size: 9px;
+        color: var(--ink-dim);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+      }
+
+      .pdf-page .pdf-facts .fact strong {
+        display: block;
+        font-family: var(--font-body);
+        font-weight: 400;
+        font-size: 11.5px;
+        color: var(--ink);
+        letter-spacing: 0;
+        text-transform: none;
+        margin-top: 2px;
+      }
+
+      .pdf-page h2 {
+        font-family: var(--font-display);
+        font-weight: 400;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        border-bottom: 1px solid var(--ink);
+        padding-bottom: 5px;
+        margin: 22px 0 10px;
+      }
+
+      .pdf-page ul.pdf-ing {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        font-size: 10px;
+        line-height: 1.55;
+      }
+
+      .pdf-page ul.pdf-ing li {
+        display: grid;
+        grid-template-columns: 72px 1fr;
+        gap: 8px;
+        padding: 3px 0;
+        border-bottom: 1px dotted var(--rule);
+        align-items: baseline;
+      }
+
+      .pdf-page ul.pdf-ing li .qty {
+        font-family: var(--font-mono);
+        font-size: 9.5px;
+        color: var(--ink);
+      }
+
+      .pdf-page ol.pdf-method {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        counter-reset: pstep;
+      }
+
+      .pdf-page ol.pdf-method li {
+        counter-increment: pstep;
+        display: grid;
+        grid-template-columns: 24px 1fr;
+        gap: 10px;
+        padding: 8px 0;
+        border-bottom: 1px solid var(--rule);
+        font-size: 10px;
+        line-height: 1.55;
+      }
+
+      .pdf-page ol.pdf-method li::before {
+        content: counter(pstep, decimal-leading-zero);
+        font-family: var(--font-mono);
+        font-size: 9px;
+        color: var(--ink-dim);
+        letter-spacing: 0.06em;
+        padding-top: 1px;
+      }
+
+      .pdf-page .pdf-tags {
+        margin-top: 28px;
+        padding-top: 10px;
+        border-top: 1px dashed var(--rule);
+        font-family: var(--font-mono);
+        font-size: 9px;
+        color: var(--ink-dim);
+        letter-spacing: 0.04em;
+      }
+
+      .pdf-page .pdf-tags .tag {
+        color: var(--ember);
+      }
+
+      .pdf-page .pdf-footer {
+        margin-top: 12px;
+        padding-top: 10px;
+        border-top: 1px solid var(--ink);
+        display: flex;
+        justify-content: space-between;
+        font-family: var(--font-mono);
+        font-size: 9px;
+        color: var(--ink-dim);
+        letter-spacing: 0.02em;
+      }
+
+      .pdf-page .pdf-footer > span:first-child {
+        font-family: var(--font-display);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+      }
+
+      .pdf-page .pdf-footer .glyph {
+        color: var(--flame);
+      }
+
+      /* ─── Type scale ───────────────────────────────────────────── */
+
+      .scale {
+        max-width: 1440px;
+        margin: 0 auto;
+        display: grid;
+        gap: 18px;
+      }
+
+      .scale-row {
+        display: grid;
+        grid-template-columns: 120px 1fr;
+        gap: 24px;
+        align-items: baseline;
+        padding-bottom: 18px;
+        border-bottom: 1px solid var(--rule-dark);
+      }
+
+      .scale-row .token {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        color: var(--ink-paper-dim);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        padding-top: 6px;
+      }
+
+      .sample {
+        color: var(--ink-paper);
+        margin: 0;
+      }
+
+      .s-display-xl { font-family: var(--font-display); font-weight: 400; font-size: 48px; line-height: 1; text-transform: uppercase; }
+      .s-display-lg { font-family: var(--font-display); font-weight: 400; font-size: 34px; line-height: 1.05; text-transform: uppercase; }
+      .s-display    { font-family: var(--font-display); font-weight: 400; font-size: 24px; line-height: 1.1; letter-spacing: 0; text-transform: uppercase; }
+      .s-lg         { font-family: var(--font-body);    font-weight: 400; font-size: 18px; line-height: 1.35; }
+      .s-md         { font-family: var(--font-body);    font-weight: 400; font-size: 15px; line-height: 1.45; }
+      .s-base       { font-family: var(--font-body);    font-weight: 400; font-size: 13px; line-height: 1.55; }
+      .s-sm         { font-family: var(--font-body);    font-weight: 400; font-size: 12px; line-height: 1.5; }
+      .s-mono       { font-family: var(--font-mono);    font-size: 11px; line-height: 1.3; color: var(--ink-paper-dim); text-transform: uppercase; letter-spacing: 0.08em; }
+      .s-mono-xxs   { font-family: var(--font-mono);    font-size: 10px; line-height: 1.2; color: var(--ink-paper-dim); text-transform: uppercase; letter-spacing: 0.12em; }
+
+      /* ─── Color swatches ───────────────────────────────────────── */
+
+      .swatches {
+        max-width: 1440px;
+        margin: 0 auto;
+        display: grid;
+        gap: 56px;
+      }
+
+      .swatch-group {
+        display: grid;
+        gap: 20px;
+      }
+
+      .swatch-group-label {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        color: var(--paper-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        margin: 0;
+        padding-bottom: 10px;
+        border-bottom: 1px solid var(--rule-ink);
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+      }
+
+      .swatch-group-label .hint {
+        color: var(--paper-muted);
+        font-size: 11px;
+        letter-spacing: 0.04em;
+        text-transform: none;
+      }
+
+      .swatch-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 20px;
+      }
+
+      .swatch {
+        display: grid;
+        gap: 10px;
+      }
+
+      .swatch-color {
+        height: 84px;
+        border: 1px solid var(--rule-ink);
+      }
+
+      .swatch-color.hatched {
+        background-image:
+          repeating-linear-gradient(
+            45deg,
+            transparent 0,
+            transparent 8px,
+            rgba(195, 180, 165, 0.12) 8px,
+            rgba(195, 180, 165, 0.12) 9px
+          ),
+          var(--bg, transparent);
+      }
+
+      .swatch-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        font-family: var(--font-mono);
+        font-size: 10.5px;
+        color: var(--paper-primary);
+        letter-spacing: 0.04em;
+      }
+
+      .swatch-meta .token {
+        color: var(--paper-primary);
+      }
+
+      .swatch-meta .hex {
+        color: var(--paper-dim);
+        text-transform: uppercase;
+      }
+
+      .swatch-note {
+        font-family: var(--font-body);
+        font-size: 11.5px;
+        color: var(--paper-muted);
+        line-height: 1.4;
+        margin: 0;
+      }
+
+      /* Functional usage demos */
+      .fn-demos {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 20px;
+      }
+
+      .callout {
+        padding: 14px 16px;
+        border-left: 3px solid;
+        font-family: var(--font-body);
+        font-size: 12.5px;
+        line-height: 1.5;
+        color: var(--ink-primary);
+        display: grid;
+        gap: 4px;
+      }
+
+      .callout .label {
+        font-family: var(--font-display);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+      }
+
+      .callout.error {
+        background: var(--error-soft);
+        border-left-color: var(--error);
+      }
+      .callout.error .label { color: var(--error); }
+
+      .callout.success {
+        background: var(--success-soft);
+        border-left-color: var(--success);
+      }
+      .callout.success .label { color: var(--success); }
+
+      .callout.warning {
+        background: var(--paper-50);
+        border-left-color: var(--warning);
+      }
+      .callout.warning .label { color: var(--warning); }
+
+      /* Contrast row */
+      .contrast-table {
+        font-family: var(--font-mono);
+        font-size: 11.5px;
+        color: var(--paper-primary);
+        border-collapse: collapse;
+        width: 100%;
+      }
+      .contrast-table th,
+      .contrast-table td {
+        padding: 8px 12px;
+        border-bottom: 1px solid var(--rule-ink);
+        text-align: left;
+      }
+      .contrast-table th {
+        color: var(--paper-muted);
+        font-weight: 400;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-size: 10px;
+      }
+      .contrast-table .ratio { font-family: var(--font-display); letter-spacing: 0.06em; }
+      .contrast-table .status-aaa { color: var(--success); }
+      .contrast-table .status-aa { color: var(--copper); }
+      .contrast-table .status-warn { color: var(--warning); }
+    </style>
+  </head>
+  <body>
+    <header class="page-header">
+      <h1>MISE — Type specimen v2</h1>
+      <div class="meta">
+        Departure Mono · Commit Mono · flame on kitchen dark ——— 2026-04-23
+      </div>
+    </header>
+
+    <!-- ─── THREE-PANEL: .MD / POPUP / PDF ─────────────────────────── -->
+
+    <div class="section-header">
+      <h2>One recipe, three renderings</h2>
+      <span class="tag">01 · artifact · popup · pdf</span>
+    </div>
+    <p class="section-intro">
+      The <code>.md</code> on the left is <strong>the artifact</strong> — what Mise writes to disk, what the user owns, what travels between Obsidian, Notion, Apple Notes, and paper. Popup and PDF are typographic renderings of it. Same content, three treatments. Nothing in popup or PDF exists without a corresponding <code>.md</code> field — the <em>ticket-top</em> is a graphic composition of frontmatter, not invented chrome.
+    </p>
+
+    <div class="three-panel">
+
+      <!-- Panel A — raw .md -->
+      <div>
+        <p class="panel-label">
+          <span>.md — the artifact</span>
+          <span class="caption">plain-text, rendered in any mono viewer</span>
+        </p>
+        <pre class="raw-md"><span class="fm-fence">---</span>
+<span class="key">ticket:</span> 00427
+<span class="key">captured:</span> 2026-04-22T16:28
+<span class="key">source:</span> https://instagram.com/p/C9xK2
+<span class="key">via:</span> 8 video frames
+<span class="key">serves:</span> 4
+<span class="key">hands_on:</span> 25m
+<span class="key">total:</span> 2h 10m
+<span class="fm-fence">---</span>
+
+<span class="heading"># Gochujang-Glazed Pork Belly</span>
+
+*slow-rendered, sharply-sauced, served over rice with a soft egg.*
+
+<span class="heading">## Ingredients</span>
+- 800 g  ·  pork belly, skin-on
+- 3 tbsp  ·  gochujang paste
+- 2 tbsp  ·  honey or maltose
+- 1½ tbsp  ·  soy sauce (light)
+- 4 cloves  ·  garlic, crushed
+- 1 thumb  ·  ginger, julienned
+- —  ·  spring onion &amp; sesame to finish
+
+<span class="heading">## Method</span>
+1. Score the pork belly skin in a crosshatch, just through the fat. Salt heavily, uncovered in the fridge overnight — this is non-negotiable.
+2. Sear skin-down in a dry cast-iron until the skin blisters and shatters when tapped. Drain most of the fat.
+3. Whisk gochujang, honey, soy, garlic and ginger with 100 ml water. Pour around (not over) the pork. Cover, oven 160 °C for 90 minutes.
+4. Uncover, turn skin-up, ladle the sticky sauce over every few minutes for the final 15 minutes at 200 °C until lacquered.
+
+<span class="hr">---</span>
+<span class="tag">#cuisine/korean · #pork · #braise · #weeknight</span>
+
+<span class="footer-glyph">✶</span> mise.app</pre>
+      </div>
+
+      <!-- Panel B — popup -->
+      <div>
+        <p class="panel-label">
+          <span>Popup — 400px, extension</span>
+          <span class="caption">Chrome MV3 toolbar popup, real render size</span>
+        </p>
+        <div class="popup-frame">
+          <div class="popup">
+            <div class="ticket-top">
+              <span class="brand">MISE · NO. 00427</span>
+              <span class="captured">2026-04-22 · 16:28</span>
+            </div>
+            <div class="source">
+              <span>instagram.com/p/C9xK2</span>
+              <span class="badge">🎬 8 frames</span>
+            </div>
+            <h2 class="title">Gochujang-Glazed Pork Belly</h2>
+            <p class="subtitle">
+              slow-rendered, sharply-sauced, served over rice with a soft egg.
+            </p>
+            <div class="facts">
+              <span class="fact">SERVES <strong>4</strong></span>
+              <span class="fact">HANDS-ON <strong>25m</strong></span>
+              <span class="fact">TOTAL <strong>2h 10m</strong></span>
+            </div>
+            <h3 class="section">Ingredients</h3>
+            <ul class="ingredients">
+              <li><span class="qty">800 g</span><span>pork belly, skin-on</span></li>
+              <li><span class="qty">3 tbsp</span><span>gochujang paste</span></li>
+              <li><span class="qty">2 tbsp</span><span>honey or maltose</span></li>
+              <li><span class="qty">1½ tbsp</span><span>soy sauce (light)</span></li>
+              <li><span class="qty">4 cloves</span><span>garlic, crushed</span></li>
+              <li><span class="qty">1 thumb</span><span>ginger, julienned</span></li>
+              <li><span class="qty">—</span><span>spring onion &amp; sesame to finish</span></li>
+            </ul>
+            <h3 class="section">Method</h3>
+            <ol class="method">
+              <li>Score the pork belly skin in a crosshatch, just through the fat. Salt heavily, uncovered in the fridge overnight — this is non-negotiable.</li>
+              <li>Sear skin-down in a dry cast-iron until the skin blisters and shatters when tapped. Drain most of the fat.</li>
+              <li>Whisk gochujang, honey, soy, garlic and ginger with 100 ml water. Pour around (not over) the pork. Cover, oven 160 °C for 90 minutes.</li>
+              <li>Uncover, turn skin-up, ladle the sticky sauce over every few minutes for the final 15 minutes at 200 °C until lacquered.</li>
+            </ol>
+            <div class="tags">
+              <span class="tag">#cuisine/korean</span> · <span class="tag">#pork</span> · <span class="tag">#braise</span> · <span class="tag">#weeknight</span>
+            </div>
+            <div class="ticket-bottom">
+              <span>2026-04-22 · 16:28</span>
+              <span><span class="glyph">✶</span> mise.app</span>
+            </div>
+          </div>
+
+          <div class="popup-actions">
+            <button class="fire-btn">
+              <span>FIRE · save .md</span><span class="kbd">↵</span>
+            </button>
+            <button class="secondary-btn">Prep</button>
+            <button class="secondary-btn">.pdf</button>
+          </div>
+          <p class="chrome-caption">↑ action row is popup chrome, not .md content</p>
+        </div>
+      </div>
+
+      <!-- Panel C — PDF -->
+      <div>
+        <p class="panel-label">
+          <span>PDF — A4 export</span>
+          <span class="caption">cream page, scaled preview</span>
+        </p>
+        <div class="pdf-frame">
+          <div class="pdf-page">
+            <div class="brand-line">
+              <span class="brand">MISE · NO. 00427</span>
+              <span class="captured">2026-04-22 · 16:28</span>
+            </div>
+            <div class="source-line">
+              <span>instagram.com/p/C9xK2</span>
+              <span class="badge">🎬 8 frames</span>
+            </div>
+
+            <h1>Gochujang-Glazed Pork Belly</h1>
+            <p class="pdf-subtitle">
+              slow-rendered, sharply-sauced, served over rice with a soft egg.
+            </p>
+
+            <div class="pdf-facts">
+              <span class="fact">SERVES <strong>4</strong></span>
+              <span class="fact">HANDS-ON <strong>25m</strong></span>
+              <span class="fact">TOTAL <strong>2h 10m</strong></span>
+            </div>
+
+            <h2>Ingredients</h2>
+            <ul class="pdf-ing">
+              <li><span class="qty">800 g</span><span>pork belly, skin-on</span></li>
+              <li><span class="qty">3 tbsp</span><span>gochujang paste</span></li>
+              <li><span class="qty">2 tbsp</span><span>honey or maltose</span></li>
+              <li><span class="qty">1½ tbsp</span><span>soy sauce (light)</span></li>
+              <li><span class="qty">4 cloves</span><span>garlic, crushed</span></li>
+              <li><span class="qty">1 thumb</span><span>ginger, julienned</span></li>
+              <li><span class="qty">—</span><span>spring onion &amp; sesame to finish</span></li>
+            </ul>
+
+            <h2>Method</h2>
+            <ol class="pdf-method">
+              <li>Score the pork belly skin in a crosshatch, just through the fat. Salt heavily, uncovered in the fridge overnight — this is non-negotiable.</li>
+              <li>Sear skin-down in a dry cast-iron until the skin blisters and shatters when tapped. Drain most of the fat.</li>
+              <li>Whisk gochujang, honey, soy, garlic and ginger with 100 ml water. Pour around (not over) the pork. Cover, oven 160 °C for 90 minutes.</li>
+              <li>Uncover, turn skin-up, ladle the sticky sauce over every few minutes for the final 15 minutes at 200 °C until lacquered.</li>
+            </ol>
+
+            <div class="pdf-tags">
+              <span class="tag">#cuisine/korean</span> · <span class="tag">#pork</span> · <span class="tag">#braise</span> · <span class="tag">#weeknight</span>
+            </div>
+            <div class="pdf-footer">
+              <span><span class="glyph">✶</span> mise.app</span>
+              <span>instagram.com/p/C9xK2</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── TYPE SCALE ──────────────────────────────────────────── -->
+
+    <div class="section-header">
+      <h2>Type scale</h2>
+      <span class="tag">02 · perfect-fourth · 1.333</span>
+    </div>
+    <div class="scale">
+      <div class="scale-row">
+        <span class="token">3xl · 48</span>
+        <p class="sample s-display-xl">The Pass</p>
+      </div>
+      <div class="scale-row">
+        <span class="token">2xl · 34</span>
+        <p class="sample s-display-lg">Tonight's tickets, neatly stacked.</p>
+      </div>
+      <div class="scale-row">
+        <span class="token">xl · 24</span>
+        <p class="sample s-display">Gochujang-Glazed Pork Belly</p>
+      </div>
+      <div class="scale-row">
+        <span class="token">lg · 18</span>
+        <p class="sample s-lg">Yields 4 · 2h 10m total · serves a hungry table</p>
+      </div>
+      <div class="scale-row">
+        <span class="token">md · 15</span>
+        <p class="sample s-md">Ingredients</p>
+      </div>
+      <div class="scale-row">
+        <span class="token">base · 13</span>
+        <p class="sample s-base">
+          Score the pork belly skin in a crosshatch, just through the fat. Salt heavily, uncovered in the fridge overnight — this is non-negotiable.
+        </p>
+      </div>
+      <div class="scale-row">
+        <span class="token">sm · 12</span>
+        <p class="sample s-sm">
+          Secondary body · footnotes · aside copy · the quiet voice that sits under the main ingredient list without competing.
+        </p>
+      </div>
+      <div class="scale-row">
+        <span class="token">xs · 11</span>
+        <p class="sample s-mono">
+          🎬 8 FRAMES · 📝 CAPTION ONLY · 📜 SCHEMA DATA
+        </p>
+      </div>
+      <div class="scale-row">
+        <span class="token">xxs · 10</span>
+        <p class="sample s-mono-xxs">
+          MISE · NO. 00427 · 2026-04-22 · ✶ MISE.APP
+        </p>
+      </div>
+    </div>
+
+    <!-- ─── COLOR SYSTEM ───────────────────────────────────────── -->
+
+    <div class="section-header">
+      <h2>Color system</h2>
+      <span class="tag">03 · split-complementary · warm-dominant</span>
+    </div>
+    <p class="section-intro">
+      Split-complementary scheme. <strong>Flame</strong> and its warm family (ember, copper) carry the brand; <strong>steel</strong> and <strong>slate</strong> are cool complements used only as shadows or receding chrome — you don't see them as foreground colors. The neutral poles are <strong>warm-near-black</strong> (kitchen after hours) and <strong>cream paper</strong> (the ticket surface). No pure black, no pure white — all darks are warm-shifted, all lights are cream. Rough application: 60% surfaces · 30% ink · 10% heat.
+    </p>
+
+    <div class="swatches">
+
+      <!-- Base surfaces — dark -->
+      <div class="swatch-group">
+        <h3 class="swatch-group-label">
+          <span>Base surfaces — warm-near-black</span>
+          <span class="hint">kitchen after hours</span>
+        </h3>
+        <div class="swatch-row">
+          <div class="swatch">
+            <div class="swatch-color" style="background: var(--ink-900);"></div>
+            <div class="swatch-meta"><span class="token">--ink-900</span><span class="hex">#0c0805</span></div>
+            <p class="swatch-note">Deepest. Shadow interiors, PDF provenance</p>
+          </div>
+          <div class="swatch">
+            <div class="swatch-color" style="background: var(--ink-800);"></div>
+            <div class="swatch-meta"><span class="token">--ink-800</span><span class="hex">#141010</span></div>
+            <p class="swatch-note">Panel darker, modal overlay</p>
+          </div>
+          <div class="swatch">
+            <div class="swatch-color" style="background: var(--ink-700);"></div>
+            <div class="swatch-meta"><span class="token">--ink-700</span><span class="hex">#1a1613</span></div>
+            <p class="swatch-note">Primary dark bg — popup surround, landing hero</p>
+          </div>
+          <div class="swatch">
+            <div class="swatch-color" style="background: var(--ink-600);"></div>
+            <div class="swatch-meta"><span class="token">--ink-600</span><span class="hex">#231d18</span></div>
+            <p class="swatch-note">Raised dark panel, secondary backdrop</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Base surfaces — paper -->
+      <div class="swatch-group">
+        <h3 class="swatch-group-label">
+          <span>Base surfaces — cream paper</span>
+          <span class="hint">the ticket</span>
+        </h3>
+        <div class="swatch-row">
+          <div class="swatch">
+            <div class="swatch-color" style="background: var(--paper-50);"></div>
+            <div class="swatch-meta"><span class="token">--paper-50</span><span class="hex">#faf4ea</span></div>
+            <p class="swatch-note">Brightest cream, PDF page bg</p>
+          </div>
+          <div class="swatch">
+            <div class="swatch-color" style="background: var(--paper-100);"></div>
+            <div class="swatch-meta"><span class="token">--paper-100</span><span class="hex">#f3ede3</span></div>
+            <p class="swatch-note">Primary card bg — popup ticket</p>
+          </div>
+          <div class="swatch">
+            <div class="swatch-color" style="background: var(--paper-200);"></div>
+            <div class="swatch-meta"><span class="token">--paper-200</span><span class="hex">#e7ded0</span></div>
+            <p class="swatch-note">Subtle cream shift, inset panels</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Ink on paper -->
+      <div class="swatch-group">
+        <h3 class="swatch-group-label">
+          <span>Ink on paper — warm dark text on cream</span>
+          <span class="hint">descending contrast</span>
+        </h3>
+        <div class="swatch-row">
+          <div class="swatch">
+            <div class="swatch-color" style="background: var(--ink-primary);"></div>
+            <div class="swatch-meta"><span class="token">--ink-primary</span><span class="hex">#181310</span></div>
+            <p class="swatch-note">Body, title. 15.8:1 AAA on paper-100</p>
+          </div>
+          <div class="swatch">
+            <div class="swatch-color" style="background: var(--ink-secondary);"></div>
+            <div class="swatch-meta"><span class="token">--ink-secondary</span><span class="hex">#3a3028</span></div>
+            <p class="swatch-note">Heading rules, secondary stamps. 8.2:1 AAA</p>
+          </div>
+          <div class="swatch">
+            <div class="swatch-color" style="background: var(--ink-dim);"></div>
+            <div class="swatch-meta"><span class="token">--ink-dim</span><span class="hex">#6b5f54</span></div>
+            <p class="swatch-note">Dim body — source URL, facts labels. 5.4:1 AA</p>
+          </div>
+          <div class="swatch">
+            <div class="swatch-color" style="background: var(--ink-muted-v2);"></div>
+            <div class="swatch-meta"><span class="token">--ink-muted-v2</span><span class="hex">#998475</span></div>
+            <p class="swatch-note">Placeholder, disabled. 3.2:1 large-text-only</p>
+          </div>
+          <div class="swatch">
+            <div class="swatch-color" style="background: var(--rule-cream);"></div>
+            <div class="swatch-meta"><span class="token">--rule-cream</span><span class="hex">#d6ccbd</span></div>
+            <p class="swatch-note">Hairline rules on cream (not for text)</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Paper on ink -->
+      <div class="swatch-group">
+        <h3 class="swatch-group-label">
+          <span>Paper on ink — warm light text on dark</span>
+          <span class="hint">descending contrast</span>
+        </h3>
+        <div class="swatch-row">
+          <div class="swatch">
+            <div class="swatch-color" style="background: var(--paper-primary); color: var(--ink-primary); display: grid; place-items: center;">Aa</div>
+            <div class="swatch-meta"><span class="token">--paper-primary</span><span class="hex">#f3ede3</span></div>
+            <p class="swatch-note">Body on dark. 14.7:1 AAA on ink-700</p>
+          </div>
+          <div class="swatch">
+            <div class="swatch-color" style="background: var(--paper-dim); color: var(--ink-primary); display: grid; place-items: center;">Aa</div>
+            <div class="swatch-meta"><span class="token">--paper-dim</span><span class="hex">#c0b4a5</span></div>
+            <p class="swatch-note">Secondary on dark. 8.9:1 AAA</p>
+          </div>
+          <div class="swatch">
+            <div class="swatch-color" style="background: var(--paper-muted); color: var(--ink-primary); display: grid; place-items: center;">Aa</div>
+            <div class="swatch-meta"><span class="token">--paper-muted</span><span class="hex">#9a8c7c</span></div>
+            <p class="swatch-note">Caption, faint label. 5.5:1 AA</p>
+          </div>
+          <div class="swatch">
+            <div class="swatch-color" style="background: var(--rule-ink);"></div>
+            <div class="swatch-meta"><span class="token">--rule-ink</span><span class="hex">#3a3028</span></div>
+            <p class="swatch-note">Hairline rules on dark</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Heat — warm accents -->
+      <div class="swatch-group">
+        <h3 class="swatch-group-label">
+          <span>Heat — warm accents</span>
+          <span class="hint">service line</span>
+        </h3>
+        <div class="swatch-row">
+          <div class="swatch">
+            <div class="swatch-color" style="background: var(--flame);"></div>
+            <div class="swatch-meta"><span class="token">--flame</span><span class="hex">#d8451e</span></div>
+            <p class="swatch-note">Primary accent — Fire button, ✶ glyph</p>
+          </div>
+          <div class="swatch">
+            <div class="swatch-color" style="background: var(--flame-bright);"></div>
+            <div class="swatch-meta"><span class="token">--flame-bright</span><span class="hex">#e85c32</span></div>
+            <p class="swatch-note">Hover state (1-stop warmer)</p>
+          </div>
+          <div class="swatch">
+            <div class="swatch-color" style="background: var(--flame-deep);"></div>
+            <div class="swatch-meta"><span class="token">--flame-deep</span><span class="hex">#b13818</span></div>
+            <p class="swatch-note">Pressed state (1-stop darker)</p>
+          </div>
+          <div class="swatch">
+            <div class="swatch-color" style="background: var(--ember);"></div>
+            <div class="swatch-meta"><span class="token">--ember</span><span class="hex">#8a2f16</span></div>
+            <p class="swatch-note">Extraction-badge bg. 7.3:1 AAA on paper-100</p>
+          </div>
+          <div class="swatch">
+            <div class="swatch-color" style="background: var(--copper);"></div>
+            <div class="swatch-meta"><span class="token">--copper</span><span class="hex">#c67a3c</span></div>
+            <p class="swatch-note">Tag highlights on dark. 5.3:1 AA on ink-700</p>
+          </div>
+          <div class="swatch">
+            <div class="swatch-color" style="background: var(--copper-deep);"></div>
+            <div class="swatch-meta"><span class="token">--copper-deep</span><span class="hex">#955a2b</span></div>
+            <p class="swatch-note">Link color on cream. 4.6:1 AA</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cool complements -->
+      <div class="swatch-group">
+        <h3 class="swatch-group-label">
+          <span>Cool complements</span>
+          <span class="hint">used only as shadow or receding chrome</span>
+        </h3>
+        <div class="swatch-row">
+          <div class="swatch">
+            <div class="swatch-color" style="background: var(--steel);"></div>
+            <div class="swatch-meta"><span class="token">--steel</span><span class="hex">#1e272e</span></div>
+            <p class="swatch-note">Deep teal — shadow base, cool-dark chrome</p>
+          </div>
+          <div class="swatch">
+            <div class="swatch-color" style="background: var(--slate);"></div>
+            <div class="swatch-meta"><span class="token">--slate</span><span class="hex">#7e858c</span></div>
+            <p class="swatch-note">Cool mid-gray — escape hatch for cool-dim text</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Functional -->
+      <div class="swatch-group">
+        <h3 class="swatch-group-label">
+          <span>Functional</span>
+          <span class="hint">error · success · warning</span>
+        </h3>
+        <div class="swatch-row">
+          <div class="swatch">
+            <div class="swatch-color" style="background: var(--error);"></div>
+            <div class="swatch-meta"><span class="token">--error</span><span class="hex">#c52e14</span></div>
+            <p class="swatch-note">Critical. Sharper + deeper than flame</p>
+          </div>
+          <div class="swatch">
+            <div class="swatch-color" style="background: var(--error-soft); border-color: var(--error);"></div>
+            <div class="swatch-meta"><span class="token">--error-soft</span><span class="hex">#f7dad3</span></div>
+            <p class="swatch-note">Error callout background</p>
+          </div>
+          <div class="swatch">
+            <div class="swatch-color" style="background: var(--success);"></div>
+            <div class="swatch-meta"><span class="token">--success</span><span class="hex">#6a7846</span></div>
+            <p class="swatch-note">Muted olive — kitchen-adjacent, not generic green</p>
+          </div>
+          <div class="swatch">
+            <div class="swatch-color" style="background: var(--success-soft);"></div>
+            <div class="swatch-meta"><span class="token">--success-soft</span><span class="hex">#e3e5da</span></div>
+            <p class="swatch-note">Success callout background</p>
+          </div>
+          <div class="swatch">
+            <div class="swatch-color" style="background: var(--warning);"></div>
+            <div class="swatch-meta"><span class="token">--warning</span><span class="hex">#d69c2f</span></div>
+            <p class="swatch-note">Amber caution — low-confidence extraction</p>
+          </div>
+        </div>
+
+        <div class="fn-demos" style="margin-top: 24px;">
+          <div class="callout error">
+            <span class="label">In the Weeds</span>
+            <span>No recipe detected on this page. Paste a URL, upload an image, or highlight text to extract.</span>
+          </div>
+          <div class="callout success">
+            <span class="label">Fired</span>
+            <span>Saved to <code>~/Obsidian/Recipes/gochujang-glazed-pork-belly.md</code>.</span>
+          </div>
+          <div class="callout warning">
+            <span class="label">Low Confidence</span>
+            <span>Video caption only — method may be incomplete. Review before Fire.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Contrast verification -->
+      <div class="swatch-group">
+        <h3 class="swatch-group-label">
+          <span>Contrast verification — WCAG 2.1</span>
+          <span class="hint">AA = 4.5:1 normal · AAA = 7.0:1 normal</span>
+        </h3>
+        <table class="contrast-table">
+          <thead>
+            <tr>
+              <th>Foreground</th>
+              <th>Background</th>
+              <th>Ratio</th>
+              <th>Status</th>
+              <th>Role</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>--ink-primary</td><td>--paper-100</td><td class="ratio">15.8</td><td class="status-aaa">AAA</td><td>body</td></tr>
+            <tr><td>--ink-dim</td><td>--paper-100</td><td class="ratio">5.4</td><td class="status-aa">AA</td><td>dim body</td></tr>
+            <tr><td>--ink-muted-v2</td><td>--paper-100</td><td class="ratio">3.2</td><td class="status-warn">large-only</td><td>placeholder</td></tr>
+            <tr><td>--paper-primary</td><td>--ink-700</td><td class="ratio">14.7</td><td class="status-aaa">AAA</td><td>body on dark</td></tr>
+            <tr><td>--paper-dim</td><td>--ink-700</td><td class="ratio">8.9</td><td class="status-aaa">AAA</td><td>secondary on dark</td></tr>
+            <tr><td>--paper-muted</td><td>--ink-700</td><td class="ratio">5.5</td><td class="status-aa">AA</td><td>caption on dark</td></tr>
+            <tr><td>--ember</td><td>--paper-100</td><td class="ratio">7.3</td><td class="status-aaa">AAA</td><td>extraction badge</td></tr>
+            <tr><td>--copper</td><td>--ink-700</td><td class="ratio">5.3</td><td class="status-aa">AA</td><td>tag on dark</td></tr>
+            <tr><td>--copper-deep</td><td>--paper-100</td><td class="ratio">4.6</td><td class="status-aa">AA</td><td>link on cream</td></tr>
+            <tr><td>--flame</td><td>--paper-100</td><td class="ratio">3.8</td><td class="status-warn">large-only</td><td>Fire button label (flagged)</td></tr>
+            <tr><td>--flame</td><td>--ink-700</td><td class="ratio">4.1</td><td class="status-warn">large-only</td><td>LED chyron accents</td></tr>
+            <tr><td>--error</td><td>--paper-100</td><td class="ratio">5.2</td><td class="status-aa">AA</td><td>error text</td></tr>
+            <tr><td>--success</td><td>--paper-100</td><td class="ratio">4.7</td><td class="status-aa">AA</td><td>success text</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+
+  </body>
+</html>

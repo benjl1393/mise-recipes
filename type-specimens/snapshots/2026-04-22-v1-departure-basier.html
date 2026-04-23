@@ -1,0 +1,848 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Mise — Type specimen</title>
+
+    <style>
+      @font-face {
+        font-family: "Departure Mono";
+        src: url("./fonts/DepartureMono-Regular.woff2") format("woff2");
+        font-weight: 400;
+        font-style: normal;
+        font-display: swap;
+      }
+      @font-face {
+        font-family: "Basier Square Mono";
+        src: url("./fonts/BasierSquareMono-Regular.woff2") format("woff2"),
+             url("./fonts/BasierSquareMono-Regular.woff") format("woff");
+        font-weight: 400;
+        font-style: normal;
+        font-display: swap;
+      }
+
+      :root {
+        /* families — two-font system, all-monospace ticket */
+        --font-display: "Departure Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+        --font-display-light: "Basier Square Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+        --font-body: "Basier Square Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+        --font-mono: "Basier Square Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+        /* industrial-warm base (rough palette placeholder — final comes from /color) */
+        --bg-page: #1a1613;
+        --bg-card: #f3ede3;
+        --bg-card-cool: #1f1a16;
+        --ink: #181310;
+        --ink-dim: #6b5f54;
+        --ink-paper: #f3ede3;
+        --ink-paper-dim: #9a8c7c;
+        --rule: #d6ccbd;
+        --rule-dark: #3a3028;
+        --flame: #d8451e;
+        --copper: #c67a3c;
+        --ember: #8a2f16;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        background: var(--bg-page);
+        color: var(--ink-paper);
+        font-family: var(--font-body);
+        font-synthesis: none;
+        font-size: 14px;
+        line-height: 1.55;
+        -webkit-font-smoothing: antialiased;
+        text-rendering: optimizeLegibility;
+        padding: 48px 32px 96px;
+      }
+
+      .page-header {
+        max-width: 960px;
+        margin: 0 auto 48px;
+        border-bottom: 1px solid var(--rule-dark);
+        padding-bottom: 24px;
+      }
+
+      .page-header h1 {
+        font-family: var(--font-display);
+        font-weight: 400;
+        font-size: 42px;
+        line-height: 1;
+        letter-spacing: 0;
+        text-transform: uppercase;
+        margin: 0 0 8px;
+        color: var(--ink-paper);
+      }
+
+      .page-header .meta {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        color: var(--ink-paper-dim);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+
+      .grid {
+        max-width: 960px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: 400px 1fr;
+        gap: 48px;
+        align-items: start;
+      }
+
+      .col-label {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        color: var(--ink-paper-dim);
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        margin: 0 0 12px;
+      }
+
+      /* ─── Mise popup mock ──────────────────────────────────── */
+
+      .popup {
+        width: 400px;
+        background: var(--bg-card);
+        color: var(--ink);
+        border: 1px solid var(--rule);
+        box-shadow: 0 20px 60px -20px rgba(0, 0, 0, 0.6);
+      }
+
+      .popup .ticket-top {
+        padding: 14px 18px;
+        border-bottom: 1px dashed var(--rule);
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+      }
+
+      .popup .ticket-top .brand {
+        font-family: var(--font-display);
+        font-weight: 400;
+        font-size: 16px;
+        letter-spacing: 0.04em;
+        line-height: 1;
+        text-transform: uppercase;
+      }
+
+      .popup .ticket-top .meta {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        color: var(--ink-dim);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+
+      .popup .source {
+        padding: 14px 18px 0;
+        font-family: var(--font-mono);
+        font-size: 11px;
+        color: var(--ink-dim);
+        display: flex;
+        justify-content: space-between;
+        letter-spacing: 0.02em;
+      }
+
+      .popup .source .badge {
+        background: var(--ember);
+        color: var(--bg-card);
+        padding: 2px 7px 1px;
+        letter-spacing: 0.06em;
+      }
+
+      .popup h2.title {
+        font-family: var(--font-display);
+        font-weight: 400;
+        font-size: 26px;
+        line-height: 1.1;
+        letter-spacing: 0;
+        text-transform: uppercase;
+        margin: 14px 18px 6px;
+        color: var(--ink);
+      }
+
+      .popup .subtitle {
+        margin: 0 18px 14px;
+        font-family: var(--font-body);
+        font-weight: 400;
+        font-size: 11px;
+        line-height: 1.4;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--ink-dim);
+      }
+
+      .popup .facts {
+        display: flex;
+        gap: 18px;
+        padding: 10px 18px;
+        border-top: 1px solid var(--rule);
+        border-bottom: 1px solid var(--rule);
+        font-family: var(--font-mono);
+        font-size: 11px;
+        color: var(--ink-dim);
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+      }
+
+      .popup .facts strong {
+        color: var(--ink);
+        font-weight: 400;
+      }
+
+      .popup h3.section {
+        font-family: var(--font-body);
+        font-weight: 400;
+        font-size: 11px;
+        line-height: 1.2;
+        margin: 18px 18px 8px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--ink);
+        border-bottom: 1px solid var(--ink);
+        padding-bottom: 6px;
+      }
+
+      .popup ul.ingredients {
+        list-style: none;
+        padding: 0;
+        margin: 0 18px 18px;
+        font-size: 14px;
+        line-height: 1.55;
+      }
+
+      .popup ul.ingredients li {
+        display: grid;
+        grid-template-columns: 72px 1fr;
+        gap: 8px;
+        align-items: baseline;
+        padding: 3px 0;
+        border-bottom: 1px dotted var(--rule);
+      }
+
+      .popup ul.ingredients li .qty {
+        font-family: var(--font-mono);
+        font-size: 12px;
+        color: var(--ink);
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+      }
+
+      .popup ol.method {
+        padding: 0;
+        margin: 0 18px 18px;
+        list-style: none;
+        counter-reset: step;
+      }
+
+      .popup ol.method li {
+        counter-increment: step;
+        display: grid;
+        grid-template-columns: 32px 1fr;
+        gap: 8px;
+        padding: 8px 0;
+        border-bottom: 1px solid var(--rule);
+        font-size: 14px;
+        line-height: 1.55;
+      }
+
+      .popup ol.method li::before {
+        content: counter(step, decimal-leading-zero);
+        font-family: var(--font-mono);
+        font-size: 11px;
+        color: var(--ink-dim);
+        letter-spacing: 0.06em;
+        padding-top: 2px;
+      }
+
+      .popup .actions {
+        padding: 14px 18px 18px;
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
+
+      .popup .fire-btn {
+        flex: 1;
+        background: var(--ink);
+        color: var(--bg-card);
+        border: none;
+        padding: 12px 14px;
+        font-family: var(--font-body);
+        font-weight: 400;
+        font-size: 12px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+      }
+
+      .popup .fire-btn .kbd {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        letter-spacing: 0.08em;
+        border: 1px solid var(--bg-card);
+        padding: 1px 5px;
+        opacity: 0.7;
+      }
+
+      .popup .secondary-btn {
+        background: transparent;
+        border: 1px solid var(--rule);
+        color: var(--ink);
+        padding: 12px 14px;
+        font-family: var(--font-body);
+        font-weight: 400;
+        font-size: 11px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        cursor: pointer;
+      }
+
+      .popup .ticket-bottom {
+        padding: 10px 18px;
+        border-top: 1px dashed var(--rule);
+        font-family: var(--font-mono);
+        font-size: 10px;
+        color: var(--ink-dim);
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        display: flex;
+        justify-content: space-between;
+      }
+
+      /* ─── Type scale panel ──────────────────────────────────── */
+
+      .scale {
+        display: grid;
+        gap: 18px;
+      }
+
+      .row {
+        display: grid;
+        grid-template-columns: 92px 1fr;
+        gap: 20px;
+        align-items: baseline;
+        padding-bottom: 18px;
+        border-bottom: 1px solid var(--rule-dark);
+      }
+
+      .row .token {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        color: var(--ink-paper-dim);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        padding-top: 6px;
+      }
+
+      .sample {
+        color: var(--ink-paper);
+        margin: 0;
+      }
+
+      .s-display-xl {
+        font-family: var(--font-display);
+        font-weight: 400;
+        font-size: 48px;
+        line-height: 1;
+        text-transform: uppercase;
+      }
+
+      .s-display-lg {
+        font-family: var(--font-display);
+        font-weight: 400;
+        font-size: 34px;
+        line-height: 1.05;
+        text-transform: uppercase;
+      }
+
+      .s-display {
+        font-family: var(--font-display);
+        font-weight: 400;
+        font-size: 24px;
+        line-height: 1.1;
+        letter-spacing: 0;
+        text-transform: uppercase;
+      }
+
+      .s-lg {
+        font-family: var(--font-body);
+        font-weight: 400;
+        font-size: 18px;
+        line-height: 1.35;
+      }
+
+      .s-md {
+        font-family: var(--font-body);
+        font-weight: 400;
+        font-size: 15px;
+        line-height: 1.45;
+      }
+
+      .s-base {
+        font-family: var(--font-body);
+        font-weight: 400;
+        font-size: 13px;
+        line-height: 1.55;
+      }
+
+      .s-sm {
+        font-family: var(--font-body);
+        font-weight: 400;
+        font-size: 12px;
+        line-height: 1.5;
+      }
+
+      .s-mono {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        line-height: 1.3;
+        color: var(--ink-paper-dim);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+
+      .s-mono-xxs {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        line-height: 1.2;
+        color: var(--ink-paper-dim);
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+      }
+
+      /* ─── PDF card preview ──────────────────────────────────── */
+
+      .pdf-wrap {
+        max-width: 960px;
+        margin: 96px auto 0;
+      }
+
+      .pdf-page {
+        width: 595px;
+        min-height: 842px;
+        background: #f7f1e6;
+        color: var(--ink);
+        padding: 72px 60px;
+        margin: 0 auto;
+        box-shadow: 0 30px 80px -20px rgba(0, 0, 0, 0.6);
+        border: 1px solid var(--rule);
+      }
+
+      .pdf-page .brand-line {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        border-bottom: 1px solid var(--ink);
+        padding-bottom: 8px;
+      }
+
+      .pdf-page .brand-line .brand {
+        font-family: var(--font-display);
+        font-weight: 400;
+        font-size: 20px;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+
+      .pdf-page .brand-line .meta {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        color: var(--ink-dim);
+      }
+
+      .pdf-page h1 {
+        font-family: var(--font-display);
+        font-weight: 400;
+        font-size: 38px;
+        line-height: 1.1;
+        letter-spacing: 0;
+        text-transform: uppercase;
+        margin: 40px 0 8px;
+      }
+
+      .pdf-page .pdf-subtitle {
+        font-family: var(--font-body);
+        font-weight: 400;
+        font-size: 11px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--ink-dim);
+        line-height: 1.45;
+        margin: 0 0 32px;
+        max-width: 420px;
+      }
+
+      .pdf-page .pdf-facts {
+        display: flex;
+        gap: 32px;
+        border-top: 1px solid var(--rule);
+        border-bottom: 1px solid var(--rule);
+        padding: 14px 0;
+        margin-bottom: 32px;
+        font-family: var(--font-mono);
+        font-size: 10px;
+        color: var(--ink-dim);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+      }
+
+      .pdf-page .pdf-facts strong {
+        display: block;
+        font-family: var(--font-body);
+        font-weight: 400;
+        font-size: 13px;
+        color: var(--ink);
+        letter-spacing: 0;
+        text-transform: none;
+        margin-top: 4px;
+      }
+
+      .pdf-page .pdf-body {
+        display: grid;
+        grid-template-columns: 180px 1fr;
+        gap: 40px;
+      }
+
+      .pdf-page h2 {
+        font-family: var(--font-body);
+        font-weight: 400;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        border-bottom: 1px solid var(--ink);
+        padding-bottom: 6px;
+        margin: 0 0 12px;
+      }
+
+      .pdf-page ul.pdf-ing {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        font-size: 10pt;
+        line-height: 1.5;
+      }
+
+      .pdf-page ul.pdf-ing li {
+        padding: 3px 0;
+        border-bottom: 1px dotted var(--rule);
+      }
+
+      .pdf-page ul.pdf-ing li .qty {
+        font-family: var(--font-mono);
+        font-size: 9pt;
+        display: block;
+        color: var(--ink);
+      }
+
+      .pdf-page ol.pdf-method {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        counter-reset: pstep;
+      }
+
+      .pdf-page ol.pdf-method li {
+        counter-increment: pstep;
+        display: grid;
+        grid-template-columns: 28px 1fr;
+        gap: 12px;
+        padding: 10px 0;
+        border-bottom: 1px solid var(--rule);
+        font-size: 10pt;
+        line-height: 1.55;
+      }
+
+      .pdf-page ol.pdf-method li::before {
+        content: counter(pstep, decimal-leading-zero);
+        font-family: var(--font-mono);
+        font-size: 9pt;
+        color: var(--ink-dim);
+        letter-spacing: 0.06em;
+      }
+
+      .pdf-page .pdf-footer {
+        margin-top: 48px;
+        padding-top: 12px;
+        border-top: 1px solid var(--ink);
+        display: flex;
+        justify-content: space-between;
+        font-family: var(--font-mono);
+        font-size: 9pt;
+        color: var(--ink-dim);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+      }
+
+      /* ─── section headers ───────────────────────────────────── */
+
+      .section-header {
+        max-width: 960px;
+        margin: 72px auto 24px;
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        border-bottom: 1px solid var(--rule-dark);
+        padding-bottom: 12px;
+      }
+
+      .section-header h2 {
+        font-family: var(--font-display);
+        font-weight: 400;
+        font-size: 24px;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+        margin: 0;
+        color: var(--ink-paper);
+      }
+
+      .section-header .tag {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        color: var(--ink-paper-dim);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+      }
+
+      .pairing-notes {
+        max-width: 960px;
+        margin: 32px auto 0;
+        font-size: 13px;
+        line-height: 1.6;
+        color: #c0b4a5;
+      }
+
+      .pairing-notes strong {
+        color: var(--ink-paper);
+      }
+
+      .pairing-notes code {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        background: var(--rule-dark);
+        padding: 1px 5px;
+        color: var(--ink-paper);
+      }
+    </style>
+  </head>
+  <body>
+    <header class="page-header">
+      <h1>MISE — Type specimen</h1>
+      <div class="meta">
+        Departure Mono · Basier Square Mono ——— two-font, all-mono ticket ——— 2026-04-21
+      </div>
+    </header>
+
+    <!-- ─── POPUP + TYPE SCALE ─────────────────────────────────── -->
+
+    <div class="grid">
+      <div>
+        <p class="col-label">Popup card — 400px, at real render size</p>
+        <div class="popup">
+          <div class="ticket-top">
+            <span class="brand">MISE</span>
+            <span class="meta">NO. 00427</span>
+          </div>
+          <div class="source">
+            <span>instagram.com/p/C9xK2</span>
+            <span class="badge">🎬 8 FRAMES</span>
+          </div>
+          <h2 class="title">Gochujang-Glazed Pork Belly</h2>
+          <p class="subtitle">
+            Slow-rendered, sharply-sauced, served over rice with a soft egg.
+          </p>
+          <div class="facts">
+            <span>YIELD <strong>4</strong></span>
+            <span>ACTIVE <strong>25m</strong></span>
+            <span>TOTAL <strong>2h 10m</strong></span>
+          </div>
+          <h3 class="section">Ingredients</h3>
+          <ul class="ingredients">
+            <li><span class="qty">800 g</span><span>pork belly, skin-on</span></li>
+            <li><span class="qty">3 tbsp</span><span>gochujang paste</span></li>
+            <li><span class="qty">2 tbsp</span><span>honey or maltose</span></li>
+            <li><span class="qty">1½ tbsp</span><span>soy sauce (light)</span></li>
+            <li><span class="qty">4 cloves</span><span>garlic, crushed</span></li>
+            <li><span class="qty">1 thumb</span><span>ginger, julienned</span></li>
+            <li><span class="qty">—</span><span>spring onion &amp; sesame to finish</span></li>
+          </ul>
+          <h3 class="section">Method</h3>
+          <ol class="method">
+            <li>
+              Score the pork belly skin in a crosshatch, just through the fat. Salt
+              heavily, uncovered in the fridge overnight — this is non-negotiable.
+            </li>
+            <li>
+              Sear skin-down in a dry cast-iron until the skin blisters and shatters
+              when tapped. Drain most of the fat.
+            </li>
+            <li>
+              Whisk gochujang, honey, soy, garlic and ginger with 100 ml water. Pour
+              around (not over) the pork. Cover, oven 160°C for 90 minutes.
+            </li>
+            <li>
+              Uncover, turn skin-up, ladle the sticky sauce over every few minutes for
+              the final 15 minutes at 200°C until lacquered.
+            </li>
+          </ol>
+          <div class="actions">
+            <button class="fire-btn">
+              <span>FIRE · save .md</span><span class="kbd">↵</span>
+            </button>
+            <button class="secondary-btn">.pdf</button>
+          </div>
+          <div class="ticket-bottom">
+            <span>✶ mise.app</span>
+            <span>21 apr '26 · 16:28</span>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <p class="col-label">Type scale — perfect-fourth, 1.333</p>
+        <div class="scale">
+          <div class="row">
+            <span class="token">3xl · 50</span>
+            <p class="sample s-display-xl">The Pass</p>
+          </div>
+          <div class="row">
+            <span class="token">2xl · 38</span>
+            <p class="sample s-display-lg">Tonight's tickets, neatly stacked.</p>
+          </div>
+          <div class="row">
+            <span class="token">xl · 29</span>
+            <p class="sample s-display">Gochujang-Glazed Pork Belly</p>
+          </div>
+          <div class="row">
+            <span class="token">lg · 22</span>
+            <p class="sample s-lg">Yields 4 · 2h 10m total · serves a hungry table</p>
+          </div>
+          <div class="row">
+            <span class="token">md · 17</span>
+            <p class="sample s-md">Ingredients</p>
+          </div>
+          <div class="row">
+            <span class="token">base · 14</span>
+            <p class="sample s-base">
+              Score the pork belly skin in a crosshatch, just through the fat. Salt
+              heavily, uncovered in the fridge overnight — this is non-negotiable.
+            </p>
+          </div>
+          <div class="row">
+            <span class="token">sm · 13</span>
+            <p class="sample s-sm">
+              Secondary body · footnotes · aside copy · the quiet voice that sits under
+              the main ingredient list without competing.
+            </p>
+          </div>
+          <div class="row">
+            <span class="token">xs · 11</span>
+            <p class="sample s-mono">
+              🎬 8 FRAMES · 📝 CAPTION ONLY · 📜 SCHEMA DATA
+            </p>
+          </div>
+          <div class="row">
+            <span class="token">xxs · 10</span>
+            <p class="sample s-mono-xxs">MISE · NO. 00427 · 21 APR '26</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── PDF PREVIEW ─────────────────────────────────────────── -->
+
+    <div class="section-header">
+      <h2>PDF export — A4, 595pt wide</h2>
+      <span class="tag">Same system, print-scaled</span>
+    </div>
+
+    <div class="pdf-wrap">
+      <div class="pdf-page">
+        <div class="brand-line">
+          <span class="brand">MISE</span>
+          <span class="meta">No. 00427 — 21 Apr 2026</span>
+        </div>
+        <h1>Gochujang-Glazed Pork Belly</h1>
+        <p class="pdf-subtitle">
+          Slow-rendered, sharply-sauced, served over rice with a soft egg. From an
+          Instagram Reel — extraction: 8 video frames.
+        </p>
+        <div class="pdf-facts">
+          <span>YIELD <strong>4</strong></span>
+          <span>ACTIVE <strong>25m</strong></span>
+          <span>TOTAL <strong>2h 10m</strong></span>
+          <span>SOURCE <strong>instagram.com</strong></span>
+        </div>
+        <div class="pdf-body">
+          <div>
+            <h2>Ingredients</h2>
+            <ul class="pdf-ing">
+              <li><span class="qty">800 G</span>pork belly, skin-on</li>
+              <li><span class="qty">3 TBSP</span>gochujang paste</li>
+              <li><span class="qty">2 TBSP</span>honey or maltose</li>
+              <li><span class="qty">1½ TBSP</span>soy sauce (light)</li>
+              <li><span class="qty">4 CLOVES</span>garlic, crushed</li>
+              <li><span class="qty">1 THUMB</span>ginger, julienned</li>
+              <li><span class="qty">—</span>spring onion &amp; sesame to finish</li>
+            </ul>
+          </div>
+          <div>
+            <h2>Method</h2>
+            <ol class="pdf-method">
+              <li>
+                Score the pork belly skin in a crosshatch, just through the fat. Salt
+                heavily, uncovered in the fridge overnight — this is non-negotiable.
+              </li>
+              <li>
+                Sear skin-down in a dry cast-iron until the skin blisters and shatters
+                when tapped. Drain most of the fat.
+              </li>
+              <li>
+                Whisk gochujang, honey, soy, garlic and ginger with 100 ml water. Pour
+                around (not over) the pork. Cover, oven 160°C for 90 minutes.
+              </li>
+              <li>
+                Uncover, turn skin-up, ladle the sticky sauce over every few minutes for
+                the final 15 minutes at 200°C until lacquered.
+              </li>
+            </ol>
+          </div>
+        </div>
+        <div class="pdf-footer">
+          <span>Mise · liberated recipes</span>
+          <span>Page 1 / 1</span>
+        </div>
+      </div>
+    </div>
+
+    <p class="pairing-notes">
+      <strong>Notes.</strong> Two-font, all-monospace system. Display is
+      <code>Departure Mono</code> (SIL OFL — pixel/bitmap forms, reads as kitchen-ticket
+      chyron at scale). Body and UI are <code>Basier Square Mono</code> (Atipo, free
+      commercial with attribution — square terminals, precision-instrument feel at small
+      sizes). Hierarchy is built from size, case, tracking, and rules — never from
+      weight (Departure has one weight; Basier Square Mono has one weight) nor italic
+      (neither cuts one). <code>font-synthesis: none</code> is set globally to stop
+      browsers from faking either. All colours here are placeholder — the final
+      industrial-warm palette comes from <code>/color</code>.
+    </p>
+  </body>
+</html>
