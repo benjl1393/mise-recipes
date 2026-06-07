@@ -1,9 +1,30 @@
 # Mise — Color System
 
-**Status:** v2 (2026-04-23) — pivoted from split-complementary warm-dominant to brutalist-with-flame
-**Scheme:** Neutral monochrome + single accent family. Flame (hue 35°) is the only chromatic color in the system, applied sparingly. Everything else is a neutral gray scale.
+**Status:** v2.1 (2026-04-24) — flame hue pivoted from coppery (35°) to sanguine (30.4°) after Figma crit
+**Scheme:** Neutral monochrome + single accent family. Flame (hue 30.4°, sanguine red) is the only chromatic color in the system, applied sparingly. Everything else is a neutral gray scale.
 **Color space:** OKLCH (perceptually uniform). All tokens defined in OKLCH; hex shown alongside where relevant.
 **Source principles:** Design for Hackers Chapters 8–9, applied to Mise's *Industrial / kitchen-after-hours* brief with a deliberate anti-AI-aesthetic stance.
+
+---
+
+## Pivot — v2 → v2.1 (hue shift, 2026-04-24)
+
+During the first Figma crit of 03A Success, Ben direct-picked a new Fire button color: `#cb1200 ≈ oklch(0.533 0.212 30.4)`. Brief: *"deeper sanguine red, like digital clock red digits — less coppery."* The whole flame family was derived from that pivot, preserving the v2 tonal spacing but pinned to the new hue (30.4°) and with chroma scaled up to match the user's more-saturated pick (0.212 base vs 0.190 v2 base).
+
+**What changed:**
+- Hue shifted from orange-red (35°) to pure-red (30.4°). Less "campfire glow," more "stop light / digital LED / blood-on-stainless."
+- Chroma bumped: base 0.190 → 0.212 (+12% saturation). More commitment.
+- All four steps (ember / deep / base / bright) anchored at the same hue — no hue drift across the family.
+
+**What improved (contrast):**
+- Fire button label: `4.0:1` AA-large-only → `5.22:1` AA normal ✅ (the long-standing flag is resolved)
+- Error text (flame-deep) on paper-100: `5.5:1` AA → `7.32:1` AAA
+- Ember on paper-100: `7.6:1` → `9.94:1`
+
+**What worsened (a little):**
+- ✶ brand glyph on ink-700 landing hero: `4.1:1` AA-large-only → `3.12:1`, which fails AA-small for text under 24px. Brand-signature leeway applies for the ✶ stamp (decorative, not load-bearing), but if it goes large on a dark hero, consider introducing a dedicated `--flame-on-dark` token at higher L.
+
+Rationale for why sanguine reads *more brutalist* than the earlier coppery orange: copper has warmth baked in — it's a *metallic* color, sympathetic to the gyuto-knife metaphor but also uncomfortably close to the "artisanal warm-cozy" register on `design-anti-ai-defaults.md`. A sanguine red, especially one reminiscent of 7-segment LED displays, is utilitarian without being *craft-warm*. The subject is a professional kitchen's service line, not a hearth.
 
 ---
 
@@ -123,14 +144,14 @@ All OKLCH. Legacy token names (`--copper`, `--success`, etc.) are retained as al
 
 ### Heat — the single accent family
 
-| Token | OKLCH | Usage |
-|---|---|---|
-| `--flame` | `oklch(0.596 0.190 35.1)` | Fire button bg, ✶ brand glyph, warning text |
-| `--flame-bright` | `oklch(0.650 0.183 36.9)` | Fire button hover (+0.054 L, same H) |
-| `--flame-deep` | `oklch(0.515 0.163 35.1)` | Fire button pressed; error text (−0.081 L). 5.5:1 AA on paper-100 |
-| `--ember` | `oklch(0.436 0.129 35.8)` | Extraction-badge bg (with paper-100 text). 7.6:1 AAA |
+| Token | OKLCH | Hex | Usage |
+|---|---|---|---|
+| `--flame` | `oklch(0.533 0.212 30.4)` | `#cb1200` | Fire button bg, ✶ brand glyph, warning text |
+| `--flame-bright` | `oklch(0.587 0.205 30.4)` | `#db3523` | Fire button hover (+0.054 L, same H) |
+| `--flame-deep` | `oklch(0.452 0.185 30.4)` | `#a40200` | Fire button pressed; error text. 7.32:1 ✅ AAA on paper-100 |
+| `--ember` | `oklch(0.373 0.151 30.4)` | `#7e0400` | Extraction-badge bg (with paper-100 text). 9.94:1 AAA |
 
-Perceptually uniform L progression: ember (0.436) → flame-deep (0.515) → flame (0.596) → flame-bright (0.650). ~0.06 L between each step. Easy to derive more stops if needed.
+Perceptually uniform L progression: ember (0.373) → flame-deep (0.452) → flame (0.533) → flame-bright (0.587). ~0.055–0.081 L between each step. Same hue (30.4°) throughout the family — no drift.
 
 ### Functional — minimal
 
@@ -177,17 +198,21 @@ Recomputed for the v2 neutral palette. AA normal = 4.5:1; AAA normal = 7.0:1; AA
 | `--paper-primary` | `--ink-700` | 16.4 | ✅ AAA | Body on dark |
 | `--paper-dim` | `--ink-700` | 9.0 | ✅ AAA | Secondary on dark |
 | `--paper-muted` | `--ink-700` | 5.0 | ✅ AA | Caption on dark |
-| `--ember` | `--paper-100` | 7.6 | ✅ AAA | Extraction badge |
-| `--flame-deep` (= error) | `--paper-100` | 5.5 | ✅ AA | Error text on cream |
-| `--flame` | `--paper-100` | 4.0 | ⚠️ large-only | Fire button label |
-| `--flame` | `--ink-700` | 4.1 | ⚠️ large-only | ✶ glyph on dark |
+| `--ember` | `--paper-100` | 9.94 | ✅ AAA | Extraction badge |
+| `--flame-deep` (= error) | `--paper-100` | 7.32 | ✅ AAA | Error text on cream |
+| `--flame` | `--paper-100` | 5.22 | ✅ AA | Fire button label |
+| `--flame` | `--ink-700` | 3.12 | ⚠️ fails AA-small | ✶ glyph on dark (brand-signature leeway) |
 
 **Improvements over v1:**
 - Error text now passes AA on cream (5.5:1) using the same hue family as flame, no separate red needed.
 - `--ink-dim` contrast improved (5.4 → 5.9) via the neutral shift.
 - `--paper-dim` contrast improved (8.9 → 9.0).
 
-**Flame button label** remains the same AA-large-text boundary case. Mitigation options unchanged: bump button text to 14pt, load Commit Mono 700 for bold, or accept the large-button-label spirit. Decide at `impeccable:layout`.
+**Improvements in v2.1 (sanguine pivot, 2026-04-24):**
+- Fire button label now passes AA for normal text (`5.22:1` vs old `4.0:1`, which only met AA-large). The earlier flag — "bump to 14pt / Commit Mono 700 / accept large-button spirit" — is resolved. Label stays at 12pt Regular.
+- `--flame-deep` on paper-100 moves from `5.5:1` AA to `7.32:1` AAA.
+- `--ember` on paper-100 moves from `7.6:1` AAA to `9.94:1` AAA.
+- All mitigations for flame-on-ink-700 unchanged: the ✶ brand glyph on landing hero drops from `4.1:1` AA-large to `3.12:1` (fails AA-large for small text). Brand-signature leeway applies in context, but if the ✶ ever gets load-bearing on a dark surface, consider a dedicated `--flame-on-dark` token at higher L.
 
 ---
 
@@ -236,16 +261,18 @@ Flame appearances per card (happy path): 2 — extraction badge (ember technical
 
 ```
 callout bg               --error-soft
-callout left border      --flame-deep (3px)
-label text               --flame-deep
+callout full border      --flame-deep (1px, all four sides)
+label text               --flame-deep (Departure Mono)
 body text                --ink-primary
 ```
 
 ### Success state (Fired)
 
+The Fired state is a full-card receipt stamp, not a callout — see the popup-states specimen. Secondary success callouts inside Prep / The Pass use:
+
 ```
 callout bg               --paper-200
-callout left border      --ink-dim (3px)
+callout full border      --ink-dim (1px, all four sides)
 label text               --ink-primary (with ✓ glyph)
 body text                --ink-primary
 ```
@@ -255,13 +282,17 @@ No color. The ✓ carries the meaning.
 ### Warning state (Low Confidence)
 
 ```
-callout bg               --paper-100
-callout left border      --flame (3px)
-label text               --flame (with ⚠ glyph)
+callout bg               --paper-200
+callout full border      --flame (1px, all four sides)
+label text               --flame (with ⚠ glyph, Departure Mono)
 body text                --ink-primary
 ```
 
-Shares flame with urgent/error. Severity signaled by `⚠` glyph, not a distinct hue.
+Shares flame with urgent/error. Severity signaled by `⚠` glyph and border color, not a distinct hue.
+
+### Callout shape note (2026-04-24 revision)
+
+The v2 doc originally specified a 3px left-stripe pattern for callouts. That pattern is an AI-default tell ("side-stripe alerts") and is explicitly banned by the impeccable design-system absolute bans. The rewrite uses a full 1px border on all four sides — the stamp/ticket register the Mise brief is already committed to, and consistent with the hairline-rule-everywhere principle. Border color carries severity; the full box reads as *flagged receipt*, not *styled alert*.
 
 ### PDF page
 
@@ -351,11 +382,11 @@ The result should read as *specific design judgment*, not *safe middle-ground*. 
   --paper-muted:   oklch(0.620 0 0);
   --rule-ink:      oklch(0.280 0 0);
 
-  /* Heat — single accent family, used sparingly */
-  --flame:        oklch(0.596 0.190 35.1);
-  --flame-bright: oklch(0.650 0.183 36.9);
-  --flame-deep:   oklch(0.515 0.163 35.1);
-  --ember:        oklch(0.436 0.129 35.8);
+  /* Heat — single accent family, used sparingly. Sanguine red (hue 30.4°) — v2.1 */
+  --flame:        oklch(0.533 0.212 30.4);   /* #cb1200 */
+  --flame-bright: oklch(0.587 0.205 30.4);   /* #db3523 */
+  --flame-deep:   oklch(0.452 0.185 30.4);   /* #a40200 */
+  --ember:        oklch(0.373 0.151 30.4);   /* #7e0400 */
 
   /* Functional */
   --error:      var(--flame-deep);

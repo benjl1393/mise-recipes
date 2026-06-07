@@ -60,10 +60,10 @@
         --rule-ink:      oklch(0.280 0 0);
 
         /* ══════ Heat — the one accent, used sparingly ══════ */
-        --flame:        oklch(0.596 0.190 35.1);    /* Fire button, ✶ glyph, urgent states */
-        --flame-bright: oklch(0.650 0.183 36.9);    /* hover */
-        --flame-deep:   oklch(0.515 0.163 35.1);    /* pressed / error */
-        --ember:        oklch(0.436 0.129 35.8);    /* extraction badge bg — darker tonal step */
+        --flame:        oklch(0.533 0.212 30.4);    /* Fire button, ✶ glyph, urgent states — sanguine red */
+        --flame-bright: oklch(0.587 0.205 30.4);    /* hover */
+        --flame-deep:   oklch(0.452 0.185 30.4);    /* pressed / error */
+        --ember:        oklch(0.373 0.151 30.4);    /* extraction badge bg — darker tonal step */
 
         /* ══════ Functional — minimal ══════ */
         --error:      var(--flame-deep);    /* urgent = darker flame (weight-class distinction) */
@@ -965,6 +965,13 @@
       <div class="meta">
         Departure Mono · Commit Mono · brutalist + flame (single accent) ——— 2026-04-23
       </div>
+      <nav style="margin-top: 8px; font-family: ui-monospace, Menlo, monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;">
+        <a href="./index.html" style="color: var(--ink-paper); text-decoration: none; border-bottom: 1px solid var(--flame); padding-bottom: 2px;">Specimen</a>
+        <span style="color: var(--ink-paper-dim); margin: 0 10px;">·</span>
+        <a href="./popup-states.html" style="color: var(--ink-paper-dim); text-decoration: none;">Popup states</a>
+        <span style="color: var(--ink-paper-dim); margin: 0 10px;">·</span>
+        <a href="./color-directions.html" style="color: var(--ink-paper-dim); text-decoration: none;">Color directions (archive)</a>
+      </nav>
     </header>
 
     <!-- ─── THREE-PANEL: .MD / POPUP / PDF ─────────────────────────── -->

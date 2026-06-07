@@ -95,21 +95,37 @@ Names are load-bearing. Use them in code, UI, docs, and commit messages.
 - **Prep** — options/settings page
 - **In the Weeds** — error state when extraction fails
 
-## Type + color (locked — v2, 2026-04-23)
+## Type + color + icons (locked — v2.1, 2026-04-24)
 
-Both systems are defined; see canonical docs:
+Three systems defined; see canonical docs:
 
 - **Type**: Departure Mono (display) + Commit Mono (body + italic). See `type-specimens/index.html` + `type-specimens/snapshots/`.
-- **Color**: Brutalist + flame. Neutral grays + a single accent family (flame at hue 35°), used sparingly. See `docs/mise-color-system.md`.
+- **Color**: Brutalist monochrome + flame. Neutral grays + a single accent family (flame at hue 30.4°, sanguine red — like digital-clock LED digits). See `docs/mise-color-system.md`.
+- **Icons**: [Phosphor Icons](https://phosphoricons.com) — **thin weight** for functional chrome (keyboard-return, arrows, status glyphs, retry, close). Matches the hairline-rule aesthetic. Emojis are reserved for *content* (source-type badges like `🎬` for video, `📝` for article) where they function as cultural shorthand — never as functional chrome. Import hygiene: when pasting a Phosphor SVG into Figma, the enclosing 24×24 bounding frame sometimes comes in with a solid white fill as an import default — treat as chrome, leave as-is or scrub per case.
 
-**v1 → v2 pivot note**: an earlier warm-dominant palette (cream + flame + copper + kitchen-dark) was built and rejected in 2026-04-23 conversation for hitting the AI-default "warm cream + rust + serif+sans" aesthetic. v2 commits to brutalist monochrome with flame as the single deliberate spark. See the global `design-anti-ai-defaults.md` rule for why.
+**Pivot history:**
+- **v1** (through 2026-04-22): warm-cream split-complementary (cream + flame + copper + kitchen-dark). Rejected for hitting the AI-default "warm cream + rust + serif+sans" aesthetic.
+- **v2** (2026-04-23): brutalist monochrome + flame at hue 35° (coppery orange). Deliberate anti-default commitment.
+- **v2.1** (2026-04-24): flame hue shifted to 30.4° — sanguine red, digital-clock LED register. Less "campfire," more "service line." Resolves the long-standing AA-large-only flag for Fire button text (now AA-normal at 5.22:1). Triggered by the first Figma crit of 03A Success.
+
+See the global `design-anti-ai-defaults.md` rule and `design-studio-principles.md` for the cross-project values these project decisions sit inside of.
 
 ## What to build next
 
-1. `impeccable:layout` + `impeccable:harden` — popup state variants (skeleton / loading / video-progress / success / in-the-weeds) rendered against the locked palette
+1. ~~`impeccable:layout` + `impeccable:harden` — popup state variants~~ — done 2026-04-24, `type-specimens/popup-states.html`
 2. Logo mark + extension icon set (task #5)
 3. Motion (`/flow` → `impeccable:animate`)
 4. Microcopy pass (`ux-copywriter`)
 5. Adversarial critique (`impeccable:critique` + `web-design-guidelines`)
 6. Final polish
 7. Build track — Chrome MV3 scaffold + Next.js landing (`superpowers:writing-plans`)
+
+### Process — desk crits, not handoffs
+
+Each pipeline step above ends in a **desk crit together**. Mise is a two-designer studio — Ben is the other designer, not a client signing off on deliverables. Every step ships only after we've stood in front of the work and talked through it.
+
+How a crit runs: bring the artifact up where both of us can see it (local server + Playwright, Figma canvas, browser). Walk into one variant at a time — name the intentional decisions, what was considered and rejected, where tension remains. Stop. Listen. Ben pushes back, redirects, or approves. Fold the reaction in, advance.
+
+Tone: peers, not reporter-to-approver. Strong opinions, loosely held, from both sides. Pushing back is the point of a crit — if Ben proposes something that pulls against the brief or the brand values we've set, say so and make the case.
+
+Studio principles accumulating in `~/.claude/rules/design-studio-principles.md` — consult before crits. Add to that doc whenever a principle surfaces; don't re-derive the same ones each session.

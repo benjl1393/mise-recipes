@@ -1,0 +1,1738 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Mise — Popup state variants</title>
+
+    <style>
+      /* ══════ Fonts ══════ */
+      @font-face {
+        font-family: "Departure Mono";
+        src: url("./fonts/DepartureMono-Regular.woff2") format("woff2");
+        font-weight: 400;
+        font-style: normal;
+        font-display: swap;
+      }
+      @font-face {
+        font-family: "Commit Mono";
+        src: url("./fonts/CommitMono-400-Regular.otf") format("opentype");
+        font-weight: 400;
+        font-style: normal;
+        font-display: swap;
+      }
+      @font-face {
+        font-family: "Commit Mono";
+        src: url("./fonts/CommitMono-400-Italic.otf") format("opentype");
+        font-weight: 400;
+        font-style: italic;
+        font-display: swap;
+      }
+
+      :root {
+        /* Families */
+        --font-display: "Departure Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+        --font-body: "Commit Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+        --font-mono: "Commit Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+        /* ══════ Color tokens — v2 brutalist + flame ══════ */
+        --ink-900: oklch(0.100 0 0);
+        --ink-800: oklch(0.150 0 0);
+        --ink-700: oklch(0.200 0 0);
+        --ink-600: oklch(0.280 0 0);
+
+        --paper-50:  oklch(0.985 0 0);
+        --paper-100: oklch(0.965 0 0);
+        --paper-200: oklch(0.920 0 0);
+        --paper-250: oklch(0.885 0 0);   /* skeleton bar bg on paper */
+
+        --ink-primary:   oklch(0.120 0 0);
+        --ink-secondary: oklch(0.280 0 0);
+        --ink-dim:       oklch(0.480 0 0);
+        --ink-muted-v2:  oklch(0.620 0 0);
+        --rule-cream:    oklch(0.820 0 0);
+
+        --paper-primary: oklch(0.965 0 0);
+        --paper-dim:     oklch(0.780 0 0);
+        --paper-muted:   oklch(0.620 0 0);
+        --rule-ink:      oklch(0.280 0 0);
+
+        --flame:        oklch(0.533 0.212 30.4);    /* sanguine — digital-clock red, not coppery */
+        --flame-bright: oklch(0.587 0.205 30.4);
+        --flame-deep:   oklch(0.452 0.185 30.4);
+        --ember:        oklch(0.373 0.151 30.4);
+
+        --error:      var(--flame-deep);
+        --error-soft: oklch(0.940 0.025 30);
+
+        --shadow:      oklch(0.100 0.015 240 / 0.25);
+        --shadow-soft: oklch(0.100 0.015 240 / 0.12);
+
+        /* Legacy aliases (existing selectors) */
+        --bg-page:       var(--ink-700);
+        --bg-panel:      var(--ink-600);
+        --bg-card:       var(--paper-100);
+        --bg-pdf:        var(--paper-50);
+        --ink:           var(--ink-primary);
+        --ink-paper:     var(--paper-primary);
+        --ink-paper-dim: var(--paper-muted);
+        --rule:          var(--rule-cream);
+        --rule-dark:     var(--rule-ink);
+
+        /* ══════ Spacing — 4pt semantic scale ══════ */
+        --space-xs:  4px;
+        --space-sm:  8px;
+        --space-md:  12px;
+        --space-lg:  16px;
+        --space-xl:  24px;
+        --space-2xl: 32px;
+        --space-3xl: 48px;
+        --space-4xl: 64px;
+        --space-5xl: 96px;
+      }
+
+      * { box-sizing: border-box; }
+
+      html, body {
+        margin: 0;
+        padding: 0;
+        background: var(--bg-page);
+        color: var(--paper-primary);
+        font-family: var(--font-body);
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+
+      /* ─── Page chrome ─────────────────────────────────────────── */
+
+      .page {
+        max-width: 1440px;
+        margin: 0 auto;
+        padding: clamp(24px, 5vw, 64px) clamp(16px, 4vw, 48px) 128px;
+      }
+
+      .page-head {
+        border-bottom: 1px solid var(--rule-dark);
+        padding-bottom: var(--space-xl);
+        margin-bottom: var(--space-4xl);
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: var(--space-lg);
+        align-items: baseline;
+      }
+
+      .page-head h1 {
+        font-family: var(--font-display);
+        font-weight: 400;
+        font-size: clamp(22px, 3vw, 36px);
+        line-height: 1.05;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+        margin: 0;
+        color: var(--paper-primary);
+      }
+
+      .page-head .slug {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        color: var(--paper-muted);
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+      }
+
+      .page-head .slug .glyph {
+        color: var(--flame);
+        margin-right: 6px;
+      }
+
+      .page-lead {
+        max-width: 70ch;
+        font-family: var(--font-body);
+        font-size: 13px;
+        line-height: 1.6;
+        color: var(--paper-dim);
+        margin-bottom: var(--space-4xl);
+      }
+
+      .page-lead em {
+        font-style: italic;
+        color: var(--paper-primary);
+      }
+
+      .section-title {
+        font-family: var(--font-display);
+        font-weight: 400;
+        font-size: 12px;
+        line-height: 1.2;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--paper-dim);
+        margin: 0 0 var(--space-lg);
+        padding-top: var(--space-2xl);
+        display: flex;
+        align-items: center;
+        gap: var(--space-md);
+      }
+
+      .section-title::before {
+        content: attr(data-index);
+        color: var(--paper-muted);
+        font-family: var(--font-mono);
+        font-size: 11px;
+        letter-spacing: 0.06em;
+      }
+
+      .section-title::after {
+        content: "";
+        flex: 1;
+        border-top: 1px solid var(--rule-dark);
+        transform: translateY(1px);
+      }
+
+      .section-note {
+        max-width: 68ch;
+        font-size: 12px;
+        line-height: 1.6;
+        color: var(--paper-muted);
+        margin: 0 0 var(--space-2xl);
+      }
+
+      /* ─── Variant grid ─────────────────────────────────────────── */
+
+      .variants {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(440px, 1fr));
+        gap: var(--space-4xl) var(--space-3xl);
+        margin-bottom: var(--space-5xl);
+      }
+
+      .variant {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-md);
+      }
+
+      .variant-head {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        padding-bottom: var(--space-sm);
+        border-bottom: 1px solid var(--rule-dark);
+      }
+
+      .variant-head .chyron {
+        font-family: var(--font-display);
+        font-size: 11px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--paper-primary);
+        display: flex;
+        gap: var(--space-sm);
+        align-items: baseline;
+      }
+
+      .variant-head .chyron .id {
+        color: var(--flame);
+      }
+
+      .variant-head .chyron .label {
+        color: var(--paper-primary);
+      }
+
+      .variant-head .caption {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        line-height: 1.55;
+        color: var(--paper-muted);
+        max-width: 52ch;
+      }
+
+      /* ─── Popup surface (shared) ───────────────────────────────── */
+
+      .popup-frame {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        align-self: start;
+      }
+
+      .popup {
+        width: 400px;
+        background: var(--bg-card);
+        color: var(--ink);
+        border: 1px solid var(--rule);
+        box-shadow: 0 20px 60px -20px var(--shadow);
+        position: relative;
+      }
+
+      /* ticket-top */
+      .popup .ticket-top {
+        padding: 14px 18px;
+        border-bottom: 1px dashed var(--rule);
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+      }
+
+      .popup .ticket-top .brand {
+        font-family: var(--font-display);
+        font-weight: 400;
+        font-size: 10px;
+        letter-spacing: 0.08em;
+        line-height: 1.2;
+        text-transform: uppercase;
+        color: var(--ink);
+      }
+
+      .popup .ticket-top .captured {
+        font-family: var(--font-display);
+        font-size: 10px;
+        line-height: 1.2;
+        color: var(--ink-dim);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+
+      /* source + badge */
+      .popup .source {
+        padding: 12px 18px;
+        border-bottom: 1px dashed var(--rule);
+        font-family: var(--font-mono);
+        font-size: 10px;
+        color: var(--ink-dim);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        letter-spacing: 0.02em;
+        gap: var(--space-md);
+      }
+
+      .popup .source .url {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .popup .source .badge {
+        background: var(--ember);
+        color: var(--bg-card);
+        padding: 3px 7px 2px;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        white-space: nowrap;
+        flex-shrink: 0;
+      }
+
+      .popup .source .badge.pending {
+        background: transparent;
+        color: var(--ink-dim);
+        border: 1px solid var(--ink-dim);
+        padding: 2px 6px 1px;
+      }
+
+      /* chyron — extraction status bar below source */
+      .popup .chyron-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 18px;
+        font-family: var(--font-display);
+        font-size: 10px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--ink-primary);
+        border-bottom: 1px dashed var(--rule);
+        gap: var(--space-md);
+      }
+
+      .popup .chyron-bar .elapsed {
+        font-family: var(--font-mono);
+        color: var(--ink-dim);
+        letter-spacing: 0.04em;
+      }
+
+      .popup .chyron-bar .status {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .popup .chyron-bar .status .dot {
+        width: 6px;
+        height: 6px;
+        background: var(--flame);
+        display: inline-block;
+      }
+
+      /* progress meter — 1px rule filling in flame */
+      .popup .progress {
+        height: 2px;
+        background: var(--rule-cream);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .popup .progress::after {
+        content: "";
+        position: absolute;
+        inset: 0 auto 0 0;
+        background: var(--flame-deep);
+        width: var(--progress, 40%);
+      }
+
+      /* title + subtitle */
+      .popup h2.title {
+        font-family: var(--font-display);
+        font-weight: 400;
+        font-size: 24px;
+        line-height: 1.1;
+        letter-spacing: 0;
+        text-transform: uppercase;
+        margin: 16px 18px 6px;
+        color: var(--ink);
+      }
+
+      .popup .subtitle {
+        margin: 0 18px 14px;
+        font-family: var(--font-body);
+        font-weight: 400;
+        font-style: italic;
+        font-size: 12px;
+        line-height: 1.45;
+        color: var(--ink-dim);
+      }
+
+      /* facts */
+      .popup .facts {
+        display: flex;
+        gap: 18px;
+        padding: 10px 18px;
+        border-top: 1px solid var(--rule);
+        border-bottom: 1px solid var(--rule);
+        font-family: var(--font-mono);
+        font-size: 10px;
+        color: var(--ink-dim);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+
+      .popup .facts .fact {
+        display: flex;
+        align-items: baseline;
+        gap: 6px;
+      }
+
+      .popup .facts .fact strong {
+        color: var(--ink);
+        font-weight: 400;
+        font-size: 11px;
+        letter-spacing: 0.02em;
+      }
+
+      /* section heading */
+      .popup h3.section {
+        font-family: var(--font-display);
+        font-weight: 400;
+        font-size: 13px;
+        line-height: 1.2;
+        margin: 18px 18px 10px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--ink);
+        border-bottom: 1px solid var(--ink);
+        padding-bottom: 6px;
+      }
+
+      /* ingredients */
+      .popup ul.ingredients {
+        list-style: none;
+        padding: 0;
+        margin: 0 18px 18px;
+        font-size: 13px;
+        line-height: 1.5;
+      }
+
+      .popup ul.ingredients li {
+        display: grid;
+        grid-template-columns: 78px 1fr;
+        gap: 8px;
+        align-items: baseline;
+        padding: 4px 0;
+        border-bottom: 1px dotted var(--rule);
+      }
+
+      .popup ul.ingredients li .qty {
+        font-family: var(--font-mono);
+        font-size: 11.5px;
+        color: var(--ink);
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+      }
+
+      /* method */
+      .popup ol.method {
+        padding: 0;
+        margin: 0 18px 18px;
+        list-style: none;
+        counter-reset: step;
+      }
+
+      .popup ol.method li {
+        counter-increment: step;
+        display: grid;
+        grid-template-columns: 32px 1fr;
+        gap: 10px;
+        padding: 9px 0;
+        border-bottom: 1px solid var(--rule);
+        font-size: 13px;
+        line-height: 1.55;
+      }
+
+      .popup ol.method li::before {
+        content: counter(step, decimal-leading-zero);
+        font-family: var(--font-mono);
+        font-size: 11px;
+        color: var(--ink-dim);
+        letter-spacing: 0.06em;
+        padding-top: 3px;
+      }
+
+      /* tag line */
+      .popup .tags {
+        padding: 12px 18px 8px;
+        border-top: 1px dashed var(--rule);
+        font-family: var(--font-mono);
+        font-size: 10.5px;
+        color: var(--ink-dim);
+        letter-spacing: 0.04em;
+        word-spacing: 0.15em;
+      }
+
+      .popup .tags .tag {
+        color: var(--ink-dim);
+      }
+
+      /* ticket-bottom */
+      .popup .ticket-bottom {
+        padding: 8px 18px 12px;
+        font-family: var(--font-display);
+        font-size: 10px;
+        color: var(--ink-dim);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        display: flex;
+        justify-content: space-between;
+      }
+
+      .popup .ticket-bottom .glyph {
+        color: var(--flame);
+      }
+
+      /* ─── Skeleton primitives ──────────────────────────────────── */
+
+      .bar {
+        display: block;
+        height: 10px;
+        background: var(--paper-250);
+        border-radius: 0;  /* brutalist — no rounded bars */
+      }
+
+      .bar.thin { height: 8px; }
+      .bar.tall { height: 16px; }
+      .bar.tallx { height: 22px; }
+
+      @media (prefers-reduced-motion: no-preference) {
+        .skel .bar {
+          animation: sweep 1.6s ease-in-out infinite;
+          background: linear-gradient(
+            90deg,
+            var(--paper-250) 0%,
+            var(--paper-200) 40%,
+            var(--paper-250) 80%
+          );
+          background-size: 200% 100%;
+        }
+        @keyframes sweep {
+          0%   { background-position: 120% 0; }
+          100% { background-position: -20% 0; }
+        }
+      }
+
+      /* skeleton-replacement of title block */
+      .popup .title-skel {
+        padding: 18px 18px 6px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .popup .subtitle-skel {
+        padding: 0 18px 14px;
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+      }
+
+      .popup .facts-skel {
+        display: flex;
+        gap: 18px;
+        padding: 12px 18px;
+        border-top: 1px solid var(--rule);
+        border-bottom: 1px solid var(--rule);
+      }
+
+      .popup .facts-skel .bar { width: 56px; height: 10px; }
+
+      .popup ul.ingredients-skel {
+        list-style: none;
+        padding: 0;
+        margin: 0 18px 18px;
+      }
+
+      .popup ul.ingredients-skel li {
+        display: grid;
+        grid-template-columns: 78px 1fr;
+        gap: 8px;
+        align-items: center;
+        padding: 8px 0;
+        border-bottom: 1px dotted var(--rule);
+      }
+
+      .popup ol.method-skel {
+        padding: 0;
+        margin: 0 18px 18px;
+        list-style: none;
+        counter-reset: step;
+      }
+
+      .popup ol.method-skel li {
+        counter-increment: step;
+        display: grid;
+        grid-template-columns: 32px 1fr;
+        gap: 10px;
+        padding: 10px 0;
+        border-bottom: 1px solid var(--rule);
+      }
+
+      .popup ol.method-skel li::before {
+        content: counter(step, decimal-leading-zero);
+        font-family: var(--font-mono);
+        font-size: 11px;
+        color: var(--ink-muted-v2);
+        letter-spacing: 0.06em;
+        padding-top: 3px;
+      }
+
+      .popup ol.method-skel li .body-skel {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+      }
+
+      /* ─── Filmstrip — video capture progress ──────────────────── */
+
+      .popup .filmstrip {
+        display: grid;
+        grid-template-columns: repeat(8, 1fr);
+        gap: 4px;
+        padding: 10px 18px;
+        border-bottom: 1px dashed var(--rule);
+      }
+
+      .popup .filmstrip .frame {
+        aspect-ratio: 1 / 1;
+        border: 1px solid var(--ink-dim);
+      }
+
+      .popup .filmstrip .frame.captured {
+        background: var(--ember);
+        border-color: var(--ember);
+      }
+
+      .popup .filmstrip .frame.active {
+        background: var(--flame);
+        border-color: var(--flame);
+      }
+
+      /* ─── Stamp — FIRED / IN THE WEEDS / LOW CONFIDENCE ───────── */
+
+      .stamp {
+        padding: 18px;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+      }
+
+      .stamp .glyph {
+        font-family: var(--font-display);
+        font-size: 10px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+      }
+
+      .stamp h2.stamp-title {
+        font-family: var(--font-display);
+        font-weight: 400;
+        font-size: 28px;
+        line-height: 1.0;
+        letter-spacing: 0;
+        text-transform: uppercase;
+        margin: 0;
+      }
+
+      .stamp .stamp-note {
+        font-family: var(--font-body);
+        font-style: italic;
+        font-size: 12px;
+        line-height: 1.5;
+        color: var(--ink-dim);
+        max-width: 42ch;
+      }
+
+      /* Empty / Error — full 1px bordered callout instead of banned side-stripe */
+      .callout {
+        margin: 14px 18px;
+        border: 1px solid var(--flame);
+        padding: 12px 14px;
+        background: var(--paper-200);
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+
+      .callout.error {
+        border-color: var(--flame-deep);
+        background: var(--error-soft);
+      }
+
+      .callout .hdr {
+        font-family: var(--font-display);
+        font-size: 10px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--flame);
+        display: flex;
+        justify-content: space-between;
+      }
+
+      .callout.error .hdr {
+        color: var(--flame-deep);
+      }
+
+      .callout .hdr .code {
+        font-family: var(--font-mono);
+        color: var(--ink-dim);
+        letter-spacing: 0.04em;
+      }
+
+      .callout .body {
+        font-family: var(--font-body);
+        font-size: 12px;
+        line-height: 1.5;
+        color: var(--ink-primary);
+      }
+
+      /* ─── Empty state — affordance list ───────────────────────── */
+
+      .fallback-list {
+        list-style: none;
+        padding: 0;
+        margin: 12px 18px 18px;
+        border-top: 1px dashed var(--rule);
+      }
+
+      .fallback-list li {
+        display: grid;
+        grid-template-columns: 24px 1fr auto;
+        gap: 10px;
+        align-items: center;
+        padding: 12px 0;
+        border-bottom: 1px dashed var(--rule);
+        font-size: 13px;
+        line-height: 1.4;
+      }
+
+      .fallback-list li .gl {
+        font-family: var(--font-display);
+        font-size: 14px;
+        color: var(--flame);
+      }
+
+      .fallback-list li .kbd {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        color: var(--ink-dim);
+        border: 1px solid var(--ink-dim);
+        padding: 1px 5px;
+        letter-spacing: 0.04em;
+      }
+
+      /* ─── Ambiguous — picker list ─────────────────────────────── */
+
+      .picker {
+        list-style: none;
+        padding: 0;
+        margin: 14px 0 10px;
+      }
+
+      .picker li {
+        display: grid;
+        grid-template-columns: 44px 1fr 18px;
+        gap: 12px;
+        align-items: center;
+        padding: 10px 18px;
+        border-bottom: 1px dashed var(--rule);
+        font-size: 12.5px;
+        line-height: 1.35;
+        cursor: pointer;
+      }
+
+      .picker li:first-child { border-top: 1px dashed var(--rule); }
+
+      .picker li .thumb {
+        width: 44px;
+        aspect-ratio: 1 / 1;
+        background: var(--paper-250);
+        border: 1px solid var(--rule);
+        display: grid;
+        place-items: center;
+        font-family: var(--font-display);
+        font-size: 10px;
+        color: var(--ink-dim);
+        letter-spacing: 0.06em;
+      }
+
+      .picker li .thumb.recipe {
+        background: var(--ember);
+        color: var(--bg-card);
+        border-color: var(--ember);
+      }
+
+      .picker li .meta {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        min-width: 0;
+      }
+
+      .picker li .meta .ptitle {
+        font-family: var(--font-display);
+        font-size: 12px;
+        color: var(--ink-primary);
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .picker li .meta .psub {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        color: var(--ink-dim);
+        letter-spacing: 0.04em;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .picker li .arrow {
+        font-family: var(--font-display);
+        font-size: 14px;
+        color: var(--ink-dim);
+        justify-self: end;
+      }
+
+      .picker li[data-focus="true"] {
+        background: var(--paper-200);
+      }
+
+      .picker li[data-focus="true"] .arrow {
+        color: var(--flame);
+      }
+
+      /* ─── Fired — overlay stamp ───────────────────────────────── */
+
+      .popup.fired .popup-body {
+        filter: grayscale(0.6) opacity(0.35);
+        pointer-events: none;
+      }
+
+      .fired-stamp {
+        position: absolute;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        padding: 18px;
+        pointer-events: none;
+      }
+
+      .fired-stamp .mark {
+        border: 2px solid var(--ink-primary);
+        padding: 18px 22px 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        align-items: center;
+        background: var(--paper-100);
+      }
+
+      .fired-stamp .mark .line1 {
+        font-family: var(--font-display);
+        font-size: 28px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--ink-primary);
+        line-height: 1.0;
+        display: flex;
+        gap: 10px;
+        align-items: baseline;
+      }
+
+      .fired-stamp .mark .line1 .check {
+        font-size: 22px;
+        color: var(--ink-primary);
+      }
+
+      .fired-stamp .mark .line2 {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        color: var(--ink-dim);
+        letter-spacing: 0.02em;
+        max-width: 32ch;
+        text-align: center;
+        line-height: 1.4;
+      }
+
+      /* ─── Action row (popup chrome) ───────────────────────────── */
+
+      .popup-actions {
+        width: 400px;
+        background: var(--bg-panel);
+        border: 1px solid var(--rule-dark);
+        padding: 12px 14px;
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
+
+      .popup-actions .fire-btn {
+        flex: 1;
+        background: var(--flame);
+        color: var(--bg-card);
+        border: none;
+        padding: 10px 14px;
+        font-family: var(--font-body);
+        font-weight: 400;
+        font-size: 12px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+      }
+
+      .popup-actions .fire-btn[disabled] {
+        background: var(--ink-600);
+        color: var(--paper-muted);
+        cursor: not-allowed;
+      }
+
+      .popup-actions .fire-btn[disabled] .kbd {
+        border-color: var(--paper-muted);
+        color: var(--paper-muted);
+      }
+
+      .popup-actions .fire-btn.warn {
+        background: var(--flame);
+        padding-right: 12px;
+      }
+
+      .popup-actions .fire-btn .kbd {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        letter-spacing: 0.08em;
+        border: 1px solid var(--bg-card);
+        padding: 1px 5px;
+        opacity: 0.7;
+      }
+
+      .popup-actions .fire-btn .warn-glyph {
+        color: var(--bg-card);
+        font-size: 12px;
+      }
+
+      .popup-actions .secondary-btn {
+        background: transparent;
+        border: 1px solid var(--rule-dark);
+        color: var(--ink-paper);
+        padding: 10px 12px;
+        font-family: var(--font-body);
+        font-weight: 400;
+        font-size: 10.5px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        cursor: pointer;
+      }
+
+      .popup-actions .retry-btn {
+        flex: 1;
+        background: var(--paper-primary);
+        color: var(--ink-primary);
+        border: none;
+        padding: 10px 14px;
+        font-family: var(--font-body);
+        font-size: 12px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+      }
+
+      .popup-actions .countdown {
+        flex: 1;
+        text-align: center;
+        font-family: var(--font-mono);
+        font-size: 11px;
+        color: var(--paper-muted);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .popup-actions .countdown strong {
+        color: var(--paper-primary);
+        font-weight: 400;
+      }
+
+      .chrome-caption {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        color: var(--paper-muted);
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+
+      /* ─── Status legend ───────────────────────────────────────── */
+
+      .legend {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+        gap: var(--space-lg);
+        padding: var(--space-lg) var(--space-xl);
+        border: 1px solid var(--rule-dark);
+        margin-bottom: var(--space-4xl);
+      }
+
+      .legend .row {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .legend .row .k {
+        font-family: var(--font-display);
+        font-size: 10px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--flame);
+      }
+
+      .legend .row .v {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        color: var(--paper-dim);
+        line-height: 1.5;
+      }
+
+      /* Focus rings — accessibility */
+      button:focus-visible,
+      .picker li:focus-visible {
+        outline: 2px solid var(--flame);
+        outline-offset: 2px;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <main class="page">
+      <header class="page-head">
+        <h1>Mise — Popup state variants</h1>
+        <span class="slug"><span class="glyph">✶</span> specimen · popup-states · 2026-04-24</span>
+      </header>
+      <nav style="margin: -40px 0 48px; font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;">
+        <a href="./index.html" style="color: var(--paper-dim); text-decoration: none;">Specimen</a>
+        <span style="color: var(--paper-muted); margin: 0 10px;">·</span>
+        <a href="./popup-states.html" style="color: var(--paper-primary); text-decoration: none; border-bottom: 1px solid var(--flame); padding-bottom: 2px;">Popup states</a>
+        <span style="color: var(--paper-muted); margin: 0 10px;">·</span>
+        <a href="./color-directions.html" style="color: var(--paper-dim); text-decoration: none;">Color directions (archive)</a>
+      </nav>
+
+      <p class="page-lead">
+        The popup is a <em>state machine with three ignitions</em>: detection (confident / ambiguous / empty), extraction (reading / capturing), and resolution (success / warning / error / fired).
+        Each variant below renders at true 400&nbsp;px Chrome MV3 width against the v2 brutalist palette, to stress-test layout, hierarchy, and edge cases before build.
+      </p>
+
+      <section class="legend" aria-label="State legend">
+        <div class="row"><span class="k">Detection</span><span class="v">Client-side, free. Decides which of the three open-states to show before any Claude call.</span></div>
+        <div class="row"><span class="k">Extraction</span><span class="v">Claude call in flight. Reading page or capturing video frames. Fire is disabled until a .md is on hand.</span></div>
+        <div class="row"><span class="k">Resolution</span><span class="v">Terminal state — filled card, low-confidence flag, retryable error, or a fired receipt.</span></div>
+        <div class="row"><span class="k">Flame budget</span><span class="v">One accent family. Fire button, ✶ glyph, extraction badge, urgent states — nothing else chromatic.</span></div>
+      </section>
+
+      <!-- ══════ 1 · DETECTION STATES ══════ -->
+
+      <h2 class="section-title" data-index="01">Detection — open-states</h2>
+      <p class="section-note">
+        The popup opens instantly on toolbar click. Before any Claude call, a free client-side detection step decides which of the three
+        states below to render. The source line (<em>what Mise is extracting</em>) is always visible; it is the promise the card is about to keep, break, or decline.
+      </p>
+
+      <div class="variants">
+        <!-- 1A — Confident · skeleton -->
+        <article class="variant">
+          <header class="variant-head">
+            <span class="chyron"><span class="id">01A</span><span class="label">Confident · skeleton</span></span>
+            <span class="caption">
+              Single unambiguous target. Popup opens → source line renders immediately → skeleton fills as extraction runs.
+              ~80% path. Fire disabled until filled.
+            </span>
+          </header>
+          <div class="popup-frame">
+            <div class="popup skel">
+              <div class="ticket-top">
+                <span class="brand">MISE · NO. ─────</span>
+                <span class="captured">2026-04-24 · 18:02</span>
+              </div>
+              <div class="source">
+                <span class="url">instagram.com/p/C9xK2</span>
+                <span class="badge">🎬 8 frames</span>
+              </div>
+              <div class="chyron-bar">
+                <span class="status"><span class="dot"></span> Opening · reading DOM</span>
+                <span class="elapsed">0:00</span>
+              </div>
+              <div class="progress" style="--progress: 8%"></div>
+
+              <div class="title-skel">
+                <span class="bar tallx" style="width: 82%"></span>
+                <span class="bar tall" style="width: 54%"></span>
+              </div>
+              <div class="subtitle-skel">
+                <span class="bar thin" style="width: 92%"></span>
+                <span class="bar thin" style="width: 64%"></span>
+              </div>
+              <div class="facts-skel">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+              </div>
+
+              <h3 class="section">Ingredients</h3>
+              <ul class="ingredients-skel">
+                <li><span class="bar" style="width: 60%"></span><span class="bar" style="width: 76%"></span></li>
+                <li><span class="bar" style="width: 50%"></span><span class="bar" style="width: 88%"></span></li>
+                <li><span class="bar" style="width: 64%"></span><span class="bar" style="width: 54%"></span></li>
+                <li><span class="bar" style="width: 42%"></span><span class="bar" style="width: 72%"></span></li>
+              </ul>
+
+              <h3 class="section">Method</h3>
+              <ol class="method-skel">
+                <li><span></span>
+                  <div class="body-skel">
+                    <span class="bar thin" style="width: 96%"></span>
+                    <span class="bar thin" style="width: 88%"></span>
+                    <span class="bar thin" style="width: 42%"></span>
+                  </div>
+                </li>
+                <li><span></span>
+                  <div class="body-skel">
+                    <span class="bar thin" style="width: 92%"></span>
+                    <span class="bar thin" style="width: 58%"></span>
+                  </div>
+                </li>
+                <li><span></span>
+                  <div class="body-skel">
+                    <span class="bar thin" style="width: 84%"></span>
+                    <span class="bar thin" style="width: 70%"></span>
+                  </div>
+                </li>
+              </ol>
+
+              <div class="ticket-bottom">
+                <span>—————————————</span>
+                <span><span class="glyph">✶</span> mise.app</span>
+              </div>
+            </div>
+            <div class="popup-actions">
+              <button class="fire-btn" disabled><span>FIRE · save .md</span><span class="kbd">↵</span></button>
+              <button class="secondary-btn">Prep</button>
+              <button class="secondary-btn">.pdf</button>
+            </div>
+            <p class="chrome-caption">↑ action row disabled until extraction lands</p>
+          </div>
+        </article>
+
+        <!-- 1B — Ambiguous · picker -->
+        <article class="variant">
+          <header class="variant-head">
+            <span class="chyron"><span class="id">01B</span><span class="label">Ambiguous · picker</span></span>
+            <span class="caption">
+              Multiple recipe targets visible on page (feed, index, multi-recipe article). No Claude call until the user picks.
+              ↑/↓ navigates, ↵ promotes pick to Confident.
+            </span>
+          </header>
+          <div class="popup-frame">
+            <div class="popup">
+              <div class="ticket-top">
+                <span class="brand">MISE · DETECTING</span>
+                <span class="captured">2026-04-24 · 18:02</span>
+              </div>
+              <div class="source">
+                <span class="url">food52.com/recipes/weeknight-noodles</span>
+                <span class="badge pending">4 targets</span>
+              </div>
+              <div class="chyron-bar">
+                <span class="status">Multiple recipes detected — which one?</span>
+                <span class="elapsed">↑↓ · ↵</span>
+              </div>
+
+              <ol class="picker" role="listbox">
+                <li role="option" data-focus="true">
+                  <div class="thumb recipe">🍜</div>
+                  <div class="meta">
+                    <span class="ptitle">Chili-Crisp Cold Noodles</span>
+                    <span class="psub">section · recipe card · 9 ingredients</span>
+                  </div>
+                  <span class="arrow">→</span>
+                </li>
+                <li role="option">
+                  <div class="thumb recipe">🥣</div>
+                  <div class="meta">
+                    <span class="ptitle">Dashi-Pickled Cucumbers</span>
+                    <span class="psub">aside · 5-min recipe · 4 ingredients</span>
+                  </div>
+                  <span class="arrow">→</span>
+                </li>
+                <li role="option">
+                  <div class="thumb recipe">🐓</div>
+                  <div class="meta">
+                    <span class="ptitle">Cold Poached Chicken</span>
+                    <span class="psub">section · recipe card · 7 ingredients</span>
+                  </div>
+                  <span class="arrow">→</span>
+                </li>
+                <li role="option">
+                  <div class="thumb">TXT</div>
+                  <div class="meta">
+                    <span class="ptitle">Extract Whole Article Instead</span>
+                    <span class="psub">fallback · combines all recipes into one .md</span>
+                  </div>
+                  <span class="arrow">→</span>
+                </li>
+              </ol>
+
+              <div class="ticket-bottom">
+                <span>ESC · CANCEL</span>
+                <span><span class="glyph">✶</span> mise.app</span>
+              </div>
+            </div>
+            <div class="popup-actions">
+              <button class="fire-btn" disabled><span>PICK ONE ABOVE</span><span class="kbd">↵</span></button>
+              <button class="secondary-btn">Prep</button>
+            </div>
+            <p class="chrome-caption">↑ no Claude call until a target is selected</p>
+          </div>
+        </article>
+
+        <!-- 1C — Empty · in the weeds -->
+        <article class="variant">
+          <header class="variant-head">
+            <span class="chyron"><span class="id">01C</span><span class="label">Empty · in the weeds</span></span>
+            <span class="caption">
+              No recipe signal on page (new tab, random article, unsupported domain). Toolbar icon grays via <code>declarativeContent</code> — click anyway yields fallback affordances.
+            </span>
+          </header>
+          <div class="popup-frame">
+            <div class="popup">
+              <div class="ticket-top">
+                <span class="brand">MISE · NO RECIPE HERE</span>
+                <span class="captured">2026-04-24 · 18:02</span>
+              </div>
+              <div class="source">
+                <span class="url">chrome://newtab</span>
+                <span class="badge pending">empty</span>
+              </div>
+
+              <div class="stamp">
+                <span class="glyph" style="color: var(--ink-dim)">— STATE —</span>
+                <h2 class="stamp-title">In the Weeds</h2>
+                <p class="stamp-note">
+                  Nothing to extract on <strong>chrome://newtab</strong>. Use one of the fallbacks below, or navigate to a page with a recipe and re-open Mise.
+                </p>
+              </div>
+
+              <ul class="fallback-list">
+                <li>
+                  <span class="gl">↵</span>
+                  <span>Paste a recipe URL to extract from elsewhere</span>
+                  <span class="kbd">⌘V</span>
+                </li>
+                <li>
+                  <span class="gl">⇞</span>
+                  <span>Upload a cookbook photo (OCR + vision)</span>
+                  <span class="kbd">U</span>
+                </li>
+                <li>
+                  <span class="gl">⋆</span>
+                  <span>Highlight text on the current page, then re-open Mise</span>
+                  <span class="kbd">—</span>
+                </li>
+              </ul>
+
+              <div class="ticket-bottom">
+                <span>ESC · CLOSE</span>
+                <span><span class="glyph">✶</span> mise.app</span>
+              </div>
+            </div>
+            <div class="popup-actions">
+              <button class="fire-btn"><span>PASTE URL</span><span class="kbd">⌘V</span></button>
+              <button class="secondary-btn">Prep</button>
+            </div>
+            <p class="chrome-caption">↑ primary action adapts to state — no Fire when no recipe</p>
+          </div>
+        </article>
+      </div>
+
+      <!-- ══════ 2 · EXTRACTION STATES ══════ -->
+
+      <h2 class="section-title" data-index="02">Extraction — in flight</h2>
+      <p class="section-note">
+        Post-detection, pre-resolution. Reading a page or capturing video frames. The chyron bar tells the user which side of the ignition they're on; the skeleton remains, Fire stays disabled, Esc cancels cleanly.
+      </p>
+
+      <div class="variants">
+        <!-- 2A — Reading page (generic) -->
+        <article class="variant">
+          <header class="variant-head">
+            <span class="chyron"><span class="id">02A</span><span class="label">Extracting · reading page</span></span>
+            <span class="caption">
+              Generic extraction — blog, YouTube description + transcript, article text. Progress bar fills as Claude streams the structured output back; Esc aborts.
+            </span>
+          </header>
+          <div class="popup-frame">
+            <div class="popup skel">
+              <div class="ticket-top">
+                <span class="brand">MISE · EXTRACTING</span>
+                <span class="captured">2026-04-24 · 18:03</span>
+              </div>
+              <div class="source">
+                <span class="url">seriouseats.com/best-chili-recipe</span>
+                <span class="badge">📝 article</span>
+              </div>
+              <div class="chyron-bar">
+                <span class="status"><span class="dot"></span> Extracting · parsing ingredients</span>
+                <span class="elapsed">0:04</span>
+              </div>
+              <div class="progress" style="--progress: 62%"></div>
+
+              <h2 class="title" style="color: var(--ink-primary); margin-top: 18px">The Best Chili</h2>
+              <p class="subtitle">slow-built, beer-deglazed, best on day two.</p>
+
+              <div class="facts">
+                <span class="fact">SERVES <strong>6</strong></span>
+                <span class="fact">HANDS-ON <strong>45m</strong></span>
+                <span class="fact">TOTAL <strong>3h</strong></span>
+              </div>
+
+              <h3 class="section">Ingredients</h3>
+              <ul class="ingredients-skel">
+                <li><span class="bar" style="width: 60%"></span><span class="bar" style="width: 80%"></span></li>
+                <li><span class="bar" style="width: 48%"></span><span class="bar" style="width: 66%"></span></li>
+                <li><span class="bar" style="width: 56%"></span><span class="bar" style="width: 88%"></span></li>
+                <li><span class="bar" style="width: 40%"></span><span class="bar" style="width: 58%"></span></li>
+                <li><span class="bar" style="width: 52%"></span><span class="bar" style="width: 72%"></span></li>
+              </ul>
+
+              <h3 class="section">Method</h3>
+              <ol class="method-skel">
+                <li><span></span>
+                  <div class="body-skel">
+                    <span class="bar thin" style="width: 94%"></span>
+                    <span class="bar thin" style="width: 66%"></span>
+                  </div>
+                </li>
+                <li><span></span>
+                  <div class="body-skel">
+                    <span class="bar thin" style="width: 88%"></span>
+                    <span class="bar thin" style="width: 52%"></span>
+                  </div>
+                </li>
+              </ol>
+
+              <div class="ticket-bottom">
+                <span>ESC · CANCEL</span>
+                <span><span class="glyph">✶</span> mise.app</span>
+              </div>
+            </div>
+            <div class="popup-actions">
+              <button class="fire-btn" disabled><span>FIRE · save .md</span><span class="kbd">↵</span></button>
+              <button class="secondary-btn">Prep</button>
+              <button class="secondary-btn">.pdf</button>
+            </div>
+            <p class="chrome-caption">↑ head-of-card populates first (title, facts); body fills last</p>
+          </div>
+        </article>
+
+        <!-- 2B — Video capture -->
+        <article class="variant">
+          <header class="variant-head">
+            <span class="chyron"><span class="id">02B</span><span class="label">Capturing · video frames</span></span>
+            <span class="caption">
+              IG Reel / TikTok / YouTube Short or long-form video. Filmstrip shows which frames have been hashed; 24-frame hard cap keeps Haiku vision cost bounded.
+            </span>
+          </header>
+          <div class="popup-frame">
+            <div class="popup skel">
+              <div class="ticket-top">
+                <span class="brand">MISE · CAPTURING</span>
+                <span class="captured">2026-04-24 · 18:03</span>
+              </div>
+              <div class="source">
+                <span class="url">youtube.com/watch?v=kX2jQ</span>
+                <span class="badge">🎬 11 / 24</span>
+              </div>
+              <div class="chyron-bar">
+                <span class="status"><span class="dot"></span> Scene-detected · frame 11 of 24</span>
+                <span class="elapsed">0:07</span>
+              </div>
+              <div class="progress" style="--progress: 46%"></div>
+              <div class="filmstrip" aria-label="Captured frames">
+                <div class="frame captured"></div>
+                <div class="frame captured"></div>
+                <div class="frame captured"></div>
+                <div class="frame captured"></div>
+                <div class="frame captured"></div>
+                <div class="frame captured"></div>
+                <div class="frame captured"></div>
+                <div class="frame active"></div>
+              </div>
+
+              <div class="title-skel">
+                <span class="bar tallx" style="width: 72%"></span>
+                <span class="bar tall" style="width: 48%"></span>
+              </div>
+              <div class="subtitle-skel">
+                <span class="bar thin" style="width: 86%"></span>
+                <span class="bar thin" style="width: 58%"></span>
+              </div>
+              <div class="facts-skel">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+              </div>
+
+              <h3 class="section">Ingredients</h3>
+              <ul class="ingredients-skel">
+                <li><span class="bar" style="width: 58%"></span><span class="bar" style="width: 74%"></span></li>
+                <li><span class="bar" style="width: 44%"></span><span class="bar" style="width: 82%"></span></li>
+                <li><span class="bar" style="width: 62%"></span><span class="bar" style="width: 54%"></span></li>
+              </ul>
+
+              <div class="ticket-bottom">
+                <span>ESC · CANCEL</span>
+                <span><span class="glyph">✶</span> mise.app</span>
+              </div>
+            </div>
+            <div class="popup-actions">
+              <button class="fire-btn" disabled><span>FIRE · save .md</span><span class="kbd">↵</span></button>
+              <button class="secondary-btn">Prep</button>
+              <button class="secondary-btn">.pdf</button>
+            </div>
+            <p class="chrome-caption">↑ filmstrip previews which frames the model will see</p>
+          </div>
+        </article>
+      </div>
+
+      <!-- ══════ 3 · RESOLUTION STATES ══════ -->
+
+      <h2 class="section-title" data-index="03">Resolution — terminal states</h2>
+      <p class="section-note">
+        The card has landed — or failed to. Success enables Fire. Low-confidence warns but still permits Fire (with a stamp). Error rewrites the action row to retry-and-fallback.
+      </p>
+
+      <div class="variants">
+        <!-- 3A — Success · filled -->
+        <article class="variant">
+          <header class="variant-head">
+            <span class="chyron"><span class="id">03A</span><span class="label">Success · filled</span></span>
+            <span class="caption">
+              Happy path, every field present, Fire ready. Pressing ↵ writes <code>.md</code> to disk and transitions to <em>03D · Fired</em>.
+            </span>
+          </header>
+          <div class="popup-frame">
+            <div class="popup">
+              <div class="ticket-top">
+                <span class="brand">MISE · NO. 00427</span>
+                <span class="captured">2026-04-24 · 18:03</span>
+              </div>
+              <div class="source">
+                <span class="url">instagram.com/p/C9xK2</span>
+                <span class="badge">🎬 8 frames</span>
+              </div>
+              <h2 class="title">Gochujang-Glazed Pork Belly</h2>
+              <p class="subtitle">slow-rendered, sharply-sauced, served over rice with a soft egg.</p>
+              <div class="facts">
+                <span class="fact">SERVES <strong>4</strong></span>
+                <span class="fact">HANDS-ON <strong>25m</strong></span>
+                <span class="fact">TOTAL <strong>2h 10m</strong></span>
+              </div>
+              <h3 class="section">Ingredients</h3>
+              <ul class="ingredients">
+                <li><span class="qty">800 g</span><span>pork belly, skin-on</span></li>
+                <li><span class="qty">3 tbsp</span><span>gochujang paste</span></li>
+                <li><span class="qty">2 tbsp</span><span>honey or maltose</span></li>
+                <li><span class="qty">1½ tbsp</span><span>soy sauce (light)</span></li>
+                <li><span class="qty">4 cloves</span><span>garlic, crushed</span></li>
+                <li><span class="qty">1 thumb</span><span>ginger, julienned</span></li>
+                <li><span class="qty">—</span><span>spring onion &amp; sesame to finish</span></li>
+              </ul>
+              <h3 class="section">Method</h3>
+              <ol class="method">
+                <li>Score the pork belly skin in a crosshatch, just through the fat. Salt heavily, uncovered in the fridge overnight — this is non-negotiable.</li>
+                <li>Sear skin-down in a dry cast-iron until the skin blisters and shatters when tapped. Drain most of the fat.</li>
+                <li>Whisk gochujang, honey, soy, garlic and ginger with 100 ml water. Pour around (not over) the pork. Cover, oven 160 °C for 90 minutes.</li>
+                <li>Uncover, turn skin-up, ladle sauce over every few minutes for the final 15 minutes at 200 °C until lacquered.</li>
+              </ol>
+              <div class="tags">
+                <span class="tag">#cuisine/korean</span> · <span class="tag">#pork</span> · <span class="tag">#braise</span> · <span class="tag">#weeknight</span>
+              </div>
+              <div class="ticket-bottom">
+                <span>2026-04-24 · 18:03</span>
+                <span><span class="glyph">✶</span> mise.app</span>
+              </div>
+            </div>
+            <div class="popup-actions">
+              <button class="fire-btn"><span>FIRE · save .md</span><span class="kbd">↵</span></button>
+              <button class="secondary-btn">Prep</button>
+              <button class="secondary-btn">.pdf</button>
+            </div>
+            <p class="chrome-caption">↑ Fire primary · Prep for unit/tag tweaks · .pdf as fallback export</p>
+          </div>
+        </article>
+
+        <!-- 3B — Low confidence · warning -->
+        <article class="variant">
+          <header class="variant-head">
+            <span class="chyron"><span class="id">03B</span><span class="label">Warning · low confidence</span></span>
+            <span class="caption">
+              Card landed but one or more fields feel thin (caption-only video, missing method steps, ambiguous units). Fire still permitted — flagged with ⚠.
+            </span>
+          </header>
+          <div class="popup-frame">
+            <div class="popup">
+              <div class="ticket-top">
+                <span class="brand">MISE · NO. 00428</span>
+                <span class="captured">2026-04-24 · 18:04</span>
+              </div>
+              <div class="source">
+                <span class="url">tiktok.com/@chef_ticket/video/72891</span>
+                <span class="badge">🎬 6 frames</span>
+              </div>
+
+              <div class="callout" role="status">
+                <div class="hdr"><span>⚠ LOW CONFIDENCE</span><span class="code">caption-only</span></div>
+                <div class="body">
+                  Video caption alone — method may be incomplete. <em>Review the 3 steps below before firing.</em>
+                </div>
+              </div>
+
+              <h2 class="title">Cacio e Pepe, On Ice</h2>
+              <p class="subtitle">the cold-noodle heresy that works.</p>
+              <div class="facts">
+                <span class="fact">SERVES <strong>2</strong></span>
+                <span class="fact">HANDS-ON <strong>15m</strong></span>
+                <span class="fact">TOTAL <strong>15m</strong></span>
+              </div>
+              <h3 class="section">Ingredients</h3>
+              <ul class="ingredients">
+                <li><span class="qty">200 g</span><span>spaghetti</span></li>
+                <li><span class="qty">80 g</span><span>pecorino romano, microplaned</span></li>
+                <li><span class="qty">2 tsp</span><span>black pepper, freshly cracked</span></li>
+                <li><span class="qty">—</span><span>ice water, for shock</span></li>
+              </ul>
+              <h3 class="section">Method</h3>
+              <ol class="method">
+                <li>Cook pasta 1 min past al dente in heavily salted water.</li>
+                <li>Shock in ice water, drain.</li>
+                <li>Toss with pecorino, pepper, 1 tbsp pasta water. Serve immediately.</li>
+              </ol>
+              <div class="tags">
+                <span class="tag">#cuisine/italian</span> · <span class="tag">#pasta</span> · <span class="tag">#cold</span> · <span class="tag">#low-confidence</span>
+              </div>
+              <div class="ticket-bottom">
+                <span>2026-04-24 · 18:04</span>
+                <span><span class="glyph">✶</span> mise.app</span>
+              </div>
+            </div>
+            <div class="popup-actions">
+              <button class="fire-btn warn"><span class="warn-glyph">⚠</span><span>FIRE ANYWAY · save .md</span><span class="kbd">↵</span></button>
+              <button class="secondary-btn">Prep</button>
+            </div>
+            <p class="chrome-caption">↑ Fire retained — Mise surfaces doubt, user decides</p>
+          </div>
+        </article>
+
+        <!-- 3C — Error · in the weeds -->
+        <article class="variant">
+          <header class="variant-head">
+            <span class="chyron"><span class="id">03C</span><span class="label">Error · in the weeds</span></span>
+            <span class="caption">
+              Extraction failed after retries (API overload, parse failure, network drop). Action row swaps Fire for Retry and Copy-raw.
+            </span>
+          </header>
+          <div class="popup-frame">
+            <div class="popup">
+              <div class="ticket-top">
+                <span class="brand">MISE · EXTRACTION FAILED</span>
+                <span class="captured">2026-04-24 · 18:05</span>
+              </div>
+              <div class="source">
+                <span class="url">youtube.com/watch?v=dQw4w9</span>
+                <span class="badge pending">3× retry</span>
+              </div>
+
+              <div class="stamp">
+                <span class="glyph" style="color: var(--flame-deep)">— STATE —</span>
+                <h2 class="stamp-title" style="color: var(--flame-deep)">In the Weeds</h2>
+                <p class="stamp-note">
+                  Mise reached Claude but the call returned <strong>529 · overloaded</strong> after three retries with backoff. The page source is cached — retry or copy the raw text and fire manually.
+                </p>
+              </div>
+
+              <div class="callout error" role="alert">
+                <div class="hdr"><span>▲ API ERROR · 529</span><span class="code">overloaded</span></div>
+                <div class="body">
+                  Anthropic reported the model is over capacity. Try again in ~30s, or fall through to Haiku (Prep → Fallback model).
+                </div>
+              </div>
+
+              <ul class="fallback-list">
+                <li>
+                  <span class="gl">↻</span>
+                  <span>Retry with the same model</span>
+                  <span class="kbd">↵</span>
+                </li>
+                <li>
+                  <span class="gl">⎘</span>
+                  <span>Copy raw page text (fire to .md manually)</span>
+                  <span class="kbd">⌘C</span>
+                </li>
+                <li>
+                  <span class="gl">↓</span>
+                  <span>Fall through to Haiku (lower-cost, less nuance)</span>
+                  <span class="kbd">H</span>
+                </li>
+              </ul>
+
+              <div class="ticket-bottom">
+                <span>ESC · CLOSE</span>
+                <span><span class="glyph">✶</span> mise.app</span>
+              </div>
+            </div>
+            <div class="popup-actions">
+              <button class="retry-btn"><span>RETRY</span><span class="kbd" style="border:1px solid var(--ink-primary); color: var(--ink-primary); opacity: .5">↵</span></button>
+              <button class="secondary-btn">Copy text</button>
+              <button class="secondary-btn">Prep</button>
+            </div>
+            <p class="chrome-caption">↑ Fire replaced by Retry when there is no artifact to save</p>
+          </div>
+        </article>
+
+        <!-- 3D — Fired · receipt stamp -->
+        <article class="variant">
+          <header class="variant-head">
+            <span class="chyron"><span class="id">03D</span><span class="label">Fired · receipt</span></span>
+            <span class="caption">
+              Momentary confirmation after ↵ Fire. The card dims, a receipt stamp lands, and the popup closes itself in ~2s — Esc cancels the close.
+            </span>
+          </header>
+          <div class="popup-frame">
+            <div class="popup fired">
+              <div class="popup-body">
+                <div class="ticket-top">
+                  <span class="brand">MISE · NO. 00427</span>
+                  <span class="captured">2026-04-24 · 18:03</span>
+                </div>
+                <div class="source">
+                  <span class="url">instagram.com/p/C9xK2</span>
+                  <span class="badge">🎬 8 frames</span>
+                </div>
+                <h2 class="title">Gochujang-Glazed Pork Belly</h2>
+                <p class="subtitle">slow-rendered, sharply-sauced, served over rice with a soft egg.</p>
+                <div class="facts">
+                  <span class="fact">SERVES <strong>4</strong></span>
+                  <span class="fact">HANDS-ON <strong>25m</strong></span>
+                  <span class="fact">TOTAL <strong>2h 10m</strong></span>
+                </div>
+                <h3 class="section">Ingredients</h3>
+                <ul class="ingredients">
+                  <li><span class="qty">800 g</span><span>pork belly, skin-on</span></li>
+                  <li><span class="qty">3 tbsp</span><span>gochujang paste</span></li>
+                  <li><span class="qty">2 tbsp</span><span>honey or maltose</span></li>
+                  <li><span class="qty">1½ tbsp</span><span>soy sauce (light)</span></li>
+                </ul>
+                <h3 class="section">Method</h3>
+                <ol class="method">
+                  <li>Score the pork belly skin in a crosshatch, just through the fat. Salt heavily, uncovered overnight.</li>
+                  <li>Sear skin-down in a dry cast-iron until the skin blisters.</li>
+                </ol>
+                <div class="ticket-bottom">
+                  <span>2026-04-24 · 18:03</span>
+                  <span><span class="glyph">✶</span> mise.app</span>
+                </div>
+              </div>
+              <div class="fired-stamp" aria-live="polite">
+                <div class="mark">
+                  <div class="line1"><span class="check">✓</span><span>FIRED</span></div>
+                  <div class="line2">saved to ~/Recipes/2026-04-24-gochujang-pork-belly.md</div>
+                </div>
+              </div>
+            </div>
+            <div class="popup-actions">
+              <span class="countdown">Closing in <strong>2s</strong> · <span style="font-family: var(--font-mono); border:1px solid var(--rule-dark); padding:1px 5px">ESC</span> to cancel</span>
+              <button class="secondary-btn">Keep open</button>
+            </div>
+            <p class="chrome-caption">↑ auto-close is the default; Keep open holds the card for chaining (copy to clipboard, etc)</p>
+          </div>
+        </article>
+      </div>
+
+      <h2 class="section-title" data-index="04">State grammar — invariants</h2>
+      <p class="section-note">
+        Rules observed across every variant above.
+      </p>
+      <div class="legend" aria-label="Invariants">
+        <div class="row"><span class="k">Source line</span><span class="v">Always visible, even when empty. It's the promise the card is about to keep or decline.</span></div>
+        <div class="row"><span class="k">Chyron placement</span><span class="v">Under the source line, above the content. Kitchen-ticket register — never floats over the card.</span></div>
+        <div class="row"><span class="k">Fire semantics</span><span class="v">Only enabled when a usable .md exists. Swapped for Retry / Paste URL when no artifact is in reach.</span></div>
+        <div class="row"><span class="k">Esc contract</span><span class="v">Cancels the current ignition cleanly. During extraction, aborts the Claude call. During Fired, cancels auto-close.</span></div>
+        <div class="row"><span class="k">Callout shape</span><span class="v">Full 1px border box (not side-stripe). Stamp register, not alert register. Border color carries severity.</span></div>
+        <div class="row"><span class="k">Flame budget</span><span class="v">Fire · ✶ · extraction badge (ember) · urgent states. Never chromatic decoration.</span></div>
+      </div>
+    </main>
+  </body>
+</html>
