@@ -103,6 +103,16 @@ Three systems defined; see canonical docs:
 - **Color**: Brutalist monochrome + flame. Neutral grays + a single accent family (flame at hue 30.4°, sanguine red — like digital-clock LED digits). See `docs/mise-color-system.md`.
 - **Icons**: [Phosphor Icons](https://phosphoricons.com) — **thin weight** for functional chrome (keyboard-return, arrows, status glyphs, retry, close). Matches the hairline-rule aesthetic. Emojis are reserved for *content* (source-type badges like `🎬` for video, `📝` for article) where they function as cultural shorthand — never as functional chrome. Import hygiene: when pasting a Phosphor SVG into Figma, the enclosing 24×24 bounding frame sometimes comes in with a solid white fill as an import default — treat as chrome, leave as-is or scrub per case.
 
+## Logo mark (locked — 2026-06-07, "The Spike")
+
+The brand mark is a **kitchen order ticket** — the brief's existing ticket/receipt spine (`NO. 00427`, the popup-is-a-ticket) made into a glyph. The "spike" (orders speared on the kitchen rail) is implied entirely by **negative space**: a semicircle notch scooped from the ticket's top edge where it was pierced. No literal rod (rejected as too on-the-nose / read as a download arrow). One **flame fired-bar** = the fired item (the single accent), a shorter neutral knockout bar beneath it, and a torn/perforated bottom edge. Source vector: Figma `Mise` node `92:1381`.
+
+- **Masters**: `type-specimens/mark/` — `mise-mark-on-dark.svg` (paper ticket, for dark surfaces), `mise-mark-on-light.svg` (ink ticket, for light surfaces), `mise-icon.svg` (ink tile, for app/extension/favicon — reads on any theme). Geometry on an 80×76 grid; notch r=6 dead-centre; flame bar `x12 y25 w57 h11`; knockout bar `x12 y42 w41.8 h8`. Flame is the locked `--flame` `#cb1200` (NOT the sketch's brighter `#fb2c1b`).
+- **PNG ladder**: `type-specimens/mark/png/mise-icon-{16,32,48,128}.png` (ready for the MV3 manifest at build time). Re-export via `type-specimens/mark/_export.html`.
+- **Favicon**: wired at `src/app/icon.svg` (Next.js App Router auto-serves it).
+- **Crit trail**: `logo-marks.html` (4 directions, crit 01) → `logo-spike.html` / `logo-spike-neg.html` (refinement) → `logo-spike-final.html` (the locked mark, in-context). Decision history in MemPalace (code/recipe_archiver, 2026-06-07).
+- **Reduction note**: at ≤16px the notch softens to a dimple; the red bar + tear keep it legible. The full mark is used at all sizes (no separate simplified glyph needed).
+
 **Pivot history:**
 - **v1** (through 2026-04-22): warm-cream split-complementary (cream + flame + copper + kitchen-dark). Rejected for hitting the AI-default "warm cream + rust + serif+sans" aesthetic.
 - **v2** (2026-04-23): brutalist monochrome + flame at hue 35° (coppery orange). Deliberate anti-default commitment.
@@ -113,7 +123,7 @@ See the global `design-anti-ai-defaults.md` rule and `design-studio-principles.m
 ## What to build next
 
 1. ~~`impeccable:layout` + `impeccable:harden` — popup state variants~~ — done 2026-04-24, `type-specimens/popup-states.html`
-2. Logo mark + extension icon set (task #5)
+2. ~~Logo mark + extension icon set~~ — done 2026-06-07, "The Spike" (see "Logo mark" section above)
 3. Motion (`/flow` → `impeccable:animate`)
 4. Microcopy pass (`ux-copywriter`)
 5. Adversarial critique (`impeccable:critique` + `web-design-guidelines`)

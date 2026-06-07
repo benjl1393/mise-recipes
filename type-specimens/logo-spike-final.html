@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Mise — The Spike (lock candidate)</title>
+    <style>
+      @font-face { font-family:"Departure Mono"; src:url("./fonts/DepartureMono-Regular.woff2") format("woff2"); font-weight:400; font-style:normal; font-display:block; }
+      @font-face { font-family:"Commit Mono"; src:url("./fonts/CommitMono-400-Regular.otf") format("opentype"); font-weight:400; font-style:normal; font-display:swap; }
+      :root{
+        --font-display:"Departure Mono",ui-monospace,Menlo,monospace;
+        --font-body:"Commit Mono",ui-monospace,Menlo,monospace;
+        --ink-700:oklch(0.200 0 0); --ink-800:oklch(0.150 0 0); --ink-600:oklch(0.280 0 0);
+        --paper-100:oklch(0.965 0 0); --paper-200:oklch(0.920 0 0);
+        --ink-primary:oklch(0.120 0 0); --ink-dim:oklch(0.480 0 0);
+        --paper-primary:oklch(0.965 0 0); --paper-dim:oklch(0.780 0 0); --paper-muted:oklch(0.620 0 0);
+        --rule-ink:oklch(0.280 0 0); --rule-cream:oklch(0.820 0 0);
+        --flame:oklch(0.533 0.212 30.4); --flame-on-dark:oklch(0.620 0.205 30.4);
+      }
+      *{box-sizing:border-box;} html,body{margin:0;padding:0;}
+      body{ background:var(--ink-700); color:var(--paper-primary); font-family:var(--font-body);
+        font-synthesis:none; font-size:14px; line-height:1.55; -webkit-font-smoothing:antialiased; padding:48px 32px 140px; }
+      .wrap{max-width:1080px;margin:0 auto;}
+      .page-header{border-bottom:1px solid var(--rule-ink);padding-bottom:24px;margin-bottom:8px;}
+      .page-header h1{font-family:var(--font-display);font-weight:400;font-size:34px;line-height:1;text-transform:uppercase;margin:0 0 12px;}
+      .page-header .meta{font-size:11px;color:var(--paper-dim);text-transform:uppercase;letter-spacing:0.08em;}
+      nav{margin-top:12px;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;}
+      nav a{color:var(--paper-dim);text-decoration:none;} nav a.active{color:var(--paper-primary);border-bottom:1px solid var(--flame-on-dark);padding-bottom:2px;} nav span{color:var(--paper-muted);margin:0 10px;}
+      .lede{max-width:740px;font-size:13px;line-height:1.65;color:var(--paper-dim);margin:26px 0 8px;}
+      .lede strong{color:var(--paper-primary);}
+      .sec-head{display:flex;justify-content:space-between;align-items:baseline;margin:52px 0 18px;border-top:1px solid var(--rule-ink);padding-top:24px;}
+      .sec-head h2{font-family:var(--font-display);font-weight:400;font-size:19px;text-transform:uppercase;margin:0;letter-spacing:0.02em;}
+      .sec-head .idx{font-size:11px;color:var(--paper-muted);letter-spacing:0.1em;text-transform:uppercase;}
+      .heroes{display:flex;gap:24px;flex-wrap:wrap;}
+      .hero{width:200px;height:200px;display:grid;place-items:center;border:1px solid var(--rule-ink);}
+      .hero svg{width:130px;height:130px;display:block;}
+      .ladder{display:flex;align-items:flex-end;gap:24px;flex-wrap:wrap;margin-bottom:18px;}
+      .lrow-tag{width:54px;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--paper-muted);align-self:center;}
+      .lrow{display:flex;align-items:flex-end;gap:24px;flex-wrap:wrap;}
+      .rung{display:grid;gap:6px;justify-items:center;} .tile{display:grid;place-items:center;border:1px solid var(--rule-ink);}
+      .rung .px{font-size:9px;color:var(--paper-muted);} .tile svg{display:block;}
+      .ctx-row{display:flex;gap:30px;flex-wrap:wrap;align-items:flex-start;}
+      .mini-popup{width:300px;background:var(--paper-100);border:1px solid var(--rule-cream);box-shadow:0 16px 40px -16px oklch(0.100 0.015 240 / 0.3);}
+      .mini-popup .ticket-top{padding:12px 14px;border-bottom:1px dashed var(--rule-cream);display:flex;align-items:center;gap:9px;}
+      .mini-popup .ticket-top svg{display:block;flex:0 0 auto;}
+      .mini-popup .ticket-top .brand{font-family:var(--font-display);font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink-primary);}
+      .mini-popup .ticket-top .no{margin-left:auto;font-family:var(--font-display);font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink-dim);}
+      .mini-popup .body{padding:14px;} .mini-popup .title{font-family:var(--font-display);font-size:18px;line-height:1.1;text-transform:uppercase;color:var(--ink-primary);margin:0 0 8px;}
+      .mini-popup .ph{height:7px;background:var(--paper-200);margin:6px 0;} .mini-popup .ph.s{width:60%;}
+      .ctx-cap{font-size:10px;color:var(--paper-muted);text-transform:uppercase;letter-spacing:0.08em;margin-top:10px;}
+      .tabbar{display:flex;align-items:flex-end;gap:2px;background:oklch(0.26 0 0);padding:8px 8px 0;border-radius:6px 6px 0 0;width:340px;}
+      .tab{display:flex;align-items:center;gap:7px;background:var(--ink-700);padding:8px 12px;border-radius:6px 6px 0 0;font-family:var(--font-body);font-size:11px;color:var(--paper-dim);}
+      .tab svg{display:block;}
+      .lockups{display:grid;gap:16px;margin-top:6px;max-width:520px;}
+      .lockup{display:flex;align-items:center;gap:14px;padding:18px 20px;border:1px solid var(--rule-ink);}
+      .lockup.on-ink{background:var(--ink-700);} .lockup.on-paper{background:var(--paper-100);}
+      .lockup .wm{font-family:var(--font-display);font-size:30px;line-height:1;text-transform:uppercase;letter-spacing:0.02em;}
+      .lockup.on-ink .wm{color:var(--paper-primary);} .lockup.on-paper .wm{color:var(--ink-primary);}
+      .lockup .tagline{font-size:9.5px;letter-spacing:0.18em;text-transform:uppercase;}
+      .lockup.on-ink .tagline{color:var(--paper-muted);} .lockup.on-paper .tagline{color:var(--ink-dim);}
+      .lockup .stack{display:grid;gap:3px;}
+    </style>
+  </head>
+  <body>
+    <!-- Duotone: --m structure, --g ground(knockout). Flame bar = --flame (single accent).
+         Spike = semicircle notch scooped from the TOP EDGE (negative space). No rod. 2 bars. Shallow tear. -->
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+      <!-- Exact geometry from Ben's Figma vector (node 92:1381). viewBox 80x76.
+           Ticket silhouette (Union) carries the semicircle notch + torn bottom as true negative space.
+           Flame bar = --flame (locked token). Second bar = --g (ground knockout). -->
+      <symbol id="sp" viewBox="0 0 80 76">
+        <path fill="var(--m)" d="M71.95 76 L63.90 68 L55.85 76 L47.80 68 L39.76 76 L31.71 68 L23.66 76 L15.85 68.24 L8.05 76 L0 68 L0 0 L34.08 0 C34.03 0.33 34 0.66 34 1 C34 4.31 36.69 7 40 7 C43.31 7 46 4.31 46 1 C46 0.66 45.97 0.33 45.92 0 L80 0 L80 68 L71.95 76 Z"/>
+        <rect x="12" y="25" width="57"   height="11" fill="var(--flame)"/>
+        <rect x="12" y="42" width="41.8" height="8"  fill="var(--g)"/>
+      </symbol>
+      <!-- 16px uses the same exact mark -->
+      <symbol id="sp-min" viewBox="0 0 80 76">
+        <path fill="var(--m)" d="M71.95 76 L63.90 68 L55.85 76 L47.80 68 L39.76 76 L31.71 68 L23.66 76 L15.85 68.24 L8.05 76 L0 68 L0 0 L34.08 0 C34.03 0.33 34 0.66 34 1 C34 4.31 36.69 7 40 7 C43.31 7 46 4.31 46 1 C46 0.66 45.97 0.33 45.92 0 L80 0 L80 68 L71.95 76 Z"/>
+        <rect x="12" y="25" width="57"   height="11" fill="var(--flame)"/>
+        <rect x="12" y="42" width="41.8" height="8"  fill="var(--g)"/>
+      </symbol>
+    </defs></svg>
+
+    <div class="wrap">
+      <header class="page-header">
+        <h1>The Spike — lock candidate</h1>
+        <div class="meta">original sketch · arrow removed · semicircle notch kept · 2 bars · 2026-06-07</div>
+        <nav>
+          <a href="./index.html">Specimen</a><span>·</span>
+          <a href="./logo-marks.html">Logo marks</a><span>·</span>
+          <a href="./logo-spike-neg.html">Neg space</a><span>·</span>
+          <a class="active" href="./logo-spike-final.html">Lock candidate</a>
+        </nav>
+      </header>
+
+      <p class="lede">
+        Back to the original sketch: the literal arrow is gone, the <strong>semicircle notch</strong> stays as the pierce — the spike implied as a scoop of negative space out of the ticket's top edge. <strong>Two bars</strong> only — the flame fired-item and one neutral line. Gentle tear at the bottom.
+      </p>
+
+      <div class="sec-head"><h2>The mark</h2><span class="idx">ink · paper · 32 master</span></div>
+      <div class="heroes">
+        <div class="hero" style="background:var(--ink-700);--m:var(--paper-primary);--g:var(--ink-700);"><svg viewBox="0 0 80 76"><use href="#sp"/></svg></div>
+        <div class="hero" style="background:var(--paper-100);--m:var(--ink-primary);--g:var(--paper-100);"><svg viewBox="0 0 80 76"><use href="#sp"/></svg></div>
+        <div class="hero" style="background:var(--ink-800);--m:var(--flame);--g:var(--ink-800);"><svg viewBox="0 0 80 76"><use href="#sp"/></svg></div>
+      </div>
+
+      <div class="sec-head"><h2>Icon ladder</h2><span class="idx">128 / 48 / 32 / 16 · min reduction at 16</span></div>
+      <div class="lrow"><span class="lrow-tag">On ink</span>
+        <div class="ladder">
+          <div class="rung"><div class="tile" style="width:128px;height:128px;background:var(--ink-700);--m:var(--paper-primary);--g:var(--ink-700);"><svg width="96" height="96"><use href="#sp"/></svg></div><span class="px">128</span></div>
+          <div class="rung"><div class="tile" style="width:48px;height:48px;background:var(--ink-700);--m:var(--paper-primary);--g:var(--ink-700);"><svg width="38" height="38"><use href="#sp"/></svg></div><span class="px">48</span></div>
+          <div class="rung"><div class="tile" style="width:32px;height:32px;background:var(--ink-700);--m:var(--paper-primary);--g:var(--ink-700);"><svg width="26" height="26"><use href="#sp"/></svg></div><span class="px">32</span></div>
+          <div class="rung"><div class="tile" style="width:16px;height:16px;background:var(--ink-700);--m:var(--paper-primary);--g:var(--ink-700);"><svg width="16" height="16"><use href="#sp-min"/></svg></div><span class="px">16</span></div>
+        </div>
+      </div>
+      <div class="lrow"><span class="lrow-tag">On paper</span>
+        <div class="ladder">
+          <div class="rung"><div class="tile" style="width:128px;height:128px;background:var(--paper-100);--m:var(--ink-primary);--g:var(--paper-100);"><svg width="96" height="96"><use href="#sp"/></svg></div><span class="px">128</span></div>
+          <div class="rung"><div class="tile" style="width:48px;height:48px;background:var(--paper-100);--m:var(--ink-primary);--g:var(--paper-100);"><svg width="38" height="38"><use href="#sp"/></svg></div><span class="px">48</span></div>
+          <div class="rung"><div class="tile" style="width:32px;height:32px;background:var(--paper-100);--m:var(--ink-primary);--g:var(--paper-100);"><svg width="26" height="26"><use href="#sp"/></svg></div><span class="px">32</span></div>
+          <div class="rung"><div class="tile" style="width:16px;height:16px;background:var(--paper-100);--m:var(--ink-primary);--g:var(--paper-100);"><svg width="16" height="16"><use href="#sp-min"/></svg></div><span class="px">16</span></div>
+        </div>
+      </div>
+
+      <div class="sec-head"><h2>In context</h2><span class="idx">popup · tab · lockup</span></div>
+      <div class="ctx-row">
+        <div>
+          <div class="mini-popup">
+            <div class="ticket-top" style="--m:var(--ink-primary);--g:var(--paper-100);">
+              <svg width="18" height="18"><use href="#sp"/></svg>
+              <span class="brand">Mise</span><span class="no">No. 00427</span>
+            </div>
+            <div class="body"><h3 class="title">Gochujang Pork Belly</h3><div class="ph"></div><div class="ph"></div><div class="ph s"></div></div>
+          </div>
+          <p class="ctx-cap">↑ popup ticket-top (18px)</p>
+          <div class="tabbar" style="margin-top:18px;">
+            <div class="tab" style="--m:var(--paper-primary);--g:var(--ink-700);"><svg width="14" height="14"><use href="#sp-min"/></svg><span>Mise — Pork Belly</span></div>
+            <div class="tab" style="--m:var(--paper-muted);--g:oklch(0.30 0 0);"><svg width="14" height="14"><use href="#sp-min"/></svg><span>instagram.com</span></div>
+          </div>
+          <p class="ctx-cap">↑ favicon at 14px</p>
+        </div>
+        <div class="lockups">
+          <div class="lockup on-ink" style="--m:var(--paper-primary);--g:var(--ink-700);">
+            <svg width="40" height="40"><use href="#sp"/></svg>
+            <div class="stack"><span class="wm">Mise</span><span class="tagline">fire · the pass · prep</span></div>
+          </div>
+          <div class="lockup on-paper" style="--m:var(--ink-primary);--g:var(--paper-100);">
+            <svg width="40" height="40"><use href="#sp"/></svg>
+            <div class="stack"><span class="wm">Mise</span><span class="tagline">own your recipes</span></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </body>
+</html>

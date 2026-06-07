@@ -1,0 +1,555 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Mise — Logo marks (crit 01)</title>
+
+    <style>
+      @font-face {
+        font-family: "Departure Mono";
+        src: url("./fonts/DepartureMono-Regular.woff2") format("woff2");
+        font-weight: 400; font-style: normal; font-display: block;
+      }
+      @font-face {
+        font-family: "Commit Mono";
+        src: url("./fonts/CommitMono-400-Regular.otf") format("opentype");
+        font-weight: 400; font-style: normal; font-display: swap;
+      }
+      @font-face {
+        font-family: "Commit Mono";
+        src: url("./fonts/CommitMono-400-Italic.otf") format("opentype");
+        font-weight: 400; font-style: italic; font-display: swap;
+      }
+
+      :root {
+        --font-display: "Departure Mono", ui-monospace, "SF Mono", Menlo, monospace;
+        --font-body: "Commit Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+        --ink-900: oklch(0.100 0 0);
+        --ink-800: oklch(0.150 0 0);
+        --ink-700: oklch(0.200 0 0);
+        --ink-600: oklch(0.280 0 0);
+        --paper-50:  oklch(0.985 0 0);
+        --paper-100: oklch(0.965 0 0);
+        --paper-200: oklch(0.920 0 0);
+        --ink-primary:   oklch(0.120 0 0);
+        --ink-dim:       oklch(0.480 0 0);
+        --paper-primary: oklch(0.965 0 0);
+        --paper-dim:     oklch(0.780 0 0);
+        --paper-muted:   oklch(0.620 0 0);
+        --rule-ink:      oklch(0.280 0 0);
+        --rule-cream:    oklch(0.820 0 0);
+
+        --flame:        oklch(0.533 0.212 30.4);   /* #cb1200 */
+        --flame-bright: oklch(0.587 0.205 30.4);
+        --flame-deep:   oklch(0.452 0.185 30.4);
+        --ember:        oklch(0.373 0.151 30.4);
+        --flame-on-dark: oklch(0.620 0.205 30.4);  /* proposed: brighter step for flame on ink, AA fix */
+      }
+
+      * { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        background: var(--ink-700);
+        color: var(--paper-primary);
+        font-family: var(--font-body);
+        font-synthesis: none;
+        font-size: 14px;
+        line-height: 1.55;
+        -webkit-font-smoothing: antialiased;
+        padding: 48px 32px 140px;
+      }
+
+      .wrap { max-width: 1180px; margin: 0 auto; }
+
+      /* header */
+      .page-header { border-bottom: 1px solid var(--rule-ink); padding-bottom: 24px; margin-bottom: 12px; }
+      .page-header h1 {
+        font-family: var(--font-display); font-weight: 400; font-size: 38px; line-height: 1;
+        text-transform: uppercase; margin: 0 0 12px;
+      }
+      .page-header .meta {
+        font-family: var(--font-body); font-size: 11px; color: var(--paper-dim);
+        text-transform: uppercase; letter-spacing: 0.08em;
+      }
+      nav { margin-top: 12px; font-family: var(--font-body); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; }
+      nav a { color: var(--paper-dim); text-decoration: none; }
+      nav a.active { color: var(--paper-primary); border-bottom: 1px solid var(--flame-on-dark); padding-bottom: 2px; }
+      nav span { color: var(--paper-muted); margin: 0 10px; }
+
+      .lede {
+        max-width: 760px; font-size: 13px; line-height: 1.65; color: var(--paper-dim);
+        margin: 28px 0 12px;
+      }
+      .lede strong { color: var(--paper-primary); }
+      .lede code {
+        font-family: var(--font-body); font-size: 12px; background: var(--ink-600);
+        padding: 1px 5px; color: var(--paper-primary);
+      }
+
+      /* toolbar comparison strip */
+      .toolbar-demo {
+        margin: 36px 0 8px; border: 1px solid var(--rule-ink); background: var(--ink-800);
+      }
+      .toolbar-demo .cap {
+        font-family: var(--font-body); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
+        color: var(--paper-muted); padding: 10px 14px; border-bottom: 1px solid var(--rule-ink);
+      }
+      .chrome-bar {
+        display: flex; align-items: center; gap: 4px; padding: 8px 12px;
+        background: oklch(0.26 0 0); /* a neutral chrome toolbar gray */
+      }
+      .chrome-bar .urlbar {
+        flex: 1; height: 26px; background: oklch(0.34 0 0); border-radius: 13px; margin-right: 8px;
+        display: flex; align-items: center; padding: 0 12px;
+        font-family: var(--font-body); font-size: 11px; color: oklch(0.70 0 0);
+      }
+      .chrome-bar .ext-slot {
+        width: 28px; height: 28px; display: grid; place-items: center; border-radius: 4px;
+        position: relative;
+      }
+      .chrome-bar .ext-slot:hover { background: oklch(0.40 0 0); }
+      .chrome-bar .ext-slot .tag {
+        position: absolute; bottom: -16px; left: 50%; transform: translateX(-50%);
+        font-family: var(--font-body); font-size: 8px; color: var(--paper-muted); letter-spacing: 0.06em;
+        white-space: nowrap;
+      }
+
+      /* direction plate */
+      .plate {
+        margin: 64px 0 0; border-top: 1px solid var(--rule-ink); padding-top: 28px;
+      }
+      .plate-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
+      .plate-head h2 {
+        font-family: var(--font-display); font-weight: 400; font-size: 22px; text-transform: uppercase;
+        margin: 0; letter-spacing: 0.02em;
+      }
+      .plate-head .idx {
+        font-family: var(--font-body); font-size: 11px; color: var(--paper-muted);
+        letter-spacing: 0.1em; text-transform: uppercase;
+      }
+      .plate-sub { max-width: 720px; font-size: 12.5px; line-height: 1.6; color: var(--paper-dim); margin: 0 0 28px; }
+
+      .plate-grid {
+        display: grid; grid-template-columns: 220px 1fr; gap: 40px; align-items: start;
+      }
+      @media (max-width: 900px) { .plate-grid { grid-template-columns: 1fr; gap: 28px; } }
+
+      /* hero mark */
+      .hero {
+        width: 220px; height: 220px; display: grid; place-items: center;
+        border: 1px solid var(--rule-ink);
+      }
+      .hero.on-ink { background: var(--ink-700); }
+      .hero svg { width: 150px; height: 150px; display: block; }
+
+      .specimens { display: grid; gap: 28px; }
+
+      /* size ladder */
+      .ladder-label {
+        font-family: var(--font-body); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase;
+        color: var(--paper-muted); margin: 0 0 12px;
+      }
+      .ladder {
+        display: flex; align-items: flex-end; gap: 28px; flex-wrap: wrap;
+      }
+      .ladder .rung { display: grid; gap: 8px; justify-items: center; }
+      .ladder .tile {
+        display: grid; place-items: center; border: 1px solid var(--rule-ink);
+      }
+      .ladder .rung .px {
+        font-family: var(--font-body); font-size: 9px; color: var(--paper-muted); letter-spacing: 0.08em;
+      }
+      .ladder .tile svg { display: block; }
+
+      /* two-row ladder: on ink / on paper */
+      .ladder-row { display: flex; align-items: center; gap: 28px; flex-wrap: wrap; margin-bottom: 18px; }
+      .ladder-row .row-tag {
+        width: 64px; font-family: var(--font-body); font-size: 9px; letter-spacing: 0.1em;
+        text-transform: uppercase; color: var(--paper-muted);
+      }
+
+      /* wordmark lockups */
+      .lockups { display: grid; gap: 18px; }
+      .lockup {
+        display: flex; align-items: center; gap: 14px; padding: 18px 20px;
+        border: 1px solid var(--rule-ink);
+      }
+      .lockup.on-ink { background: var(--ink-700); }
+      .lockup.on-paper { background: var(--paper-100); }
+      .lockup svg { display: block; flex: 0 0 auto; }
+      .lockup .wm {
+        font-family: var(--font-display); font-weight: 400; text-transform: uppercase;
+        font-size: 30px; line-height: 1; letter-spacing: 0.02em;
+      }
+      .lockup.on-ink .wm { color: var(--paper-primary); }
+      .lockup.on-paper .wm { color: var(--ink-primary); }
+      .lockup .stack { display: grid; gap: 3px; }
+      .lockup .stack .tagline {
+        font-family: var(--font-body); font-size: 9.5px; letter-spacing: 0.18em; text-transform: uppercase;
+      }
+      .lockup.on-ink .tagline { color: var(--paper-muted); }
+      .lockup.on-paper .tagline { color: var(--ink-dim); }
+
+      /* rationale */
+      .rationale {
+        margin-top: 26px; display: grid; gap: 12px; max-width: 720px;
+        border-left: 1px solid var(--flame-on-dark); padding-left: 18px;
+      }
+      .rationale .row { display: grid; grid-template-columns: 110px 1fr; gap: 14px; align-items: start; }
+      .rationale .k {
+        font-family: var(--font-body); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
+        color: var(--paper-muted); padding-top: 2px;
+      }
+      .rationale .v { font-size: 12.5px; line-height: 1.6; color: var(--paper-dim); }
+      .rationale .v strong { color: var(--paper-primary); }
+    </style>
+  </head>
+  <body>
+    <!-- ════════ SVG SYMBOL DEFINITIONS ════════
+         Each mark is drawn with two fills via CSS vars set on the host:
+           --m  = the mark color (ink or paper, the structural form)
+           --h  = the heat color (flame), used as the single precious accent
+         Marks are designed on a 32-unit grid so they downscale cleanly to 16px.
+    -->
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+      <defs>
+
+        <!-- A · THE STRIKE — asymmetric ignition spark (✶ reframed as directional) -->
+        <symbol id="m-strike" viewBox="0 0 32 32">
+          <!-- four rays of unequal length from an off-center origin (13,17): a struck spark, not a symmetric star -->
+          <g fill="var(--h)">
+            <!-- dominant strike: long up-right ray -->
+            <path d="M13 17 L30 2 L16 15 Z" />
+            <path d="M13 17 L30 2 L18 18 Z" opacity="0" />
+            <!-- up-right as a clean sliver -->
+            <path d="M13 17 L29 3 L15 16 Z" />
+            <!-- short down-left ray (recoil) -->
+            <path d="M13 17 L4 27 L12 18 Z" />
+            <!-- up-left short ray -->
+            <path d="M13 17 L6 8 L13 15 Z" />
+            <!-- down-right short ray -->
+            <path d="M13 17 L23 25 L15 18 Z" />
+            <!-- hot core -->
+            <circle cx="13" cy="17" r="2.6" />
+          </g>
+        </symbol>
+
+        <!-- B · THE MONO M — Departure-Mono pixel monogram, spark in the valley -->
+        <symbol id="m-monoM" viewBox="0 0 32 32">
+          <!-- pixel grid M on a 8x8 cell layout (cell=3, origin x=4 y=5), bold -->
+          <g fill="var(--m)">
+            <!-- left bar (cols 0-1) rows 0-7 -->
+            <rect x="4"  y="5" width="3" height="22"/>
+            <rect x="7"  y="5" width="3" height="22"/>
+            <!-- right bar (cols 6-7) -->
+            <rect x="22" y="5" width="3" height="22"/>
+            <rect x="25" y="5" width="3" height="22"/>
+            <!-- inner diagonals stepping to center -->
+            <rect x="10" y="8"  width="3" height="3"/>
+            <rect x="13" y="11" width="3" height="3"/>
+            <rect x="19" y="8"  width="3" height="3"/>
+            <rect x="16" y="11" width="3" height="3"/>
+          </g>
+          <!-- the spark sits in the M's central valley — the single heat moment -->
+          <rect x="14.5" y="14.5" width="3" height="3" fill="var(--h)"/>
+        </symbol>
+
+        <!-- C · THE SPIKE — order ticket on the kitchen rail -->
+        <symbol id="m-spike" viewBox="0 0 32 32">
+          <!-- the rail spike: vertical shaft with a pointed top -->
+          <g fill="var(--m)">
+            <path d="M15 2 L17 2 L17 6 L19 6 L16 9 L13 6 L15 6 Z"/>
+            <rect x="15" y="2" width="2" height="6"/>
+          </g>
+          <!-- the speared ticket: a slip with a torn (perforated) bottom edge -->
+          <g fill="var(--m)">
+            <path d="M7 9 H25 V24
+                     l-2.25 2 -2.25 -2 -2.25 2 -2.25 -2 -2.25 2 -2.25 -2 -2.25 2 -2.25 -2
+                     Z"/>
+          </g>
+          <!-- punch hole where the spike pierces -->
+          <circle cx="16" cy="9" r="1.4" fill="var(--ground,#000)"/>
+          <!-- the order line: one flame bar = the fired item -->
+          <rect x="11" y="14" width="10" height="2.4" fill="var(--h)"/>
+          <!-- two neutral order lines -->
+          <rect x="11" y="18" width="7" height="1.6" fill="var(--ground,#000)" opacity="0.9"/>
+        </symbol>
+
+        <!-- D · THE SCORE — knife crosshatch / mise-en-place grid, one cell fired -->
+        <symbol id="m-score" viewBox="0 0 32 32">
+          <!-- a 3x3 scored square: hairline grid (the board, prepped) -->
+          <g stroke="var(--m)" stroke-width="2" fill="none">
+            <rect x="5" y="5" width="22" height="22"/>
+            <line x1="12.33" y1="5" x2="12.33" y2="27"/>
+            <line x1="19.66" y1="5" x2="19.66" y2="27"/>
+            <line x1="5" y1="12.33" x2="27" y2="12.33"/>
+            <line x1="5" y1="19.66" x2="27" y2="19.66"/>
+          </g>
+          <!-- one cell fired -->
+          <rect x="19.66" y="5" width="7.34" height="7.33" fill="var(--h)"/>
+        </symbol>
+
+      </defs>
+    </svg>
+
+    <div class="wrap">
+      <header class="page-header">
+        <h1>MISE — Logo marks</h1>
+        <div class="meta">crit 01 · four directions · 2026-06-07 · Departure Mono · sanguine flame (single accent)</div>
+        <nav>
+          <a href="./index.html">Specimen</a><span>·</span>
+          <a href="./popup-states.html">Popup states</a><span>·</span>
+          <a class="active" href="./logo-marks.html">Logo marks</a><span>·</span>
+          <a href="./color-directions.html">Color directions (archive)</a>
+        </nav>
+      </header>
+
+      <p class="lede">
+        The mark has one non-negotiable job: <strong>survive at 16&nbsp;px in a browser toolbar</strong> and still read as the same tool on the landing page, the <code>.md</code> footer, and the PDF. A wordmark can't do that — the glyph has to. Below, four directions at the real MV3 size ladder (128 / 48 / 32 / 16), on ink and paper, with wordmark lockups. Walk them one at a time.
+      </p>
+
+      <!-- ════════ TOOLBAR COMPARISON — the decisive test ════════ -->
+      <div class="toolbar-demo">
+        <div class="cap">The 16px test — all four, in a Chrome toolbar, at true pixel size</div>
+        <div class="chrome-bar">
+          <span class="urlbar">instagram.com/reel/C9xK2…</span>
+          <div class="ext-slot" style="--m: var(--paper-primary); --h: var(--flame-on-dark);">
+            <svg width="16" height="16"><use href="#m-strike"/></svg>
+            <span class="tag">A strike</span>
+          </div>
+          <div class="ext-slot" style="--m: var(--paper-primary); --h: var(--flame-on-dark);">
+            <svg width="16" height="16"><use href="#m-monoM"/></svg>
+            <span class="tag">B mono-M</span>
+          </div>
+          <div class="ext-slot" style="--m: var(--paper-primary); --h: var(--flame-on-dark); --ground: oklch(0.26 0 0);">
+            <svg width="16" height="16"><use href="#m-spike"/></svg>
+            <span class="tag">C spike</span>
+          </div>
+          <div class="ext-slot" style="--m: var(--paper-primary); --h: var(--flame-on-dark);">
+            <svg width="16" height="16"><use href="#m-score"/></svg>
+            <span class="tag">D score</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════════ A · THE STRIKE ════════ -->
+      <section class="plate">
+        <div class="plate-head">
+          <h2>The Strike</h2>
+          <span class="idx">Direction A · ✶ reframed</span>
+        </div>
+        <p class="plate-sub">
+          Keeps the existing <code>✶</code> brand glyph but redraws it as an <em>asymmetric, directional</em> spark — struck off steel, not a symmetric decorative star. Unequal rays, an off-center hot core, one dominant up-right strike. The recoil is the gesture of <strong>Fire</strong>: ignition on the service line.
+        </p>
+        <div class="plate-grid">
+          <div class="hero on-ink" style="--m: var(--paper-primary); --h: var(--flame-on-dark);">
+            <svg viewBox="0 0 32 32"><use href="#m-strike"/></svg>
+          </div>
+          <div class="specimens">
+            <div>
+              <p class="ladder-label">MV3 icon ladder</p>
+              <div class="ladder-row">
+                <span class="row-tag">On ink</span>
+                <div class="ladder">
+                  <div class="rung"><div class="tile" style="width:128px;height:128px;background:var(--ink-700);--m:var(--paper-primary);--h:var(--flame-on-dark);"><svg width="96" height="96"><use href="#m-strike"/></svg></div><span class="px">128</span></div>
+                  <div class="rung"><div class="tile" style="width:48px;height:48px;background:var(--ink-700);--m:var(--paper-primary);--h:var(--flame-on-dark);"><svg width="36" height="36"><use href="#m-strike"/></svg></div><span class="px">48</span></div>
+                  <div class="rung"><div class="tile" style="width:32px;height:32px;background:var(--ink-700);--m:var(--paper-primary);--h:var(--flame-on-dark);"><svg width="24" height="24"><use href="#m-strike"/></svg></div><span class="px">32</span></div>
+                  <div class="rung"><div class="tile" style="width:16px;height:16px;background:var(--ink-700);--m:var(--paper-primary);--h:var(--flame-on-dark);"><svg width="16" height="16"><use href="#m-strike"/></svg></div><span class="px">16</span></div>
+                </div>
+              </div>
+              <div class="ladder-row">
+                <span class="row-tag">On paper</span>
+                <div class="ladder">
+                  <div class="rung"><div class="tile" style="width:128px;height:128px;background:var(--paper-100);--m:var(--ink-primary);--h:var(--flame);"><svg width="96" height="96"><use href="#m-strike"/></svg></div><span class="px">128</span></div>
+                  <div class="rung"><div class="tile" style="width:48px;height:48px;background:var(--paper-100);--m:var(--ink-primary);--h:var(--flame);"><svg width="36" height="36"><use href="#m-strike"/></svg></div><span class="px">48</span></div>
+                  <div class="rung"><div class="tile" style="width:32px;height:32px;background:var(--paper-100);--m:var(--ink-primary);--h:var(--flame);"><svg width="24" height="24"><use href="#m-strike"/></svg></div><span class="px">32</span></div>
+                  <div class="rung"><div class="tile" style="width:16px;height:16px;background:var(--paper-100);--m:var(--ink-primary);--h:var(--flame);"><svg width="16" height="16"><use href="#m-strike"/></svg></div><span class="px">16</span></div>
+                </div>
+              </div>
+            </div>
+            <div class="lockups">
+              <div class="lockup on-ink" style="--m: var(--paper-primary); --h: var(--flame-on-dark);">
+                <svg width="42" height="42"><use href="#m-strike"/></svg>
+                <div class="stack"><span class="wm">Mise</span><span class="tagline">fire · the pass · prep</span></div>
+              </div>
+              <div class="lockup on-paper" style="--m: var(--ink-primary); --h: var(--flame);">
+                <svg width="42" height="42"><use href="#m-strike"/></svg>
+                <div class="stack"><span class="wm">Mise</span><span class="tagline">own your recipes</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="rationale">
+          <div class="row"><span class="k">Decision</span><span class="v">Honor the glyph Ben already chose, but make it <strong>directional</strong> so it reads as ignition, not decoration.</span></div>
+          <div class="row"><span class="k">Rejected</span><span class="v">The symmetric ✶ as-is — too close to the AI-sparkle cliché the whole brand is positioned against.</span></div>
+          <div class="row"><span class="k">Tension</span><span class="v">A burst is still a burst. Does asymmetry do enough to escape "sparkle," or is any radial mark compromised here? At 16px the short rays may vanish into a blob.</span></div>
+        </div>
+      </section>
+
+      <!-- ════════ B · THE MONO M ════════ -->
+      <section class="plate">
+        <div class="plate-head">
+          <h2>The Mono M</h2>
+          <span class="idx">Direction B · type IS the brand</span>
+        </div>
+        <p class="plate-sub">
+          The mark is Departure Mono's own DNA: a pixel-grid <strong>M</strong> built from the same coarse cells the display face is drawn on. The single flame pixel sits in the M's central valley — the one heat moment. Brutally literal, ticket-printer honest, and it scales to 16px because it's already a bitmap.
+        </p>
+        <div class="plate-grid">
+          <div class="hero on-ink" style="--m: var(--paper-primary); --h: var(--flame-on-dark);">
+            <svg viewBox="0 0 32 32"><use href="#m-monoM"/></svg>
+          </div>
+          <div class="specimens">
+            <div>
+              <p class="ladder-label">MV3 icon ladder</p>
+              <div class="ladder-row">
+                <span class="row-tag">On ink</span>
+                <div class="ladder">
+                  <div class="rung"><div class="tile" style="width:128px;height:128px;background:var(--ink-700);--m:var(--paper-primary);--h:var(--flame-on-dark);"><svg width="96" height="96"><use href="#m-monoM"/></svg></div><span class="px">128</span></div>
+                  <div class="rung"><div class="tile" style="width:48px;height:48px;background:var(--ink-700);--m:var(--paper-primary);--h:var(--flame-on-dark);"><svg width="36" height="36"><use href="#m-monoM"/></svg></div><span class="px">48</span></div>
+                  <div class="rung"><div class="tile" style="width:32px;height:32px;background:var(--ink-700);--m:var(--paper-primary);--h:var(--flame-on-dark);"><svg width="24" height="24"><use href="#m-monoM"/></svg></div><span class="px">32</span></div>
+                  <div class="rung"><div class="tile" style="width:16px;height:16px;background:var(--ink-700);--m:var(--paper-primary);--h:var(--flame-on-dark);"><svg width="16" height="16"><use href="#m-monoM"/></svg></div><span class="px">16</span></div>
+                </div>
+              </div>
+              <div class="ladder-row">
+                <span class="row-tag">On paper</span>
+                <div class="ladder">
+                  <div class="rung"><div class="tile" style="width:128px;height:128px;background:var(--paper-100);--m:var(--ink-primary);--h:var(--flame);"><svg width="96" height="96"><use href="#m-monoM"/></svg></div><span class="px">128</span></div>
+                  <div class="rung"><div class="tile" style="width:48px;height:48px;background:var(--paper-100);--m:var(--ink-primary);--h:var(--flame);"><svg width="36" height="36"><use href="#m-monoM"/></svg></div><span class="px">48</span></div>
+                  <div class="rung"><div class="tile" style="width:32px;height:32px;background:var(--paper-100);--m:var(--ink-primary);--h:var(--flame);"><svg width="24" height="24"><use href="#m-monoM"/></svg></div><span class="px">32</span></div>
+                  <div class="rung"><div class="tile" style="width:16px;height:16px;background:var(--paper-100);--m:var(--ink-primary);--h:var(--flame);"><svg width="16" height="16"><use href="#m-monoM"/></svg></div><span class="px">16</span></div>
+                </div>
+              </div>
+            </div>
+            <div class="lockups">
+              <div class="lockup on-ink" style="--m: var(--paper-primary); --h: var(--flame-on-dark);">
+                <svg width="42" height="42"><use href="#m-monoM"/></svg>
+                <div class="stack"><span class="wm">Mise</span><span class="tagline">fire · the pass · prep</span></div>
+              </div>
+              <div class="lockup on-paper" style="--m: var(--ink-primary); --h: var(--flame);">
+                <svg width="42" height="42"><use href="#m-monoM"/></svg>
+                <div class="stack"><span class="wm">Mise</span><span class="tagline">own your recipes</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="rationale">
+          <div class="row"><span class="k">Decision</span><span class="v">Let the type system <strong>be</strong> the identity. The mark and the wordmark are literally the same face — maximum coherence, zero invented chrome.</span></div>
+          <div class="row"><span class="k">Rejected</span><span class="v">A drawn/illustrated monogram. The point is that nothing is added on top of the font.</span></div>
+          <div class="row"><span class="k">Tension</span><span class="v">A lone "M" is the most generic mark shape there is. Does the pixel grid + flame valley make it <em>Mise's</em> M, or just <em>an</em> M? Needs the valley spark to actually be legible at 16px.</span></div>
+        </div>
+      </section>
+
+      <!-- ════════ C · THE SPIKE ════════ -->
+      <section class="plate">
+        <div class="plate-head">
+          <h2>The Spike</h2>
+          <span class="idx">Direction C · the rail</span>
+        </div>
+        <p class="plate-sub">
+          The most narrative direction. In a pro kitchen, orders get speared on the rail — the ticket spike. The mark is one order slip on the spike, torn at the bottom (perforation), with a single flame line: <strong>the fired item</strong>. Pure <em>Bear</em> service-line iconography. Mise captures one ticket and you walk.
+        </p>
+        <div class="plate-grid">
+          <div class="hero on-ink" style="--m: var(--paper-primary); --h: var(--flame-on-dark); --ground: var(--ink-700);">
+            <svg viewBox="0 0 32 32"><use href="#m-spike"/></svg>
+          </div>
+          <div class="specimens">
+            <div>
+              <p class="ladder-label">MV3 icon ladder</p>
+              <div class="ladder-row">
+                <span class="row-tag">On ink</span>
+                <div class="ladder">
+                  <div class="rung"><div class="tile" style="width:128px;height:128px;background:var(--ink-700);--m:var(--paper-primary);--h:var(--flame-on-dark);--ground:var(--ink-700);"><svg width="96" height="96"><use href="#m-spike"/></svg></div><span class="px">128</span></div>
+                  <div class="rung"><div class="tile" style="width:48px;height:48px;background:var(--ink-700);--m:var(--paper-primary);--h:var(--flame-on-dark);--ground:var(--ink-700);"><svg width="36" height="36"><use href="#m-spike"/></svg></div><span class="px">48</span></div>
+                  <div class="rung"><div class="tile" style="width:32px;height:32px;background:var(--ink-700);--m:var(--paper-primary);--h:var(--flame-on-dark);--ground:var(--ink-700);"><svg width="24" height="24"><use href="#m-spike"/></svg></div><span class="px">32</span></div>
+                  <div class="rung"><div class="tile" style="width:16px;height:16px;background:var(--ink-700);--m:var(--paper-primary);--h:var(--flame-on-dark);--ground:var(--ink-700);"><svg width="16" height="16"><use href="#m-spike"/></svg></div><span class="px">16</span></div>
+                </div>
+              </div>
+              <div class="ladder-row">
+                <span class="row-tag">On paper</span>
+                <div class="ladder">
+                  <div class="rung"><div class="tile" style="width:128px;height:128px;background:var(--paper-100);--m:var(--ink-primary);--h:var(--flame);--ground:var(--paper-100);"><svg width="96" height="96"><use href="#m-spike"/></svg></div><span class="px">128</span></div>
+                  <div class="rung"><div class="tile" style="width:48px;height:48px;background:var(--paper-100);--m:var(--ink-primary);--h:var(--flame);--ground:var(--paper-100);"><svg width="36" height="36"><use href="#m-spike"/></svg></div><span class="px">48</span></div>
+                  <div class="rung"><div class="tile" style="width:32px;height:32px;background:var(--paper-100);--m:var(--ink-primary);--h:var(--flame);--ground:var(--paper-100);"><svg width="24" height="24"><use href="#m-spike"/></svg></div><span class="px">32</span></div>
+                  <div class="rung"><div class="tile" style="width:16px;height:16px;background:var(--paper-100);--m:var(--ink-primary);--h:var(--flame);--ground:var(--paper-100);"><svg width="16" height="16"><use href="#m-spike"/></svg></div><span class="px">16</span></div>
+                </div>
+              </div>
+            </div>
+            <div class="lockups">
+              <div class="lockup on-ink" style="--m: var(--paper-primary); --h: var(--flame-on-dark); --ground: var(--ink-700);">
+                <svg width="42" height="42"><use href="#m-spike"/></svg>
+                <div class="stack"><span class="wm">Mise</span><span class="tagline">fire · the pass · prep</span></div>
+              </div>
+              <div class="lockup on-paper" style="--m: var(--ink-primary); --h: var(--flame); --ground: var(--paper-100);">
+                <svg width="42" height="42"><use href="#m-spike"/></svg>
+                <div class="stack"><span class="wm">Mise</span><span class="tagline">own your recipes</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="rationale">
+          <div class="row"><span class="k">Decision</span><span class="v">A mark with a <strong>story</strong> — the ticket on the rail ties the whole internal language (Fire / The Pass / ticket nos.) into one image.</span></div>
+          <div class="row"><span class="k">Rejected</span><span class="v">A literal knife/gyuto silhouette — too "commercial food brand," the exact NYT-Cooking register the brief bans.</span></div>
+          <div class="row"><span class="k">Tension</span><span class="v">Most detail = most fragile at 16px. The perforation and order lines will almost certainly collapse. May only work as a 48px+ mark, with a simplified glyph for the toolbar.</span></div>
+        </div>
+      </section>
+
+      <!-- ════════ D · THE SCORE ════════ -->
+      <section class="plate">
+        <div class="plate-head">
+          <h2>The Score</h2>
+          <span class="idx">Direction D · the grid</span>
+        </div>
+        <p class="plate-sub">
+          The most abstract / Pentagram. A scored square — the crosshatch you cut into pork-belly skin, and the grid of <em>mise en place</em>: everything in its place. One cell is fired. Hairline geometry, no representation, reads as a considered system rather than an illustration.
+        </p>
+        <div class="plate-grid">
+          <div class="hero on-ink" style="--m: var(--paper-primary); --h: var(--flame-on-dark);">
+            <svg viewBox="0 0 32 32"><use href="#m-score"/></svg>
+          </div>
+          <div class="specimens">
+            <div>
+              <p class="ladder-label">MV3 icon ladder</p>
+              <div class="ladder-row">
+                <span class="row-tag">On ink</span>
+                <div class="ladder">
+                  <div class="rung"><div class="tile" style="width:128px;height:128px;background:var(--ink-700);--m:var(--paper-primary);--h:var(--flame-on-dark);"><svg width="96" height="96"><use href="#m-score"/></svg></div><span class="px">128</span></div>
+                  <div class="rung"><div class="tile" style="width:48px;height:48px;background:var(--ink-700);--m:var(--paper-primary);--h:var(--flame-on-dark);"><svg width="36" height="36"><use href="#m-score"/></svg></div><span class="px">48</span></div>
+                  <div class="rung"><div class="tile" style="width:32px;height:32px;background:var(--ink-700);--m:var(--paper-primary);--h:var(--flame-on-dark);"><svg width="24" height="24"><use href="#m-score"/></svg></div><span class="px">32</span></div>
+                  <div class="rung"><div class="tile" style="width:16px;height:16px;background:var(--ink-700);--m:var(--paper-primary);--h:var(--flame-on-dark);"><svg width="16" height="16"><use href="#m-score"/></svg></div><span class="px">16</span></div>
+                </div>
+              </div>
+              <div class="ladder-row">
+                <span class="row-tag">On paper</span>
+                <div class="ladder">
+                  <div class="rung"><div class="tile" style="width:128px;height:128px;background:var(--paper-100);--m:var(--ink-primary);--h:var(--flame);"><svg width="96" height="96"><use href="#m-score"/></svg></div><span class="px">128</span></div>
+                  <div class="rung"><div class="tile" style="width:48px;height:48px;background:var(--paper-100);--m:var(--ink-primary);--h:var(--flame);"><svg width="36" height="36"><use href="#m-score"/></svg></div><span class="px">48</span></div>
+                  <div class="rung"><div class="tile" style="width:32px;height:32px;background:var(--paper-100);--m:var(--ink-primary);--h:var(--flame);"><svg width="24" height="24"><use href="#m-score"/></svg></div><span class="px">32</span></div>
+                  <div class="rung"><div class="tile" style="width:16px;height:16px;background:var(--paper-100);--m:var(--ink-primary);--h:var(--flame);"><svg width="16" height="16"><use href="#m-score"/></svg></div><span class="px">16</span></div>
+                </div>
+              </div>
+            </div>
+            <div class="lockups">
+              <div class="lockup on-ink" style="--m: var(--paper-primary); --h: var(--flame-on-dark);">
+                <svg width="42" height="42"><use href="#m-score"/></svg>
+                <div class="stack"><span class="wm">Mise</span><span class="tagline">fire · the pass · prep</span></div>
+              </div>
+              <div class="lockup on-paper" style="--m: var(--ink-primary); --h: var(--flame);">
+                <svg width="42" height="42"><use href="#m-score"/></svg>
+                <div class="stack"><span class="wm">Mise</span><span class="tagline">own your recipes</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="rationale">
+          <div class="row"><span class="k">Decision</span><span class="v">Carry two brief-true ideas in one geometry — <strong>knife score</strong> + <strong>mise-en-place grid</strong> — with the fired cell as the single flame.</span></div>
+          <div class="row"><span class="k">Rejected</span><span class="v">A literal flame or fire glyph — on-the-nose, and flame-as-shape competes with flame-as-color.</span></div>
+          <div class="row"><span class="k">Tension</span><span class="v">A gridded square is close to a generic "table / spreadsheet / grid" icon. Risk it reads as data, not kitchen. The fired cell has to carry a lot of meaning.</span></div>
+        </div>
+      </section>
+
+    </div>
+  </body>
+</html>
