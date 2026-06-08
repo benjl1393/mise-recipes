@@ -1,0 +1,818 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Mise — Popup motion prototype</title>
+
+    <style>
+      /* ══════ Fonts ══════ */
+      @font-face {
+        font-family: "Departure Mono";
+        src: url("./fonts/DepartureMono-Regular.woff2") format("woff2");
+        font-weight: 400; font-style: normal; font-display: swap;
+      }
+      @font-face {
+        font-family: "Commit Mono";
+        src: url("./fonts/CommitMono-400-Regular.otf") format("opentype");
+        font-weight: 400; font-style: normal; font-display: swap;
+      }
+      @font-face {
+        font-family: "Commit Mono";
+        src: url("./fonts/CommitMono-400-Italic.otf") format("opentype");
+        font-weight: 400; font-style: italic; font-display: swap;
+      }
+
+      :root {
+        --font-display: "Departure Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+        --font-body: "Commit Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+        --font-mono: "Commit Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+        /* Color — v2.1 brutalist + sanguine flame */
+        --ink-900: oklch(0.100 0 0);
+        --ink-800: oklch(0.150 0 0);
+        --ink-700: oklch(0.200 0 0);
+        --ink-600: oklch(0.280 0 0);
+        --paper-50:  oklch(0.985 0 0);
+        --paper-100: oklch(0.965 0 0);
+        --paper-200: oklch(0.920 0 0);
+        --paper-250: oklch(0.885 0 0);
+
+        --ink-primary:   oklch(0.120 0 0);
+        --ink-secondary: oklch(0.280 0 0);
+        --ink-dim:       oklch(0.480 0 0);
+        --ink-muted-v2:  oklch(0.620 0 0);
+        --rule-cream:    oklch(0.820 0 0);
+
+        --paper-primary: oklch(0.965 0 0);
+        --paper-dim:     oklch(0.780 0 0);
+        --paper-muted:   oklch(0.620 0 0);
+        --rule-ink:      oklch(0.280 0 0);
+
+        --flame:        oklch(0.533 0.212 30.4);
+        --flame-bright: oklch(0.587 0.205 30.4);
+        --flame-deep:   oklch(0.452 0.185 30.4);
+        --ember:        oklch(0.373 0.151 30.4);
+
+        --shadow:      oklch(0.100 0.015 240 / 0.25);
+
+        --bg-page:       var(--ink-700);
+        --bg-panel:      var(--ink-600);
+        --bg-card:       var(--paper-100);
+        --ink:           var(--ink-primary);
+        --rule:          var(--rule-cream);
+        --rule-dark:     var(--rule-ink);
+
+        /* Spacing */
+        --space-xs: 4px; --space-sm: 8px; --space-md: 12px; --space-lg: 16px;
+        --space-xl: 24px; --space-2xl: 32px; --space-3xl: 48px; --space-4xl: 64px;
+
+        /* ══════ MOTION SYSTEM (from /flow strategy) ══════ */
+        --t-micro: 100ms;   /* button press, hover, focus-slide */
+        --t-line:  200ms;   /* a single line/bar arriving */
+        --t-std:   300ms;   /* state arrivals, callouts */
+        --t-fire:  180ms;   /* stamp impact — the signature beat */
+        --t-dismiss: 200ms; /* clean close after the stamp holds */
+        --stagger:  60ms;   /* print-in: between SECTIONS, not lines */
+        --fill-stagger: 90ms; /* skeleton→filled: clearer head-first rhythm */
+
+        --ease-arrive: cubic-bezier(0.16, 1, 0.3, 1);   /* entering */
+        --ease-exit:   cubic-bezier(0.7, 0, 0.84, 0);   /* dismiss */
+        --ease-toggle: cubic-bezier(0.65, 0, 0.35, 1);  /* focus slide, promote */
+        --ease-stamp:  cubic-bezier(0.16, 1, 0.3, 1);   /* stamp settle (no overshoot) */
+      }
+
+      * { box-sizing: border-box; }
+
+      html, body {
+        margin: 0; padding: 0;
+        background: var(--bg-page);
+        color: var(--paper-primary);
+        font-family: var(--font-body);
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+
+      /* ─── Page chrome ─── */
+      .page { max-width: 1100px; margin: 0 auto; padding: clamp(24px,5vw,56px) clamp(16px,4vw,40px) 96px; }
+
+      .page-head {
+        border-bottom: 1px solid var(--rule-dark);
+        padding-bottom: var(--space-xl);
+        margin-bottom: var(--space-xl);
+        display: grid; grid-template-columns: 1fr auto; gap: var(--space-lg); align-items: baseline;
+      }
+      .page-head h1 {
+        font-family: var(--font-display); font-weight: 400;
+        font-size: clamp(20px,3vw,32px); line-height: 1.05; letter-spacing: 0.02em;
+        text-transform: uppercase; margin: 0; color: var(--paper-primary);
+      }
+      .page-head .slug {
+        font-family: var(--font-mono); font-size: 11px; color: var(--paper-muted);
+        letter-spacing: 0.1em; text-transform: uppercase;
+      }
+      .page-head .slug .glyph { color: var(--flame); margin-right: 6px; }
+
+      nav.specnav {
+        margin: 0 0 40px; font-family: var(--font-mono); font-size: 11px;
+        letter-spacing: 0.08em; text-transform: uppercase;
+      }
+      nav.specnav a { color: var(--paper-dim); text-decoration: none; }
+      nav.specnav a.here { color: var(--paper-primary); border-bottom: 1px solid var(--flame); padding-bottom: 2px; }
+      nav.specnav .sep { color: var(--paper-muted); margin: 0 10px; }
+
+      .page-lead {
+        max-width: 72ch; font-size: 13px; line-height: 1.6;
+        color: var(--paper-dim); margin-bottom: var(--space-2xl);
+      }
+      .page-lead em { font-style: italic; color: var(--paper-primary); }
+
+      /* ─── Layout: stage + sidebar ─── */
+      .layout { display: grid; grid-template-columns: 440px 1fr; gap: var(--space-4xl); align-items: start; }
+      @media (max-width: 900px) { .layout { grid-template-columns: 1fr; } }
+
+      /* ─── Control bar ─── */
+      .controls {
+        display: flex; flex-wrap: wrap; gap: var(--space-sm); align-items: center;
+        margin-bottom: var(--space-lg);
+        padding-bottom: var(--space-md); border-bottom: 1px solid var(--rule-dark);
+      }
+      .ctrl-btn {
+        background: var(--flame); color: var(--bg-card); border: none;
+        padding: 9px 14px; font-family: var(--font-body); font-size: 11px;
+        letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer;
+        display: inline-flex; align-items: center; gap: 8px;
+        transition: transform var(--t-micro) var(--ease-arrive), filter var(--t-micro) var(--ease-arrive);
+      }
+      .ctrl-btn:hover { filter: brightness(1.12); }
+      .ctrl-btn:active { transform: scale(0.97); }
+      .ctrl-btn.ghost { background: transparent; color: var(--paper-primary); border: 1px solid var(--rule-dark); }
+      .ctrl-btn.ghost:hover { background: var(--ink-600); filter: none; }
+
+      .toggle {
+        margin-left: auto; display: inline-flex; align-items: center; gap: 8px;
+        font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em;
+        text-transform: uppercase; color: var(--paper-dim); cursor: pointer; user-select: none;
+      }
+      .toggle input { accent-color: var(--flame); width: 14px; height: 14px; }
+
+      .scenario-pick { display: inline-flex; gap: 0; border: 1px solid var(--rule-dark); }
+      .scenario-pick button {
+        background: transparent; color: var(--paper-dim); border: none; border-right: 1px solid var(--rule-dark);
+        padding: 8px 11px; font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.06em;
+        text-transform: uppercase; cursor: pointer;
+      }
+      .scenario-pick button:last-child { border-right: none; }
+      .scenario-pick button[aria-pressed="true"] { background: var(--ember); color: var(--bg-card); }
+
+      /* ─── Stage ─── */
+      .stage {
+        background:
+          repeating-linear-gradient(45deg, transparent 0 11px, oklch(0.180 0 0) 11px 12px),
+          var(--ink-800);
+        border: 1px solid var(--rule-dark);
+        padding: 40px 20px; display: grid; place-items: start center; min-height: 560px;
+        overflow: hidden;
+      }
+
+      /* beat readout */
+      .beat {
+        margin-top: var(--space-lg); font-family: var(--font-mono); font-size: 11px;
+        letter-spacing: 0.06em; color: var(--paper-dim); min-height: 1.4em;
+      }
+      .beat .k { color: var(--flame); }
+
+      /* ─── Popup surface (mirrors popup-states.html) ─── */
+      .popup-frame { display: flex; flex-direction: column; gap: 10px; align-self: start; width: 400px; }
+
+      .popup {
+        width: 400px; background: var(--bg-card); color: var(--ink);
+        border: 1px solid var(--rule); box-shadow: 0 20px 60px -20px var(--shadow);
+        position: relative; overflow: hidden;
+      }
+
+      .ticket-top {
+        padding: 14px 18px; border-bottom: 1px dashed var(--rule);
+        display: flex; justify-content: space-between; align-items: baseline;
+      }
+      .ticket-top .brand {
+        font-family: var(--font-display); font-weight: 400; font-size: 10px;
+        letter-spacing: 0.08em; line-height: 1.2; text-transform: uppercase; color: var(--ink);
+      }
+      .ticket-top .captured {
+        font-family: var(--font-display); font-size: 10px; line-height: 1.2;
+        color: var(--ink-dim); text-transform: uppercase; letter-spacing: 0.08em;
+      }
+
+      .source {
+        padding: 12px 18px; border-bottom: 1px dashed var(--rule);
+        font-family: var(--font-mono); font-size: 10px; color: var(--ink-dim);
+        display: flex; justify-content: space-between; align-items: center;
+        letter-spacing: 0.02em; gap: var(--space-md);
+      }
+      .source .url { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .source .badge {
+        background: var(--ember); color: var(--bg-card); padding: 3px 7px 2px;
+        letter-spacing: 0.06em; text-transform: uppercase; white-space: nowrap; flex-shrink: 0;
+      }
+
+      .chyron-bar {
+        display: flex; justify-content: space-between; align-items: center;
+        padding: 8px 18px; font-family: var(--font-display); font-size: 10px;
+        letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-primary);
+        border-bottom: 1px dashed var(--rule); gap: var(--space-md);
+      }
+      .chyron-bar .elapsed { font-family: var(--font-mono); color: var(--ink-dim); letter-spacing: 0.04em; }
+      .chyron-bar .status { display: flex; align-items: center; gap: 8px; }
+      .chyron-bar .status .dot { width: 6px; height: 6px; background: var(--flame); display: inline-block; }
+
+      /* progress — animate scaleX, never width */
+      .progress { height: 2px; background: var(--rule-cream); position: relative; overflow: hidden; }
+      .progress::after {
+        content: ""; position: absolute; inset: 0 0 0 0; background: var(--flame-deep);
+        transform-origin: left center; transform: scaleX(var(--p, 0));
+        transition: transform var(--t-std) var(--ease-arrive);
+      }
+
+      /* filmstrip */
+      .filmstrip {
+        display: grid; grid-template-columns: repeat(8, 1fr); gap: 4px;
+        padding: 10px 18px; border-bottom: 1px dashed var(--rule);
+      }
+      .filmstrip .frame { aspect-ratio: 1/1; border: 1px solid var(--ink-dim); }
+      .filmstrip .frame.captured { background: var(--ember); border-color: var(--ember); }
+      .filmstrip .frame.active { background: var(--flame); border-color: var(--flame); }
+
+      /* title / subtitle / facts / sections */
+      .title {
+        font-family: var(--font-display); font-weight: 400; font-size: 24px; line-height: 1.1;
+        text-transform: uppercase; margin: 16px 18px 6px; color: var(--ink);
+      }
+      .subtitle {
+        margin: 0 18px 14px; font-family: var(--font-body); font-style: italic;
+        font-size: 12px; line-height: 1.45; color: var(--ink-dim);
+      }
+      .facts {
+        display: flex; gap: 18px; padding: 10px 18px;
+        border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule);
+        font-family: var(--font-mono); font-size: 10px; color: var(--ink-dim);
+        text-transform: uppercase; letter-spacing: 0.08em;
+      }
+      .facts .fact { display: flex; align-items: baseline; gap: 6px; }
+      .facts .fact strong { color: var(--ink); font-weight: 400; font-size: 11px; letter-spacing: 0.02em; }
+
+      .section-h {
+        font-family: var(--font-display); font-weight: 400; font-size: 13px; line-height: 1.2;
+        margin: 18px 18px 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink);
+        border-bottom: 1px solid var(--ink); padding-bottom: 6px;
+      }
+      ul.ingredients { list-style: none; padding: 0; margin: 0 18px 18px; font-size: 13px; line-height: 1.5; }
+      ul.ingredients li {
+        display: grid; grid-template-columns: 78px 1fr; gap: 8px; align-items: baseline;
+        padding: 4px 0; border-bottom: 1px dotted var(--rule);
+      }
+      ul.ingredients li .qty {
+        font-family: var(--font-mono); font-size: 11.5px; color: var(--ink);
+        letter-spacing: 0.02em; text-transform: uppercase;
+      }
+      ol.method { padding: 0; margin: 0 18px 18px; list-style: none; counter-reset: step; }
+      ol.method li {
+        counter-increment: step; display: grid; grid-template-columns: 32px 1fr; gap: 10px;
+        padding: 9px 0; border-bottom: 1px solid var(--rule); font-size: 13px; line-height: 1.55;
+      }
+      ol.method li::before {
+        content: counter(step, decimal-leading-zero); font-family: var(--font-mono);
+        font-size: 11px; color: var(--ink-dim); letter-spacing: 0.06em; padding-top: 3px;
+      }
+      .tags {
+        padding: 12px 18px 8px; border-top: 1px dashed var(--rule);
+        font-family: var(--font-mono); font-size: 10.5px; color: var(--ink-dim);
+        letter-spacing: 0.04em; word-spacing: 0.15em;
+      }
+      .ticket-bottom {
+        padding: 8px 18px 12px; font-family: var(--font-display); font-size: 10px;
+        color: var(--ink-dim); letter-spacing: 0.08em; text-transform: uppercase;
+        display: flex; justify-content: space-between;
+      }
+      .ticket-bottom .glyph { color: var(--flame); }
+
+      /* skeleton bars */
+      .bar { display: block; height: 10px; background: var(--paper-250); }
+      .bar.thin { height: 8px; } .bar.tall { height: 16px; } .bar.tallx { height: 22px; }
+
+      /* subtle wave — a faint neutral light-band ripples down the ticket while
+         loading. Monochrome (no flame). Phase-shifted per section so the wave
+         travels top-to-bottom, matching the print direction. */
+      @media (prefers-reduced-motion: no-preference) {
+        .bar {
+          background: linear-gradient(90deg,
+            var(--paper-250) 0%, var(--paper-200) 45%, var(--paper-250) 70%);
+          background-size: 220% 100%;
+          animation: skel-wave 1.8s ease-in-out infinite;
+        }
+        .skel-group[data-group="ing"]    .bar { animation-delay: -300ms; }
+        .skel-group[data-group="method"] .bar { animation-delay: -600ms; }
+        @keyframes skel-wave {
+          0%   { background-position: 130% 0; }
+          100% { background-position: -30% 0; }
+        }
+      }
+      .title-skel { padding: 18px 18px 6px; display: flex; flex-direction: column; gap: 8px; }
+      .subtitle-skel { padding: 0 18px 14px; display: flex; flex-direction: column; gap: 5px; }
+      .facts-skel { display: flex; gap: 18px; padding: 12px 18px; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); }
+      .facts-skel .bar { width: 56px; height: 10px; }
+      ul.ingredients-skel { list-style: none; padding: 0; margin: 0 18px 18px; }
+      ul.ingredients-skel li {
+        display: grid; grid-template-columns: 78px 1fr; gap: 8px; align-items: center;
+        padding: 8px 0; border-bottom: 1px dotted var(--rule);
+      }
+      ol.method-skel { padding: 0; margin: 0 18px 18px; list-style: none; counter-reset: step; }
+      ol.method-skel li {
+        counter-increment: step; display: grid; grid-template-columns: 32px 1fr; gap: 10px;
+        padding: 10px 0; border-bottom: 1px solid var(--rule);
+      }
+      ol.method-skel li::before {
+        content: counter(step, decimal-leading-zero); font-family: var(--font-mono);
+        font-size: 11px; color: var(--ink-muted-v2); letter-spacing: 0.06em; padding-top: 3px;
+      }
+      ol.method-skel li .body-skel { display: flex; flex-direction: column; gap: 5px; }
+
+      /* ════════════════════════════════════════════════════════════
+         MOTION LAYER
+         ════════════════════════════════════════════════════════════ */
+
+      /* (1) PRINT-IN — the ticket feeds out of the printer, top to bottom.
+         Each direct child of .popup-body settles down from -4px, staggered. */
+      .popup-body > * { will-change: transform, opacity; }
+      .popup.printing .popup-body > * {
+        animation: print-in var(--t-line) var(--ease-arrive) backwards;
+        animation-delay: calc(var(--i, 0) * var(--stagger));
+      }
+      @keyframes print-in {
+        from { opacity: 0; transform: translateY(-4px); }
+        to   { opacity: 1; transform: translateY(0); }
+      }
+
+      /* status dot — live pulse while working */
+      .popup.extracting .chyron-bar .status .dot,
+      .popup.capturing  .chyron-bar .status .dot {
+        animation: dot-pulse 900ms var(--ease-toggle) infinite;
+      }
+      @keyframes dot-pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.25; } }
+
+      /* (3) SKELETON → FILLED — sectioned reveal, head first, body last.
+         Skel blocks crossfade out; real blocks arrive from translateY(6px), 3 groups. */
+      .skel-group { transition: opacity var(--t-line) var(--ease-exit); }
+      .popup.filled .skel-group { opacity: 0; }
+
+      /* extraction chrome is gone once the recipe lands — Success card goes
+         source → title directly, like 03A in popup-states */
+      .popup.filled .chyron-bar,
+      .popup.filled .progress,
+      .popup.filled .filmstrip { display: none; }
+
+      .real-group { display: none; }
+      .popup.filled .real-group { display: block; }
+      .popup.filled.animate-fill .real-group {
+        animation: fill-in var(--t-std) var(--ease-arrive) backwards;
+        animation-delay: calc(var(--g, 0) * var(--fill-stagger));
+      }
+      @keyframes fill-in {
+        from { opacity: 0; transform: translateY(6px); }
+        to   { opacity: 1; transform: translateY(0); }
+      }
+      /* the head block is the hero of the fill — give it a touch more travel
+         so the title "lands" first, body sections follow lighter */
+      .popup.filled.animate-fill .real-group[data-group="head"] {
+        animation-duration: 360ms;
+      }
+      .popup.filled.animate-fill .real-group[data-group="head"] .title {
+        animation: fill-head 360ms var(--ease-arrive) backwards;
+      }
+      @keyframes fill-head {
+        from { opacity: 0; transform: translateY(10px); }
+        to   { opacity: 1; transform: translateY(0); }
+      }
+      /* during fill, the skel and real occupy the same flow slot per group;
+         we collapse skel height once faded so the card doesn't double-tall */
+      .popup.filled .skel-group { display: none; }
+
+      /* Chrome MV3 popup is height-capped (~600px). The recipe scrolls inside;
+         the action row stays pinned below, so Fire is always in view. The body
+         is the scroll container — the .fired-stamp (child of .popup) stays
+         pinned to the visible area, not the full scroll height. */
+      .popup-body { max-height: 440px; overflow-y: auto; overscroll-behavior: contain; }
+      .popup-body::-webkit-scrollbar { width: 8px; }
+      .popup-body::-webkit-scrollbar-thumb { background: var(--rule-cream); }
+
+      /* (4) FIRE → STAMP → CLOSE */
+      .popup-body { transition: filter var(--t-fire) var(--ease-arrive), opacity var(--t-fire) var(--ease-arrive); }
+      .popup.fired .popup-body { filter: grayscale(0.6); opacity: 0.35; pointer-events: none; }
+
+      .fired-stamp {
+        position: absolute; inset: 0; display: grid; place-items: center;
+        padding: 18px; pointer-events: none; opacity: 0; z-index: 6;
+      }
+      .popup.fired .fired-stamp {
+        opacity: 1;
+        animation: stamp-land var(--t-fire) var(--ease-stamp) backwards;
+      }
+      @keyframes stamp-land {
+        from { opacity: 0; transform: scale(1.04); }
+        to   { opacity: 1; transform: scale(1.0); }
+      }
+      .fired-stamp .mark {
+        border: 2px solid var(--ink-primary); padding: 18px 22px 16px;
+        display: flex; flex-direction: column; gap: 8px; align-items: center; background: var(--paper-100);
+      }
+      .fired-stamp .mark .stamp-glyph {
+        width: 28px; height: auto; color: var(--flame);   /* the one heat moment */
+        display: block; margin-bottom: 12px;
+      }
+      .fired-stamp .mark .line1 {
+        font-family: var(--font-display); font-size: 28px; letter-spacing: 0.14em;
+        text-transform: uppercase; color: var(--ink-primary); line-height: 1.0;
+      }
+      .fired-stamp .mark .line2 {
+        font-family: var(--font-mono); font-size: 11px; color: var(--ink-dim);
+        letter-spacing: 0.02em; max-width: 32ch; text-align: center; line-height: 1.4;
+      }
+
+      /* CLOSE — after the stamp holds, the card recedes and fades. A clean
+         dismiss with no explicit metaphor: the stamp landing is the signature. */
+      .popup-frame { transition: transform var(--t-dismiss) var(--ease-exit), opacity var(--t-dismiss) var(--ease-exit); }
+      .popup-frame.dismissed { transform: scale(0.98); opacity: 0; }
+
+      /* ─── Action row ─── */
+      .popup-actions {
+        width: 400px; background: var(--bg-panel); border: 1px solid var(--rule-dark);
+        padding: 12px 14px; display: flex; gap: 8px; align-items: center;
+      }
+      .fire-btn {
+        flex: 1; background: var(--flame); color: var(--bg-card); border: none;
+        padding: 10px 14px; font-family: var(--font-body); font-size: 12px;
+        letter-spacing: 0.14em; text-transform: uppercase; cursor: pointer;
+        display: flex; align-items: center; justify-content: center; gap: 10px;
+        transition: transform var(--t-micro) var(--ease-arrive), filter var(--t-micro) var(--ease-arrive);
+      }
+      .fire-btn:hover { filter: brightness(1.12); }
+      .fire-btn:active { transform: scale(0.97); }
+      .fire-btn[disabled] { background: var(--ink-600); color: var(--paper-muted); cursor: not-allowed; transform: none; filter: none; }
+      .fire-btn[disabled] .kbd { border-color: var(--paper-muted); color: var(--paper-muted); }
+      .fire-btn .kbd { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em; border: 1px solid var(--bg-card); padding: 1px 5px; opacity: 0.7; }
+      /* ready pulse — fires once when extraction lands and Fire becomes armed */
+      .fire-btn.armed { animation: arm-pulse 520ms var(--ease-arrive) 1; }
+      @keyframes arm-pulse {
+        0% { box-shadow: 0 0 0 0 oklch(0.533 0.212 30.4 / 0.6); }
+        100% { box-shadow: 0 0 0 10px oklch(0.533 0.212 30.4 / 0); }
+      }
+      .secondary-btn {
+        background: transparent; border: 1px solid var(--rule-dark); color: var(--paper-primary);
+        padding: 10px 12px; font-family: var(--font-body); font-size: 10.5px;
+        letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer;
+        transition: background var(--t-micro) var(--ease-arrive);
+      }
+      .secondary-btn:hover { background: var(--ink-600); }
+      .countdown {
+        flex: 1; text-align: center; font-family: var(--font-mono); font-size: 11px;
+        color: var(--paper-muted); letter-spacing: 0.08em; text-transform: uppercase;
+      }
+      .countdown strong { color: var(--paper-primary); font-weight: 400; }
+
+      button:focus-visible { outline: 2px solid var(--flame); outline-offset: 2px; }
+
+      /* ─── Sidebar legend ─── */
+      .legend-col { font-size: 12px; line-height: 1.6; color: var(--paper-dim); }
+      .legend-col h2 {
+        font-family: var(--font-display); font-weight: 400; font-size: 12px;
+        letter-spacing: 0.18em; text-transform: uppercase; color: var(--paper-dim);
+        margin: 0 0 var(--space-md); padding-bottom: var(--space-sm); border-bottom: 1px solid var(--rule-dark);
+      }
+      .beats { list-style: none; padding: 0; margin: 0 0 var(--space-2xl); }
+      .beats li { display: grid; grid-template-columns: 18px 1fr; gap: 10px; padding: 10px 0; border-bottom: 1px dashed var(--rule-dark); }
+      .beats li .n { font-family: var(--font-mono); color: var(--flame); font-size: 11px; }
+      .beats li .b { font-family: var(--font-display); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--paper-primary); display: block; margin-bottom: 3px; }
+      .beats li .d { font-family: var(--font-mono); font-size: 10.5px; color: var(--paper-muted); line-height: 1.5; }
+
+      .tokens { font-family: var(--font-mono); font-size: 10.5px; color: var(--paper-muted); line-height: 1.7; }
+      .tokens .row { display: flex; justify-content: space-between; gap: 12px; border-bottom: 1px dotted var(--rule-dark); padding: 3px 0; }
+      .tokens .row .v { color: var(--paper-dim); }
+
+      /* Reduced motion — real OS pref */
+      @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+      }
+      /* Reduced motion — in-page simulation toggle (for crit) */
+      .rm *, .rm *::before, .rm *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+    </style>
+  </head>
+
+  <body>
+    <main class="page">
+      <header class="page-head">
+        <h1>Mise — Popup motion</h1>
+        <span class="slug"><span class="glyph">✶</span> prototype · motion · 2026-06-07</span>
+      </header>
+      <nav class="specnav">
+        <a href="./index.html">Specimen</a><span class="sep">·</span>
+        <a href="./popup-states.html">Popup states</a><span class="sep">·</span>
+        <a class="here" href="./popup-motion.html">Motion</a>
+      </nav>
+
+      <p class="page-lead">
+        The popup's whole life is one kitchen ticket: it <em>prints in</em>, gets <em>worked</em>, and is <em>fired</em> — the stamp landing is the moment, then the card closes cleanly.
+        Surfaces arrive smooth and decisive; textural details (frames committing one by one) tick in steps, like a print head. Press <strong style="color:var(--paper-primary)">Replay</strong>, then hit <strong style="color:var(--paper-primary)">Fire</strong> to feel the signature beat.
+      </p>
+
+      <div class="layout">
+        <div>
+          <div class="controls">
+            <button class="ctrl-btn" id="replay">▶ Replay</button>
+            <button class="ctrl-btn ghost" id="autofire">⚡ Auto-fire</button>
+            <label class="toggle"><input type="checkbox" id="rm" /> Reduced motion</label>
+          </div>
+
+          <div class="stage">
+            <div class="popup-frame" id="frame">
+              <div class="popup" id="popup">
+                <div class="popup-body" id="body">
+                  <div class="ticket-top" style="--i:0">
+                    <span class="brand" id="brand">MISE · NO. ─────</span>
+                    <span class="captured">2026-06-07 · 18:02</span>
+                  </div>
+                  <div class="source" style="--i:1">
+                    <span class="url">instagram.com/p/C9xK2</span>
+                    <span class="badge" id="badge">🎬 0 / 8</span>
+                  </div>
+                  <div class="chyron-bar" style="--i:2">
+                    <span class="status"><span class="dot"></span> <span id="status">Opening · reading DOM</span></span>
+                    <span class="elapsed" id="elapsed">0:00</span>
+                  </div>
+                  <div class="progress" id="progress" style="--p:0.04; --i:3"></div>
+                  <div class="filmstrip" id="filmstrip" style="--i:4">
+                    <div class="frame"></div><div class="frame"></div><div class="frame"></div><div class="frame"></div>
+                    <div class="frame"></div><div class="frame"></div><div class="frame"></div><div class="frame"></div>
+                  </div>
+
+                  <!-- HEAD group: skeleton + real -->
+                  <div class="skel-group" data-group="head" style="--i:5">
+                    <div class="title-skel">
+                      <span class="bar tallx" style="width:82%"></span>
+                      <span class="bar tall" style="width:54%"></span>
+                    </div>
+                    <div class="subtitle-skel">
+                      <span class="bar thin" style="width:92%"></span>
+                      <span class="bar thin" style="width:64%"></span>
+                    </div>
+                    <div class="facts-skel">
+                      <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+                    </div>
+                  </div>
+                  <div class="real-group" data-group="head" style="--g:0">
+                    <h2 class="title">Gochujang-Glazed Pork Belly</h2>
+                    <p class="subtitle">slow-rendered, sharply-sauced, served over rice with a soft egg.</p>
+                    <div class="facts">
+                      <span class="fact">SERVES <strong>4</strong></span>
+                      <span class="fact">HANDS-ON <strong>25m</strong></span>
+                      <span class="fact">TOTAL <strong>2h 10m</strong></span>
+                    </div>
+                  </div>
+
+                  <!-- INGREDIENTS group -->
+                  <div class="skel-group" data-group="ing" style="--i:6">
+                    <h3 class="section-h">Ingredients</h3>
+                    <ul class="ingredients-skel">
+                      <li><span class="bar" style="width:60%"></span><span class="bar" style="width:76%"></span></li>
+                      <li><span class="bar" style="width:50%"></span><span class="bar" style="width:88%"></span></li>
+                      <li><span class="bar" style="width:64%"></span><span class="bar" style="width:54%"></span></li>
+                      <li><span class="bar" style="width:42%"></span><span class="bar" style="width:72%"></span></li>
+                    </ul>
+                  </div>
+                  <div class="real-group" data-group="ing" style="--g:1">
+                    <h3 class="section-h">Ingredients</h3>
+                    <ul class="ingredients">
+                      <li><span class="qty">800 g</span><span>pork belly, skin-on</span></li>
+                      <li><span class="qty">3 tbsp</span><span>gochujang paste</span></li>
+                      <li><span class="qty">2 tbsp</span><span>honey or maltose</span></li>
+                      <li><span class="qty">1½ tbsp</span><span>soy sauce (light)</span></li>
+                      <li><span class="qty">4 cloves</span><span>garlic, crushed</span></li>
+                      <li><span class="qty">1 thumb</span><span>ginger, julienned</span></li>
+                    </ul>
+                  </div>
+
+                  <!-- METHOD group -->
+                  <div class="skel-group" data-group="method" style="--i:7">
+                    <h3 class="section-h">Method</h3>
+                    <ol class="method-skel">
+                      <li><span></span><div class="body-skel"><span class="bar thin" style="width:96%"></span><span class="bar thin" style="width:88%"></span><span class="bar thin" style="width:42%"></span></div></li>
+                      <li><span></span><div class="body-skel"><span class="bar thin" style="width:92%"></span><span class="bar thin" style="width:58%"></span></div></li>
+                      <li><span></span><div class="body-skel"><span class="bar thin" style="width:84%"></span><span class="bar thin" style="width:70%"></span></div></li>
+                    </ol>
+                  </div>
+                  <div class="real-group" data-group="method" style="--g:2">
+                    <h3 class="section-h">Method</h3>
+                    <ol class="method">
+                      <li>Score the pork belly skin in a crosshatch, just through the fat. Salt heavily, uncovered in the fridge overnight.</li>
+                      <li>Sear skin-down in a dry cast-iron until the skin blisters and shatters when tapped.</li>
+                      <li>Whisk gochujang, honey, soy, garlic and ginger with 100 ml water. Pour around the pork. Cover, oven 160 °C for 90 minutes.</li>
+                      <li>Uncover, turn skin-up, ladle sauce over for the final 15 minutes at 200 °C until lacquered.</li>
+                    </ol>
+                    <div class="tags">
+                      <span>#cuisine/korean</span> · <span>#pork</span> · <span>#braise</span> · <span>#weeknight</span>
+                    </div>
+                  </div>
+
+                  <div class="ticket-bottom" style="--i:8">
+                    <span id="footL">—————————————</span>
+                    <span><span class="glyph">✶</span> mise.app</span>
+                  </div>
+                </div><!-- /popup-body -->
+
+                <div class="fired-stamp" aria-live="polite">
+                  <div class="mark">
+                    <svg class="stamp-glyph" viewBox="0 0 28 34" fill="currentColor" aria-hidden="true">
+                      <path d="M15 29H17V27H19V29H18V32H20V34H8V32H7V30H9V32H10V27H12V29H13V25H15V29Z"/>
+                      <path d="M22 32H20V30H22V32Z"/>
+                      <path d="M11 24H7V22H6V28H7V30H5V28H4V22H3V20H5V18H4V17H3V15H5V16H6V18H8V16H7V13H5V10H3V11H4V13H2V11H1V9H3V8H2V6H4V8H5V9H7V12H9V8H11V12H10V13H12V11H14V8H12V3H13V2H15V4H14V5H16V8H18V10H20V18H22V14H24V18H26V27H24V30H22V22H21V24H19V22H18V21H14V17H16V14H14V17H12V22H11V24Z"/>
+                      <path d="M2 17H0V15H2V17Z"/>
+                      <path d="M27 8H28V10H26V11H24V10H22V6H24V9H26V8H25V4H27V8Z"/>
+                      <path d="M9 6H7V3H9V6Z"/>
+                      <path d="M24 4H22V2H24V4Z"/>
+                      <path d="M17 2H15V0H17V2Z"/>
+                    </svg>
+                    <div class="line1">FIRED</div>
+                    <div class="line2">saved to ~/Recipes/2026-06-08-gochujang-pork-belly.md</div>
+                  </div>
+                </div>
+              </div><!-- /popup -->
+
+              <div class="popup-actions" id="actions">
+                <button class="fire-btn" id="fire" disabled><span id="fireLabel">FIRE · save .md</span><span class="kbd">↵</span></button>
+                <button class="secondary-btn">Prep</button>
+                <button class="secondary-btn">.pdf</button>
+              </div>
+            </div><!-- /popup-frame -->
+          </div><!-- /stage -->
+
+          <div class="beat" id="beat"><span class="k">idle</span> — press Replay to print a ticket</div>
+        </div>
+
+        <aside class="legend-col">
+          <h2>The four beats</h2>
+          <ol class="beats">
+            <li><span class="n">01</span><div><span class="b">Prints in</span><span class="d">Popup opens — ticket feeds out top-to-bottom, lines settling from −4px, 60ms section stagger. Establishes the printer.</span></div></li>
+            <li><span class="n">02</span><div><span class="b">Worked</span><span class="d">Extraction. Frames commit one by one (mechanical, steps feel). Progress fills via scaleX; the status dot pulses live.</span></div></li>
+            <li><span class="n">03</span><div><span class="b">Fills in</span><span class="d">Skeleton → recipe, head first then body — 3 sectioned groups, not a teletype crawl. Fire arms with one pulse. The peak moment.</span></div></li>
+            <li><span class="n">04</span><div><span class="b">Fired</span><span class="d">Press (0.97) → card dims → the FIRED stamp lands (1.04→1.0 settle, no bounce) — the signature beat — then the card recedes and closes cleanly.</span></div></li>
+          </ol>
+
+          <h2>Motion tokens</h2>
+          <div class="tokens">
+            <div class="row"><span>--t-micro</span><span class="v">100ms · press/hover</span></div>
+            <div class="row"><span>--t-line</span><span class="v">200ms · line arrives</span></div>
+            <div class="row"><span>--t-std</span><span class="v">300ms · state arrival</span></div>
+            <div class="row"><span>--t-fire</span><span class="v">180ms · stamp</span></div>
+            <div class="row"><span>--t-dismiss</span><span class="v">200ms · clean close</span></div>
+            <div class="row"><span>--stagger</span><span class="v">60ms · per section</span></div>
+            <div class="row"><span>--ease-arrive</span><span class="v">.16,1,.3,1</span></div>
+            <div class="row"><span>--ease-exit</span><span class="v">.7,0,.84,0</span></div>
+            <div class="row"><span>--ease-stamp</span><span class="v">scale 1.04→1.0</span></div>
+          </div>
+        </aside>
+      </div>
+    </main>
+
+    <script>
+      const $ = (id) => document.getElementById(id);
+      const popup = $("popup"), frame = $("frame"), body = $("body");
+      const fire = $("fire"), fireLabel = $("fireLabel"), beat = $("beat");
+      const statusEl = $("status"), elapsedEl = $("elapsed"), badge = $("badge");
+      const brand = $("brand"), progress = $("progress"), footL = $("footL");
+      const filmstrip = $("filmstrip"), frames = [...filmstrip.children];
+      const actions = $("actions");
+
+      let timers = [];
+      const clearAll = () => { timers.forEach(clearTimeout); timers = []; };
+      const after = (ms, fn) => { timers.push(setTimeout(fn, ms)); };
+      const rm = () => document.body.classList.contains("rm") ||
+        window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const setBeat = (k, txt) => { beat.innerHTML = `<span class="k">${k}</span> — ${txt}`; };
+
+      // reduced-motion toggle
+      $("rm").addEventListener("change", (e) => document.body.classList.toggle("rm", e.target.checked));
+
+      function reset() {
+        clearAll();
+        popup.className = "popup";
+        fire.disabled = true; fire.classList.remove("armed");
+        frame.classList.remove("dismissed");
+        fireLabel.textContent = "FIRE · save .md";
+        actions.style.display = "flex";
+        statusEl.textContent = "Opening · reading DOM";
+        elapsedEl.textContent = "0:00";
+        badge.textContent = "🎬 0 / 8";
+        brand.textContent = "MISE · NO. ─────";
+        footL.textContent = "—————————————";
+        progress.style.setProperty("--p", "0.04");
+        frames.forEach((f) => (f.className = "frame"));
+      }
+
+      function run(autofire = false) {
+        reset();
+        const fast = rm();
+        const T = (ms) => (fast ? 0 : ms);
+
+        // BEAT 1 — PRINTS IN
+        popup.classList.add("printing");
+        setBeat("01 · prints in", "ticket feeds out of the printer");
+        after(T(600), () => popup.classList.remove("printing"));
+
+        // BEAT 2 — WORKED (capture frames, then extract)
+        after(T(620), () => {
+          popup.classList.add("capturing");
+          statusEl.textContent = "Scene-detected · frame 1 of 8";
+          setBeat("02 · worked", "capturing video frames — committing one by one");
+        });
+
+        // commit 8 frames, one at a time (mechanical / steps feel)
+        const frameStart = 700, frameGap = fast ? 0 : 120;
+        for (let i = 0; i < 8; i++) {
+          after(T(frameStart) + frameGap * i, () => {
+            if (i > 0) frames[i - 1].className = "frame captured";
+            frames[i].className = "frame active";
+            badge.textContent = `🎬 ${i + 1} / 8`;
+            statusEl.textContent = `Scene-detected · frame ${i + 1} of 8`;
+            progress.style.setProperty("--p", (0.08 + (i + 1) / 8 * 0.42).toFixed(3));
+            elapsedEl.textContent = `0:0${Math.min(9, 1 + Math.floor(i / 2))}`;
+          });
+        }
+        const capDone = T(frameStart) + frameGap * 8;
+        after(capDone, () => {
+          frames[7].className = "frame captured";
+          popup.classList.remove("capturing");
+          popup.classList.add("extracting");
+          statusEl.textContent = "Extracting · parsing ingredients";
+          progress.style.setProperty("--p", "0.7");
+          setBeat("02 · worked", "extracting structure — parsing the page");
+        });
+        after(capDone + T(700), () => progress.style.setProperty("--p", "0.92"));
+
+        // BEAT 3 — FILLS IN
+        const fillAt = capDone + T(1150);
+        after(fillAt, () => {
+          popup.classList.remove("extracting");
+          popup.classList.add("filled", "animate-fill");
+          brand.textContent = "MISE · NO. 00427";
+          badge.textContent = "🎬 8 frames";
+          statusEl.textContent = "Extracting · parsing ingredients";
+          footL.textContent = "2026-06-07 · 18:03";
+          progress.style.setProperty("--p", "1");
+          setBeat("03 · fills in", "skeleton → recipe, head first then body");
+        });
+        // the chyron bar is hidden by content in the final card; arm Fire
+        after(fillAt + T(420), () => {
+          fire.disabled = false;
+          fire.classList.add("armed");
+          setBeat("03 · armed", "extraction landed — Fire is live. Hit it.");
+          if (autofire) after(T(650), () => doFire());
+        });
+      }
+
+      function doFire() {
+        if (fire.disabled && !rm()) return;
+        const fast = rm();
+        const T = (ms) => (fast ? 0 : ms);
+        fire.classList.remove("armed");
+        fire.disabled = true;
+        fireLabel.textContent = "FIRING…";
+        setBeat("04 · fired", "press → dim → stamp lands");
+
+        // press feedback handled by :active; stamp on next tick
+        after(T(120), () => {
+          popup.classList.add("fired");
+        });
+        // swap action row to countdown
+        after(T(140), () => {
+          actions.innerHTML =
+            '<span class="countdown">Closing in <strong>1s</strong> · ESC to cancel</span>' +
+            '<button class="secondary-btn">Keep open</button>';
+        });
+        // CLOSE — clean dismiss after the stamp holds
+        after(T(900), () => {
+          setBeat("04 · closing", "stamp held — card closes cleanly");
+          frame.classList.add("dismissed");
+        });
+        after(T(900) + T(320), () => {
+          setBeat("done", "fired & filed. Press Replay to run it again.");
+        });
+      }
+
+      fire.addEventListener("click", doFire);
+      $("replay").addEventListener("click", () => run(false));
+      $("autofire").addEventListener("click", () => run(true));
+
+      // autostart
+      run(false);
+    </script>
+  </body>
+</html>
