@@ -1,7 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128" role="img" aria-label="Mise">
-  <!-- Mise favicon — plate + mono-M, ink tile so it reads on any browser theme. Master: type-specimens/mark/mise-plate-icon.svg -->
-  <rect width="128" height="128" fill="#232323"/>
-  <g fill="#f3f3f3" transform="translate(12 8)">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 104 112" width="104" height="112" role="img" aria-label="Mise">
+  <!-- Mise mark — plate + mono-M, for LIGHT surfaces. 13×14 pixel grid @ 8px. Source: Figma node 107:1447. -->
+  <g fill="#1e1e1e">
     <rect x="32" y="0" width="8" height="8"/>
     <rect x="40" y="0" width="8" height="8"/>
     <rect x="48" y="0" width="8" height="8"/>

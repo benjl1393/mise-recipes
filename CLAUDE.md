@@ -103,27 +103,30 @@ Three systems defined; see canonical docs:
 - **Color**: Brutalist monochrome + flame. Neutral grays + a single accent family (flame at hue 30.4°, sanguine red — like digital-clock LED digits). See `docs/mise-color-system.md`.
 - **Icons**: [Phosphor Icons](https://phosphoricons.com) — **thin weight** for functional chrome (keyboard-return, arrows, status glyphs, retry, close). Matches the hairline-rule aesthetic. Emojis are reserved for *content* (source-type badges like `🎬` for video, `📝` for article) where they function as cultural shorthand — never as functional chrome. Import hygiene: when pasting a Phosphor SVG into Figma, the enclosing 24×24 bounding frame sometimes comes in with a solid white fill as an import default — treat as chrome, leave as-is or scrub per case.
 
-## Logo mark (locked — 2026-06-07, "The Spike")
+## Logo mark (locked — 2026-06-08, plate + mono-M)
 
-The brand mark is a **kitchen order ticket** — the brief's existing ticket/receipt spine (`NO. 00427`, the popup-is-a-ticket) made into a glyph. The "spike" (orders speared on the kitchen rail) is implied entirely by **negative space**: a semicircle notch scooped from the ticket's top edge where it was pierced. No literal rod (rejected as too on-the-nose / read as a download arrow). One **flame fired-bar** = the fired item (the single accent), a shorter neutral knockout bar beneath it, and a torn/perforated bottom edge. Source vector: Figma `Mise` node `92:1381`.
+The brand mark is a **top-down plate** — a single-pixel rounded rim — with the **Departure Mono "M" plated in the centre**. The M is the *actual* Departure Mono glyph, so the mark and the wordmark are one face: the type IS the identity. Drawn on the same coarse pixel grid (8px cells) as the Fire / In-the-Weeds / Off-Menu icons. **Monochrome** — the flame pixel was deliberately removed (Ben: "it makes it harder to read it as an 'M'"), so the single flame accent lives only in the UI (Fire button, FIRED stamp), never baked into the glyph. Source vector: Figma `Mise` node `107:1447`.
 
-- **Masters**: `type-specimens/mark/` — `mise-mark-on-dark.svg` (paper ticket, for dark surfaces), `mise-mark-on-light.svg` (ink ticket, for light surfaces), `mise-icon.svg` (ink tile, for app/extension/favicon — reads on any theme). Geometry on an 80×76 grid; notch r=6 dead-centre; flame bar `x12 y25 w57 h11`; knockout bar `x12 y42 w41.8 h8`. Flame is the locked `--flame` `#cb1200` (NOT the sketch's brighter `#fb2c1b`).
-- **PNG ladder**: `type-specimens/mark/png/mise-icon-{16,32,48,128}.png` (ready for the MV3 manifest at build time). Re-export via `type-specimens/mark/_export.html`.
+- **Geometry**: 13 cols × 14 rows pixel grid @ 8px/cell. The M letter occupies rows 3–10, cols 4–8; everything else is the plate rim.
+- **Masters**: `type-specimens/mark/` — `mise-plate-on-dark.svg` (paper mark, for dark surfaces), `mise-plate-on-light.svg` (ink mark `#1e1e1e`, for light surfaces), `mise-plate-icon.svg` (ink tile `#232323` + paper mark, for app/extension/favicon — reads on any theme), `mise-plate-icon-16.svg` (M-only 16px variant).
+- **PNG ladder**: `type-specimens/mark/png/mise-icon-{16,32,48,128}.png` (ready for the MV3 manifest at build time). Re-export by rasterizing the master SVGs at exact sizes (Playwright element screenshot, deviceScaleFactor 1) — 16 uses the M-only variant.
 - **Favicon**: wired at `src/app/icon.svg` (Next.js App Router auto-serves it).
-- **Crit trail**: `logo-marks.html` (4 directions, crit 01) → `logo-spike.html` / `logo-spike-neg.html` (refinement) → `logo-spike-final.html` (the locked mark, in-context). Decision history in MemPalace (code/recipe_archiver, 2026-06-07).
-- **Reduction note**: at ≤16px the notch softens to a dimple; the red bar + tear keep it legible. The full mark is used at all sizes (no separate simplified glyph needed).
+- **Crit trail**: `logo-plate.html` (3 plate directions — top-down / side-dish / knockout) → direction A (top-down) chosen → single-pixel rim → Ben finalised in Figma (`107:1447`) → `logo-mark.html` (the adopted mark, in-context: hero, ladder, lockup, toolbar states). Decision history in MemPalace (code/recipe_archiver, 2026-06-08).
+- **Reduction note**: at ≤16px the 1px rim breaks up — ship the **M-only** variant (`mise-plate-icon-16.svg`, rim dropped). 128/48/32 carry the full plate.
+- **Toolbar states**: idle = all-paper mark; recipe-detected = paper rim + **flame M** (only the M catches fire — a runtime UI state, not in the glyph).
 
 **Pivot history:**
-- **v1** (through 2026-04-22): warm-cream split-complementary (cream + flame + copper + kitchen-dark). Rejected for hitting the AI-default "warm cream + rust + serif+sans" aesthetic.
-- **v2** (2026-04-23): brutalist monochrome + flame at hue 35° (coppery orange). Deliberate anti-default commitment.
-- **v2.1** (2026-04-24): flame hue shifted to 30.4° — sanguine red, digital-clock LED register. Less "campfire," more "service line." Resolves the long-standing AA-large-only flag for Fire button text (now AA-normal at 5.22:1). Triggered by the first Figma crit of 03A Success.
+- **v1** (through 2026-04-22): warm-cream split-complementary. Rejected for hitting the AI-default "warm cream + rust + serif+sans" aesthetic.
+- **v2 / v2.1** (2026-04-23/24): brutalist monochrome + flame; flame hue settled at 30.4° sanguine red.
+- **"The Spike"** (2026-06-07, retired): a kitchen order-ticket glyph — negative-space notch + flame fired-bar + torn edge (Figma `92:1381`, 80×76 grid). Committed at `7a2a72e`, then reopened. Old masters archived at `type-specimens/mark/_archive-spike/`.
+- **plate + mono-M** (2026-06-08, current): the Mono-M direction (rejected earlier as "a lone M is too generic") revived and fixed by plating it. Monochrome. The spike-themed motion signature (ticket speared onto a rail) was dropped in the same pivot — the FIRED stamp landing is now the motion signature instead.
 
 See the global `design-anti-ai-defaults.md` rule and `design-studio-principles.md` for the cross-project values these project decisions sit inside of.
 
 ## What to build next
 
 1. ~~`impeccable:layout` + `impeccable:harden` — popup state variants~~ — done 2026-04-24, `type-specimens/popup-states.html`
-2. ~~Logo mark + extension icon set~~ — done 2026-06-07, "The Spike" (see "Logo mark" section above)
+2. ~~Logo mark + extension icon set~~ — done; "The Spike" (2026-06-07) → repivoted to **plate + mono-M** (2026-06-08, see "Logo mark" section above)
 3. Motion (`/flow` → `impeccable:animate`)
 4. Microcopy pass (`ux-copywriter`)
 5. Adversarial critique (`impeccable:critique` + `web-design-guidelines`)

@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Mise — Logo: the adopted mark</title>
+    <style>
+      @font-face {
+        font-family: "Departure Mono";
+        src: url("./fonts/DepartureMono-Regular.woff2") format("woff2");
+        font-weight: 400; font-style: normal; font-display: swap;
+      }
+      @font-face {
+        font-family: "Commit Mono";
+        src: url("./fonts/CommitMono-400-Regular.otf") format("opentype");
+        font-weight: 400; font-style: normal; font-display: swap;
+      }
+      :root {
+        --font-display: "Departure Mono", ui-monospace, Menlo, monospace;
+        --font-mono: "Commit Mono", ui-monospace, Menlo, monospace;
+        --ink-900: oklch(0.100 0 0);
+        --ink-800: oklch(0.150 0 0);
+        --ink-700: oklch(0.200 0 0);
+        --ink-600: oklch(0.280 0 0);
+        --paper-100: oklch(0.965 0 0);
+        --paper-muted: oklch(0.620 0 0);
+        --paper-dim: oklch(0.780 0 0);
+        --rule-ink: oklch(0.280 0 0);
+        --flame: oklch(0.533 0.212 30.4);
+        --s-sm: 8px; --s-md: 12px; --s-lg: 16px; --s-xl: 24px; --s-2xl: 32px; --s-3xl: 48px; --s-4xl: 64px;
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; background: var(--ink-700); color: var(--paper-100); font-family: var(--font-mono); -webkit-font-smoothing: antialiased; }
+      .page { max-width: 1080px; margin: 0 auto; padding: clamp(24px,5vw,56px) clamp(16px,4vw,40px) 120px; }
+      .page-head { border-bottom: 1px solid var(--rule-ink); padding-bottom: var(--s-xl); margin-bottom: var(--s-xl); display: grid; grid-template-columns: 1fr auto; gap: var(--s-lg); align-items: baseline; }
+      .page-head h1 { font-family: var(--font-display); font-weight: 400; font-size: clamp(20px,3vw,32px); line-height: 1.05; letter-spacing: 0.02em; text-transform: uppercase; margin: 0; }
+      .page-head .slug { font-family: var(--font-mono); font-size: 11px; color: var(--paper-muted); letter-spacing: 0.1em; text-transform: uppercase; }
+      .page-head .slug .g { color: var(--flame); margin-right: 6px; }
+      nav.specnav { margin: 0 0 36px; font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; }
+      nav.specnav a { color: var(--paper-dim); text-decoration: none; }
+      nav.specnav a.here { color: var(--paper-100); border-bottom: 1px solid var(--flame); padding-bottom: 2px; }
+      nav.specnav .sep { color: var(--paper-muted); margin: 0 10px; }
+      .lead { max-width: 74ch; font-size: 13px; line-height: 1.6; color: var(--paper-dim); margin-bottom: var(--s-3xl); }
+      .lead em { font-style: normal; color: var(--paper-100); }
+
+      .sect-title { font-family: var(--font-display); font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--paper-dim); margin: 0 0 var(--s-lg); padding-top: var(--s-xl); display: flex; align-items: center; gap: var(--s-md); }
+      .sect-title::after { content: ""; flex: 1; border-top: 1px solid var(--rule-ink); }
+
+      .row { display: flex; gap: var(--s-xl); flex-wrap: wrap; align-items: flex-end; margin-bottom: var(--s-2xl); }
+
+      .tile { display: grid; place-items: center; }
+      .tile.ink { background: var(--ink-800); } .tile.ink .mark { color: var(--paper-100); }
+      .tile.paper { background: var(--paper-100); } .tile.paper .mark { color: var(--ink-900); }
+      .hero { width: 240px; height: 240px; border: 1px solid var(--rule-ink); }
+      .hero .mark { width: 58%; }
+      .cap { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--paper-muted); margin-top: 6px; text-align: center; }
+
+      .ladder { display: flex; gap: var(--s-lg); align-items: flex-end; }
+      .ladder .step { text-align: center; }
+      .ladder .tile { border: 1px solid var(--rule-ink); }
+      .ladder .tile .mark { width: 76%; }
+      .sz-128 { width: 128px; height: 128px; } .sz-48 { width: 48px; height: 48px; }
+      .sz-32 { width: 32px; height: 32px; } .sz-16 { width: 16px; height: 16px; }
+
+      .mark svg { display: block; width: 100%; height: auto; shape-rendering: crispEdges; }
+
+      .lockup { display: flex; align-items: center; gap: 16px; padding: 18px 22px; }
+      .lockup.ink { background: var(--ink-800); border: 1px solid var(--rule-ink); }
+      .lockup.paper { background: var(--paper-100); border: 1px solid var(--rule-ink); }
+      .lockup .mark { width: 52px; flex-shrink: 0; }
+      .lockup .wm { display: flex; flex-direction: column; gap: 3px; }
+      .lockup .wm .name { font-family: var(--font-display); font-size: 34px; line-height: 1; letter-spacing: 0.04em; }
+      .lockup .wm .tag { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; }
+      .lockup.ink .mark { color: var(--paper-100); } .lockup.paper .mark { color: var(--ink-900); }
+      .lockup.ink .name { color: var(--paper-100); } .lockup.ink .tag { color: var(--paper-muted); }
+      .lockup.paper .name { color: var(--ink-900); } .lockup.paper .tag { color: var(--paper-muted); }
+
+      /* MV3 toolbar context */
+      .toolbar { display: inline-flex; align-items: center; gap: 10px; background: var(--ink-600); border: 1px solid var(--rule-ink); border-radius: 8px; padding: 7px 10px; }
+      .toolbar .url { font-family: var(--font-mono); font-size: 11px; color: var(--paper-dim); background: var(--ink-800); padding: 6px 12px; border-radius: 5px; }
+      .toolbar .btn { width: 28px; height: 28px; display: grid; place-items: center; border-radius: 6px; }
+      .toolbar .btn:hover { background: var(--ink-700); }
+      .toolbar .btn .mark { width: 20px; color: var(--paper-100); }
+      .toolbar .btn.active { background: var(--ink-800); }
+      .toolbar .btn.active .mark { color: var(--paper-100); }   /* plate rim stays white */
+      .toolbar .btn.active .mark .m { fill: var(--flame); }      /* only the M catches fire */
+
+      .note { max-width: 72ch; font-family: var(--font-mono); font-size: 12px; line-height: 1.6; color: var(--paper-muted); }
+      .note .k { color: var(--flame); }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <header class="page-head">
+        <h1>Mise — the mark</h1>
+        <span class="slug"><span class="g">✶</span> adopted · plate + mono-M · 2026-06-08</span>
+      </header>
+      <nav class="specnav">
+        <a href="./index.html">Specimen</a><span class="sep">·</span>
+        <a href="./popup-motion.html">Motion</a><span class="sep">·</span>
+        <a href="./logo-plate.html">Logo: directions</a><span class="sep">·</span>
+        <a class="here" href="./logo-mark.html">The mark</a>
+      </nav>
+      <p class="lead">
+        The adopted mark: a top-down <em>plate</em> — single-pixel rounded rim — with the <em>Departure Mono M</em> plated in the centre. The M is the real type, so the mark and the wordmark are one face. Drawn on the same coarse pixel grid as the Fire / Weeds / Off-Menu icons. <em>Monochrome</em> — the flame stays in the UI, not the logo, so the M reads cleanly.
+      </p>
+
+      <h2 class="sect-title">Hero</h2>
+      <div class="row">
+        <div><div class="tile ink hero" id="heroInk"></div><div class="cap">on ink</div></div>
+        <div><div class="tile paper hero" id="heroPaper"></div><div class="cap">on paper</div></div>
+      </div>
+
+      <h2 class="sect-title">Icon ladder · MV3</h2>
+      <div class="row">
+        <div class="ladder" id="ladder"></div>
+      </div>
+      <p class="note"><span class="k">16px note:</span> at true favicon size the 1px rim breaks up — ship a simplified 16px variant (M-only, or rim dropped). The 128/48/32 hold.</p>
+
+      <h2 class="sect-title">Lockup</h2>
+      <div class="row">
+        <div class="lockup ink" id="lockInk"></div>
+      </div>
+      <div class="row">
+        <div class="lockup paper" id="lockPaper"></div>
+      </div>
+
+      <h2 class="sect-title">In situ · extension toolbar</h2>
+      <div class="row">
+        <div class="toolbar" id="toolbar">
+          <span class="url">instagram.com/p/C9xK2</span>
+          <span class="btn" id="tbIdle" title="Mise — idle"></span>
+          <span class="btn active" id="tbActive" title="Mise — recipe detected"></span>
+        </div>
+      </div>
+      <p class="note">Idle (paper) and recipe-detected (flame) toolbar states — the only place the mark touches the flame, and only as a UI state, never baked into the glyph.</p>
+    </main>
+
+    <script>
+      const ROWS = [
+        "....#####....",
+        "..##.....##..",
+        ".##.......##.",
+        ".#..#...#..#.",
+        "#...#...#...#",
+        "#...##.##...#",
+        "#...#.#.#...#",
+        "#...#.#.#...#",
+        "#...#...#...#",
+        "#...#...#...#",
+        ".#..#...#..#.",
+        ".##.......##.",
+        "..##.....##..",
+        "....#####....",
+      ];
+      function markSVG() {
+        const cell = 8, cols = ROWS[0].length, R = ROWS.length;
+        let rim = "", m = "";
+        for (let y = 0; y < R; y++) for (let x = 0; x < cols; x++) {
+          if (ROWS[y][x] !== "#") continue;
+          const r = `<rect x="${x*cell}" y="${y*cell}" width="${cell}" height="${cell}"/>`;
+          // the M letter lives in rows 3–10, cols 4–8; everything else is the plate rim
+          if (y >= 3 && y <= 10 && x >= 4 && x <= 8) m += r; else rim += r;
+        }
+        return `<svg viewBox="0 0 ${cols*cell} ${R*cell}" xmlns="http://www.w3.org/2000/svg" fill="currentColor" role="img" aria-label="Mise"><g class="rim">${rim}</g><g class="m">${m}</g></svg>`;
+      }
+      const mk = () => `<span class="mark">${markSVG()}</span>`;
+      heroInk.innerHTML = mk(); heroPaper.innerHTML = mk();
+      ladder.innerHTML = [128,48,32,16].map(s =>
+        `<div class="step"><div class="tile ink sz-${s}">${mk()}</div><div class="cap">${s}</div></div>`).join("");
+      lockInk.innerHTML = `${mk()}<div class="wm"><span class="name">MISE</span><span class="tag">Own your recipes</span></div>`;
+      lockPaper.innerHTML = `${mk()}<div class="wm"><span class="name">MISE</span><span class="tag">Fire · The Pass · Prep</span></div>`;
+      tbIdle.innerHTML = mk(); tbActive.innerHTML = mk();
+    </script>
+  </body>
+</html>
