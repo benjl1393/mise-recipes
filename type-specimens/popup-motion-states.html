@@ -1,0 +1,409 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Mise — Motion: non-happy paths</title>
+    <style>
+      @font-face { font-family:"Departure Mono"; src:url("./fonts/DepartureMono-Regular.woff2") format("woff2"); font-weight:400; font-style:normal; font-display:swap; }
+      @font-face { font-family:"Commit Mono"; src:url("./fonts/CommitMono-400-Regular.otf") format("opentype"); font-weight:400; font-style:normal; font-display:swap; }
+      @font-face { font-family:"Commit Mono"; src:url("./fonts/CommitMono-400-Italic.otf") format("opentype"); font-weight:400; font-style:italic; font-display:swap; }
+
+      :root {
+        --font-display:"Departure Mono",ui-monospace,Menlo,monospace;
+        --font-body:"Commit Mono",ui-monospace,Menlo,monospace;
+        --font-mono:"Commit Mono",ui-monospace,Menlo,monospace;
+        --ink-800:oklch(0.150 0 0); --ink-700:oklch(0.200 0 0); --ink-600:oklch(0.280 0 0);
+        --paper-50:oklch(0.985 0 0); --paper-100:oklch(0.965 0 0); --paper-200:oklch(0.920 0 0); --paper-250:oklch(0.885 0 0);
+        --ink-primary:oklch(0.120 0 0); --ink-dim:oklch(0.480 0 0); --ink-muted-v2:oklch(0.620 0 0);
+        --paper-primary:oklch(0.965 0 0); --paper-dim:oklch(0.780 0 0); --paper-muted:oklch(0.620 0 0);
+        --rule-cream:oklch(0.820 0 0); --rule-ink:oklch(0.280 0 0);
+        --flame:oklch(0.533 0.212 30.4); --flame-deep:oklch(0.452 0.185 30.4); --ember:oklch(0.373 0.151 30.4);
+        --error-soft:oklch(0.940 0.025 30);
+        --bg-page:var(--ink-700); --bg-panel:var(--ink-600); --bg-card:var(--paper-100);
+        --ink:var(--ink-primary); --rule:var(--rule-cream); --rule-dark:var(--rule-ink);
+        --t-micro:100ms; --t-line:200ms; --t-std:300ms; --t-fire:180ms; --t-dismiss:200ms; --stagger:60ms;
+        --ease-arrive:cubic-bezier(0.16,1,0.3,1); --ease-exit:cubic-bezier(0.7,0,0.84,0);
+        --ease-toggle:cubic-bezier(0.65,0,0.35,1); --ease-stamp:cubic-bezier(0.16,1,0.3,1);
+        --s-sm:8px; --s-md:12px; --s-lg:16px; --s-xl:24px; --s-2xl:32px; --s-3xl:48px; --s-4xl:64px;
+      }
+      * { box-sizing:border-box; }
+      html,body { margin:0; background:var(--bg-page); color:var(--paper-primary); font-family:var(--font-body); -webkit-font-smoothing:antialiased; }
+      .page { max-width:1180px; margin:0 auto; padding:clamp(24px,5vw,56px) clamp(16px,4vw,40px) 120px; }
+      .page-head { border-bottom:1px solid var(--rule-dark); padding-bottom:var(--s-xl); margin-bottom:var(--s-xl); display:grid; grid-template-columns:1fr auto; gap:var(--s-lg); align-items:baseline; }
+      .page-head h1 { font-family:var(--font-display); font-weight:400; font-size:clamp(20px,3vw,32px); line-height:1.05; letter-spacing:0.02em; text-transform:uppercase; margin:0; }
+      .page-head .slug { font-family:var(--font-mono); font-size:11px; color:var(--paper-muted); letter-spacing:0.1em; text-transform:uppercase; }
+      .page-head .slug .g { color:var(--flame); margin-right:6px; }
+      nav.specnav { margin:0 0 36px; font-family:var(--font-mono); font-size:11px; letter-spacing:0.08em; text-transform:uppercase; }
+      nav.specnav a { color:var(--paper-dim); text-decoration:none; } nav.specnav a.here { color:var(--paper-primary); border-bottom:1px solid var(--flame); padding-bottom:2px; }
+      nav.specnav .sep { color:var(--paper-muted); margin:0 10px; }
+      .lead { max-width:74ch; font-size:13px; line-height:1.6; color:var(--paper-dim); margin-bottom:var(--s-2xl); }
+      .lead em { font-style:normal; color:var(--paper-primary); }
+
+      .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(440px,1fr)); gap:var(--s-4xl) var(--s-3xl); }
+      .demo { display:flex; flex-direction:column; gap:var(--s-md); }
+      .demo-head { display:flex; flex-direction:column; gap:3px; padding-bottom:var(--s-sm); border-bottom:1px solid var(--rule-dark); }
+      .demo-head .ttl { font-family:var(--font-display); font-size:11px; letter-spacing:0.14em; text-transform:uppercase; display:flex; gap:var(--s-sm); align-items:baseline; }
+      .demo-head .ttl .id { color:var(--flame); } .demo-head .ttl .lbl { color:var(--paper-primary); }
+      .demo-head .cap { font-family:var(--font-mono); font-size:11px; line-height:1.5; color:var(--paper-muted); max-width:52ch; }
+      .controls { display:flex; gap:var(--s-sm); align-items:center; }
+      .ctrl-btn { background:var(--flame); color:var(--bg-card); border:none; padding:7px 12px; font-family:var(--font-body); font-size:10px; letter-spacing:0.12em; text-transform:uppercase; cursor:pointer; transition:transform var(--t-micro) var(--ease-arrive),filter var(--t-micro) var(--ease-arrive); }
+      .ctrl-btn:hover { filter:brightness(1.12); } .ctrl-btn:active { transform:scale(0.97); }
+      .ctrl-hint { font-family:var(--font-mono); font-size:10px; letter-spacing:0.06em; color:var(--paper-muted); }
+      .beat { font-family:var(--font-mono); font-size:11px; letter-spacing:0.05em; color:var(--paper-dim); min-height:1.4em; }
+      .beat .k { color:var(--flame); }
+
+      /* ── popup shell ── */
+      .popup-frame { display:flex; flex-direction:column; gap:10px; width:400px; }
+      .popup { width:400px; background:var(--bg-card); color:var(--ink); border:1px solid var(--rule); box-shadow:0 20px 60px -20px oklch(0.100 0.015 240/0.25); position:relative; overflow:hidden; }
+      .popup-body { max-height:440px; overflow-y:auto; }
+      .popup-body::-webkit-scrollbar { width:8px; } .popup-body::-webkit-scrollbar-thumb { background:var(--rule-cream); }
+      .ticket-top { padding:14px 18px; border-bottom:1px dashed var(--rule); display:flex; justify-content:space-between; align-items:baseline; }
+      .ticket-top .brand { font-family:var(--font-display); font-size:10px; letter-spacing:0.08em; text-transform:uppercase; color:var(--ink); }
+      .ticket-top .captured { font-family:var(--font-display); font-size:10px; color:var(--ink-dim); text-transform:uppercase; letter-spacing:0.08em; }
+      .source { padding:12px 18px; border-bottom:1px dashed var(--rule); font-family:var(--font-mono); font-size:10px; color:var(--ink-dim); display:flex; justify-content:space-between; align-items:center; gap:var(--s-md); }
+      .source .url { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+      .source .badge { background:var(--ember); color:var(--bg-card); padding:3px 7px 2px; letter-spacing:0.06em; text-transform:uppercase; white-space:nowrap; flex-shrink:0; }
+      .source .badge.pending { background:transparent; color:var(--ink-dim); border:1px solid var(--ink-dim); padding:2px 6px 1px; }
+      .chyron-bar { display:flex; justify-content:space-between; align-items:center; padding:8px 18px; font-family:var(--font-display); font-size:10px; letter-spacing:0.14em; text-transform:uppercase; color:var(--ink-primary); border-bottom:1px dashed var(--rule); gap:var(--s-md); }
+      .chyron-bar .elapsed { font-family:var(--font-mono); color:var(--ink-dim); letter-spacing:0.04em; }
+      .chyron-bar .status { display:flex; align-items:center; gap:8px; }
+      .chyron-bar .status .dot { width:6px; height:6px; background:var(--flame); display:inline-block; }
+      .popup.working .chyron-bar .status .dot { animation:dot-pulse 900ms var(--ease-toggle) infinite; }
+      @keyframes dot-pulse { 0%,100%{opacity:1;} 50%{opacity:0.25;} }
+      .progress { height:2px; background:var(--rule-cream); position:relative; overflow:hidden; }
+      .progress::after { content:""; position:absolute; inset:0 0 0 0; background:var(--flame-deep); transform-origin:left center; transform:scaleX(var(--p,0)); transition:transform var(--t-std) var(--ease-arrive); }
+      .title { font-family:var(--font-display); font-size:24px; line-height:1.1; text-transform:uppercase; margin:16px 18px 6px; color:var(--ink); }
+      .subtitle { margin:0 18px 14px; font-style:italic; font-size:12px; line-height:1.45; color:var(--ink-dim); }
+      .facts { display:flex; gap:18px; padding:10px 18px; border-top:1px solid var(--rule); border-bottom:1px solid var(--rule); font-family:var(--font-mono); font-size:10px; color:var(--ink-dim); text-transform:uppercase; letter-spacing:0.08em; }
+      .facts .fact strong { color:var(--ink); font-weight:400; font-size:11px; }
+      .section-h { font-family:var(--font-display); font-size:13px; margin:18px 18px 10px; letter-spacing:0.1em; text-transform:uppercase; color:var(--ink); border-bottom:1px solid var(--ink); padding-bottom:6px; }
+      ul.ingredients { list-style:none; padding:0; margin:0 18px 18px; font-size:13px; line-height:1.5; }
+      ul.ingredients li { display:grid; grid-template-columns:78px 1fr; gap:8px; align-items:baseline; padding:4px 0; border-bottom:1px dotted var(--rule); }
+      ul.ingredients li .qty { font-family:var(--font-mono); font-size:11.5px; color:var(--ink); text-transform:uppercase; }
+      .ticket-bottom { padding:8px 18px 12px; font-family:var(--font-display); font-size:10px; color:var(--ink-dim); letter-spacing:0.08em; text-transform:uppercase; display:flex; justify-content:space-between; }
+      .ticket-bottom .glyph { color:var(--flame); }
+
+      /* skeleton + wave */
+      .bar { display:block; height:10px; background:var(--paper-250); } .bar.thin{height:8px;} .bar.tall{height:16px;} .bar.tallx{height:22px;}
+      .title-skel { padding:18px 18px 6px; display:flex; flex-direction:column; gap:8px; }
+      .facts-skel { display:flex; gap:18px; padding:12px 18px; border-top:1px solid var(--rule); border-bottom:1px solid var(--rule); }
+      .facts-skel .bar { width:56px; }
+      ul.ing-skel { list-style:none; padding:0; margin:0 18px 18px; } ul.ing-skel li { display:grid; grid-template-columns:78px 1fr; gap:8px; align-items:center; padding:8px 0; border-bottom:1px dotted var(--rule); }
+      @media (prefers-reduced-motion:no-preference) {
+        .bar { background:linear-gradient(90deg,var(--paper-250) 0%,var(--paper-200) 45%,var(--paper-250) 70%); background-size:220% 100%; animation:wave 1.8s ease-in-out infinite; }
+        @keyframes wave { 0%{background-position:130% 0;} 100%{background-position:-30% 0;} }
+      }
+
+      /* callout */
+      .callout { margin:14px 18px; border:1px solid var(--flame); padding:12px 14px; background:var(--paper-200); display:flex; flex-direction:column; gap:6px; }
+      .callout.error { border-color:var(--flame-deep); background:var(--error-soft); }
+      .callout .hdr { font-family:var(--font-display); font-size:10px; letter-spacing:0.16em; text-transform:uppercase; color:var(--flame); display:flex; justify-content:space-between; }
+      .callout.error .hdr { color:var(--flame-deep); }
+      .callout .hdr .code { font-family:var(--font-mono); color:var(--ink-dim); letter-spacing:0.04em; }
+      .callout .body { font-size:12px; line-height:1.5; color:var(--ink-primary); }
+
+      /* stamp — horizontal [icon] MESSAGE in a box, centered. Matches Figma:
+         Departure Mono Regular 28px / +4% tracking, 2px border, 14/20 padding,
+         icon ~30px tall, border colour = text colour (icon + text inherit it). */
+      .stamp { margin:14px 18px; border:2px solid currentColor; background:var(--paper-100); padding:14px 20px; display:flex; flex-direction:row; align-items:center; justify-content:center; gap:12px; color:var(--ink-primary); }
+      .stamp.err { color:var(--flame-deep); }
+      .stamp .glyph-mark { height:30px; flex-shrink:0; display:flex; }
+      .stamp .glyph-mark svg { display:block; height:100%; width:auto; }
+      .stamp h2.st { font-family:var(--font-display); font-weight:400; font-size:28px; line-height:1.0; letter-spacing:0.04em; text-transform:uppercase; margin:0; white-space:nowrap; }
+      .off-note { margin:6px 18px 0; font-style:italic; font-size:12px; line-height:1.5; color:var(--ink-dim); max-width:42ch; }
+
+      .fallback { list-style:none; padding:0; margin:12px 18px 18px; border-top:1px dashed var(--rule); }
+      .fallback li { display:grid; grid-template-columns:24px 1fr auto; gap:10px; align-items:center; padding:12px 0; border-bottom:1px dashed var(--rule); font-size:13px; line-height:1.4; }
+      .fallback li .gl { font-family:var(--font-display); font-size:14px; color:var(--flame); }
+      .fallback li .kbd { font-family:var(--font-mono); font-size:10px; color:var(--ink-dim); border:1px solid var(--ink-dim); padding:1px 5px; }
+
+      /* picker */
+      .picker { list-style:none; padding:0; margin:0; position:relative; }
+      .picker .focusbar { position:absolute; left:0; right:0; top:0; height:0; background:var(--paper-200); pointer-events:none; transition:transform var(--t-std) var(--ease-toggle), height var(--t-std) var(--ease-toggle); z-index:0; }
+      .picker li { position:relative; z-index:1; display:grid; grid-template-columns:44px 1fr 18px; gap:12px; align-items:center; padding:10px 18px; border-bottom:1px dashed var(--rule); font-size:12.5px; line-height:1.35; cursor:pointer; }
+      .picker li:first-child { border-top:1px dashed var(--rule); }
+      .picker li .thumb { width:44px; aspect-ratio:1/1; background:var(--ember); color:var(--bg-card); border:1px solid var(--ember); display:grid; place-items:center; font-size:18px; }
+      .picker li .thumb.txt { background:var(--paper-250); color:var(--ink-dim); border-color:var(--rule); font-family:var(--font-display); font-size:10px; }
+      .picker li .meta { display:flex; flex-direction:column; gap:2px; min-width:0; }
+      .picker li .meta .pt { font-family:var(--font-display); font-size:12px; color:var(--ink-primary); letter-spacing:0.02em; text-transform:uppercase; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+      .picker li .meta .ps { font-family:var(--font-mono); font-size:10px; color:var(--ink-dim); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+      .picker li .arr { font-family:var(--font-display); font-size:14px; color:var(--ink-dim); justify-self:end; transition:color var(--t-micro); }
+      .picker li.focus .arr { color:var(--flame); }
+      .picker.promoting li { transition:opacity var(--t-std) var(--ease-exit), max-height var(--t-std) var(--ease-exit), padding var(--t-std) var(--ease-exit); overflow:hidden; max-height:80px; }
+      .picker.promoting li:not(.focus) { opacity:0; max-height:0; padding-top:0; padding-bottom:0; border:none; }
+      .picker.promoting .focusbar { opacity:0; }
+
+      /* print-in / fill-in */
+      .print > * { animation:print-in var(--t-line) var(--ease-arrive) backwards; animation-delay:calc(var(--i,0)*var(--stagger)); }
+      @keyframes print-in { from{opacity:0; transform:translateY(-4px);} to{opacity:1; transform:translateY(0);} }
+      .arrive { animation:arrive var(--t-std) var(--ease-arrive) backwards; animation-delay:calc(var(--i,0)*var(--stagger)); }
+      @keyframes arrive { from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:translateY(0);} }
+      .stamp-land { animation:stamp-land var(--t-fire) var(--ease-stamp) backwards; }
+      @keyframes stamp-land { from{opacity:0; transform:scale(1.04);} to{opacity:1; transform:scale(1.0);} }
+
+      /* action row */
+      .popup-actions { width:400px; background:var(--bg-panel); border:1px solid var(--rule-dark); padding:12px 14px; display:flex; gap:8px; align-items:center; }
+      .fire-btn { flex:1; background:var(--flame); color:var(--bg-card); border:none; padding:10px 14px; font-family:var(--font-body); font-size:12px; letter-spacing:0.14em; text-transform:uppercase; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:10px; transition:transform var(--t-micro) var(--ease-arrive),filter var(--t-micro) var(--ease-arrive); }
+      .fire-btn:hover { filter:brightness(1.12); } .fire-btn:active { transform:scale(0.97); }
+      .fire-btn[disabled] { background:var(--ink-600); color:var(--paper-muted); cursor:not-allowed; }
+      .fire-btn .kbd, .retry-btn .kbd { font-family:var(--font-mono); font-size:10px; border:1px solid var(--bg-card); padding:1px 5px; opacity:0.7; }
+      .fire-btn.warn .wg { font-size:12px; }
+      .retry-btn { flex:1; background:var(--paper-primary); color:var(--ink-primary); border:none; padding:10px 14px; font-family:var(--font-body); font-size:12px; letter-spacing:0.14em; text-transform:uppercase; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:10px; }
+      .retry-btn .kbd { border-color:var(--ink-primary); color:var(--ink-primary); }
+      .secondary-btn { background:transparent; border:1px solid var(--rule-dark); color:var(--paper-primary); padding:10px 12px; font-family:var(--font-body); font-size:10.5px; letter-spacing:0.12em; text-transform:uppercase; cursor:pointer; }
+      .armed { animation:arm 520ms var(--ease-arrive) 1; }
+      @keyframes arm { 0%{box-shadow:0 0 0 0 oklch(0.533 0.212 30.4/0.6);} 100%{box-shadow:0 0 0 10px oklch(0.533 0.212 30.4/0);} }
+      button:focus-visible { outline:2px solid var(--flame); outline-offset:2px; }
+
+      @media (prefers-reduced-motion:reduce) { *,*::before,*::after { animation-duration:0.01ms!important; animation-iteration-count:1!important; transition-duration:0.01ms!important; } }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <header class="page-head">
+        <h1>Mise — motion · non-happy paths</h1>
+        <span class="slug"><span class="g">✶</span> prototype · states · 2026-06-08</span>
+      </header>
+      <nav class="specnav">
+        <a href="./index.html">Specimen</a><span class="sep">·</span>
+        <a href="./popup-states.html">Popup states</a><span class="sep">·</span>
+        <a href="./popup-motion.html">Motion · spine</a><span class="sep">·</span>
+        <a class="here" href="./popup-motion-states.html">Motion · states</a>
+      </nav>
+      <p class="lead">
+        The happy path lives in <em>Motion · spine</em>. These are the branches: when detection is ambiguous, when the card lands thin, when extraction fails, and when there's nothing to extract. Same motion grammar — print-in, sectioned arrival, stamp settle — applied to each. The <em>picker</em> adds the one new mechanic: a focus bar that slides, and a promote-to-extract morph.
+      </p>
+
+      <div class="grid">
+        <!-- A · AMBIGUOUS PICKER -->
+        <article class="demo">
+          <div class="demo-head">
+            <span class="ttl"><span class="id">A</span><span class="lbl">Ambiguous · picker</span></span>
+            <span class="cap">Multiple recipes on the page. Rows print in; ↑/↓ slides the focus bar; ↵ promotes — others collapse, the pick morphs into extraction.</span>
+          </div>
+          <div class="controls"><button class="ctrl-btn" data-replay="A">▶ Replay</button><span class="ctrl-hint" id="hintA">click the card, then ↑ ↓ ↵</span></div>
+          <div class="popup-frame">
+            <div class="popup" id="popA" tabindex="0">
+              <div class="popup-body" id="bodyA"></div>
+            </div>
+            <div class="popup-actions" id="actA"></div>
+          </div>
+          <div class="beat" id="beatA"></div>
+        </article>
+
+        <!-- B · LOW CONFIDENCE -->
+        <article class="demo">
+          <div class="demo-head">
+            <span class="ttl"><span class="id">B</span><span class="lbl">Warning · low confidence</span></span>
+            <span class="cap">Card lands but a field feels thin. It fills as normal, then the ⚠ doubt-callout slides in and Fire becomes "Fire anyway".</span>
+          </div>
+          <div class="controls"><button class="ctrl-btn" data-replay="B">▶ Replay</button></div>
+          <div class="popup-frame">
+            <div class="popup" id="popB"><div class="popup-body" id="bodyB"></div></div>
+            <div class="popup-actions" id="actB"></div>
+          </div>
+          <div class="beat" id="beatB"></div>
+        </article>
+
+        <!-- C · IN THE WEEDS -->
+        <article class="demo">
+          <div class="demo-head">
+            <span class="ttl"><span class="id">C</span><span class="lbl">Error · in the weeds</span></span>
+            <span class="cap">Extraction stalls and fails. The skeleton clears, the weed stamp + error callout arrive, and the action row swaps Fire → Retry.</span>
+          </div>
+          <div class="controls"><button class="ctrl-btn" data-replay="C">▶ Replay</button></div>
+          <div class="popup-frame">
+            <div class="popup" id="popC"><div class="popup-body" id="bodyC"></div></div>
+            <div class="popup-actions" id="actC"></div>
+          </div>
+          <div class="beat" id="beatC"></div>
+        </article>
+
+        <!-- D · OFF MENU -->
+        <article class="demo">
+          <div class="demo-head">
+            <span class="ttl"><span class="id">D</span><span class="lbl">Empty · off menu</span></span>
+            <span class="cap">Nothing to extract. No card prints — the off-menu stamp and the fallback affordances arrive instead.</span>
+          </div>
+          <div class="controls"><button class="ctrl-btn" data-replay="D">▶ Replay</button></div>
+          <div class="popup-frame">
+            <div class="popup" id="popD"><div class="popup-body" id="bodyD"></div></div>
+            <div class="popup-actions" id="actD"></div>
+          </div>
+          <div class="beat" id="beatD"></div>
+        </article>
+      </div>
+    </main>
+
+    <script>
+      const $ = id => document.getElementById(id);
+      const rm = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const T = ms => rm() ? 0 : ms;
+      // per-demo timer registries
+      const timers = { A:[], B:[], C:[], D:[] };
+      const clearD = k => { timers[k].forEach(clearTimeout); timers[k] = []; };
+      const after = (k, ms, fn) => timers[k].push(setTimeout(fn, ms));
+      const beat = (k, tag, txt) => $("beat"+k).innerHTML = `<span class="k">${tag}</span> — ${txt}`;
+
+      // error glyph — BROKEN PLATE (Ben's Figma redraw, node 122:1728). Same 8px pixel grid as
+      // the logo; clean plate = the mark, cracked plate = the dish is ruined.
+      const BROKEN = `<svg viewBox="0 0 104 112" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><rect x="32" y="0" width="8" height="8"/><rect x="40" y="0" width="8" height="8"/><rect x="48" y="0" width="8" height="8"/><rect x="40" y="8" width="8" height="8"/><rect x="48" y="16" width="8" height="8"/><rect x="56" y="32" width="8" height="8"/><rect x="48" y="32" width="8" height="8"/><rect x="56" y="24" width="8" height="8"/><rect x="64" y="16" width="8" height="8"/><rect x="40" y="40" width="8" height="8"/><rect x="32" y="48" width="8" height="8"/><rect x="24" y="40" width="8" height="8"/><rect x="16" y="32" width="8" height="8"/><rect x="48" y="56" width="8" height="8"/><rect x="56" y="64" width="8" height="8"/><rect x="64" y="72" width="8" height="8"/><rect x="72" y="64" width="8" height="8"/><rect x="80" y="56" width="8" height="8"/><rect x="88" y="48" width="8" height="8"/><rect x="72" y="80" width="8" height="8"/><rect x="40" y="56" width="8" height="8"/><rect x="40" y="64" width="8" height="8"/><rect x="40" y="80" width="8" height="8"/><rect x="48" y="88" width="8" height="8"/><rect x="56" y="96" width="8" height="8"/><rect x="32" y="72" width="8" height="8"/><rect x="24" y="80" width="8" height="8"/><rect x="56" y="0" width="8" height="8"/><rect x="64" y="0" width="8" height="8"/><rect x="16" y="8" width="8" height="8"/><rect x="24" y="8" width="8" height="8"/><rect x="72" y="8" width="8" height="8"/><rect x="80" y="8" width="8" height="8"/><rect x="8" y="16" width="8" height="8"/><rect x="16" y="16" width="8" height="8"/><rect x="80" y="16" width="8" height="8"/><rect x="88" y="16" width="8" height="8"/><rect x="8" y="24" width="8" height="8"/><rect x="88" y="24" width="8" height="8"/><rect x="0" y="32" width="8" height="8"/><rect x="96" y="32" width="8" height="8"/><rect x="0" y="40" width="8" height="8"/><rect x="96" y="40" width="8" height="8"/><rect x="0" y="48" width="8" height="8"/><rect x="96" y="48" width="8" height="8"/><rect x="0" y="56" width="8" height="8"/><rect x="96" y="56" width="8" height="8"/><rect x="0" y="64" width="8" height="8"/><rect x="0" y="72" width="8" height="8"/><rect x="96" y="64" width="8" height="8"/><rect x="96" y="72" width="8" height="8"/><rect x="8" y="80" width="8" height="8"/><rect x="88" y="80" width="8" height="8"/><rect x="8" y="88" width="8" height="8"/><rect x="16" y="88" width="8" height="8"/><rect x="80" y="88" width="8" height="8"/><rect x="88" y="88" width="8" height="8"/><rect x="16" y="96" width="8" height="8"/><rect x="24" y="96" width="8" height="8"/><rect x="72" y="96" width="8" height="8"/><rect x="80" y="96" width="8" height="8"/><rect x="32" y="104" width="8" height="8"/><rect x="40" y="104" width="8" height="8"/><rect x="48" y="104" width="8" height="8"/><rect x="56" y="104" width="8" height="8"/><rect x="64" y="104" width="8" height="8"/></svg>`;
+      const OFFMENU = `<svg viewBox="0 0 27 34" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M9 26H7V24H9V26Z"/><path d="M21 26H19V24H21V26Z"/><path d="M11 24H9V22H11V24Z"/><path d="M19 24H17V22H19V24Z"/><path d="M13 22H11V20H13V22Z"/><path d="M17 22H15V20H17V22Z"/><path d="M15 20H13V18H15V20Z"/><path d="M13 18H11V16H13V18Z"/><path d="M17 18H15V16H17V18Z"/><path d="M11 16H9V14H11V16Z"/><path d="M19 16H17V14H19V16Z"/><path d="M9 14H7V12H9V14Z"/><path d="M21 14H19V12H21V14Z"/><path fill-rule="evenodd" clip-rule="evenodd" d="M27 34H0V7H1V5H3V7H7V3H5V1H7V0H27V34ZM9 9H2V32H25V2H9V9Z"/><path d="M5 5H3V3H5V5Z"/></svg>`;
+
+      // ════ A · PICKER ════
+      const PICKS = [
+        { e:"🍜", t:"Chili-Crisp Cold Noodles", s:"section · recipe card · 9 ingredients" },
+        { e:"🥣", t:"Dashi-Pickled Cucumbers", s:"aside · 5-min recipe · 4 ingredients" },
+        { e:"🐓", t:"Cold Poached Chicken", s:"section · recipe card · 7 ingredients" },
+        { e:"TXT", t:"Extract Whole Article", s:"fallback · combine all into one .md", txt:true },
+      ];
+      let focusA = 0;
+      function renderPickerRows() {
+        return PICKS.map((p,i)=>`<li data-i="${i}" role="option">
+          <div class="thumb ${p.txt?'txt':''}">${p.e}</div>
+          <div class="meta"><span class="pt">${p.t}</span><span class="ps">${p.s}</span></div>
+          <span class="arr">→</span></li>`).join("");
+      }
+      function moveFocus(n) {
+        const lis = $("bodyA").querySelectorAll(".picker li");
+        if (!lis.length) return;
+        focusA = (n + lis.length) % lis.length;
+        lis.forEach(li=>li.classList.remove("focus"));
+        const li = lis[focusA]; li.classList.add("focus");
+        const bar = $("bodyA").querySelector(".focusbar");
+        if (bar) { bar.style.height = li.offsetHeight+"px"; bar.style.transform = `translateY(${li.offsetTop}px)`; }
+      }
+      function promote() {
+        const picker = $("bodyA").querySelector(".picker");
+        if (!picker || picker.classList.contains("promoting")) return;
+        const chosen = PICKS[focusA];
+        beat("A","↵ promote", `picked "${chosen.t}" — others collapse, extraction begins`);
+        picker.classList.add("promoting");
+        $("actA").innerHTML = `<button class="fire-btn" disabled><span>EXTRACTING…</span></button>`;
+        after("A", T(360), () => {
+          // morph into extraction skeleton
+          $("popA").classList.add("working");
+          $("bodyA").innerHTML = `
+            <div class="ticket-top"><span class="brand">MISE · EXTRACTING</span><span class="captured">18:02</span></div>
+            <div class="source"><span class="url">food52.com/…</span><span class="badge">📝 ${chosen.txt?'article':'recipe'}</span></div>
+            <div class="chyron-bar"><span class="status"><span class="dot"></span> Extracting · ${chosen.t}</span><span class="elapsed">0:01</span></div>
+            <div class="progress" style="--p:.15"></div>
+            <div class="title-skel"><span class="bar tallx" style="width:78%"></span><span class="bar tall" style="width:50%"></span></div>
+            <div class="facts-skel"><span class="bar"></span><span class="bar"></span><span class="bar"></span></div>
+            <ul class="ing-skel"><li><span class="bar" style="width:60%"></span><span class="bar" style="width:76%"></span></li><li><span class="bar" style="width:50%"></span><span class="bar" style="width:84%"></span></li><li><span class="bar" style="width:64%"></span><span class="bar" style="width:54%"></span></li></ul>`;
+          $("bodyA").classList.add("print");
+          [...$("bodyA").children].forEach((c,i)=>c.style.setProperty("--i",i));
+          after("A", T(120), ()=>$("bodyA").querySelector(".progress").style.setProperty("--p",".7"));
+          beat("A","→ extracting", "the chosen target is now the happy path (see spine)");
+        });
+      }
+      function runA() {
+        clearD("A"); focusA = 0;
+        $("popA").className = "popup"; $("popA").tabIndex = 0;
+        $("bodyA").className = "popup-body";
+        $("bodyA").innerHTML = `
+          <div class="ticket-top"><span class="brand">MISE · DETECTING</span><span class="captured">2026-06-08 · 18:02</span></div>
+          <div class="source"><span class="url">food52.com/recipes/weeknight-noodles</span><span class="badge pending">4 targets</span></div>
+          <div class="chyron-bar"><span class="status">Multiple recipes — which one?</span><span class="elapsed">↑↓ · ↵</span></div>
+          <ol class="picker" role="listbox"><div class="focusbar"></div>${renderPickerRows()}</ol>
+          <div class="ticket-bottom"><span>ESC · CANCEL</span><span><span class="glyph">✶</span> mise.app</span></div>`;
+        $("actA").innerHTML = `<button class="fire-btn" disabled><span>PICK ONE ABOVE</span><span class="kbd">↵</span></button><button class="secondary-btn">Prep</button>`;
+        beat("A","detecting", "rows printing in");
+        // print-in rows
+        const rows = $("bodyA").querySelectorAll(".picker li");
+        rows.forEach((li,i)=>{ li.classList.add("arrive"); li.style.setProperty("--i", i); });
+        // wire clicks
+        rows.forEach(li => li.addEventListener("click", ()=>{ focusA = +li.dataset.i; moveFocus(focusA); promote(); }));
+        after("A", T(360), ()=>moveFocus(0));
+        // auto-demo: ↓ ↓ then promote
+        after("A", T(1100), ()=>{ beat("A","↓","focus slides"); moveFocus(focusA+1); });
+        after("A", T(1700), ()=>{ beat("A","↓","focus slides"); moveFocus(focusA+1); });
+        after("A", T(2500), ()=>promote());
+      }
+      $("popA").addEventListener("keydown", e=>{
+        if (e.key==="ArrowDown"){ e.preventDefault(); clearD("A"); moveFocus(focusA+1); }
+        else if (e.key==="ArrowUp"){ e.preventDefault(); clearD("A"); moveFocus(focusA-1); }
+        else if (e.key==="Enter"){ e.preventDefault(); clearD("A"); promote(); }
+      });
+
+      // ════ B · LOW CONFIDENCE ════
+      function runB() {
+        clearD("B"); $("popB").className = "popup"; $("bodyB").className = "popup-body";
+        $("bodyB").innerHTML = `
+          <div class="ticket-top"><span class="brand">MISE · NO. 00428</span><span class="captured">2026-06-08 · 18:04</span></div>
+          <div class="source"><span class="url">tiktok.com/@chef/video/72891</span><span class="badge">🎬 6 frames</span></div>
+          <div class="callout" id="coB" role="status" style="display:none"><div class="hdr"><span>⚠ LOW CONFIDENCE</span><span class="code">caption-only</span></div><div class="body">Video caption alone — method may be incomplete. <em>Review before firing.</em></div></div>
+          <h2 class="title">Cacio e Pepe, On Ice</h2>
+          <p class="subtitle">the cold-noodle heresy that works.</p>
+          <div class="facts"><span class="fact">SERVES <strong>2</strong></span><span class="fact">HANDS-ON <strong>15m</strong></span><span class="fact">TOTAL <strong>15m</strong></span></div>
+          <h3 class="section-h">Ingredients</h3>
+          <ul class="ingredients"><li><span class="qty">200 g</span><span>spaghetti</span></li><li><span class="qty">80 g</span><span>pecorino, microplaned</span></li><li><span class="qty">2 tsp</span><span>black pepper</span></li></ul>
+          <div class="ticket-bottom"><span>18:04</span><span><span class="glyph">✶</span> mise.app</span></div>`;
+        $("actB").innerHTML = `<button class="fire-btn" disabled><span>FIRE · save .md</span><span class="kbd">↵</span></button><button class="secondary-btn">Prep</button>`;
+        // fill in (sectioned)
+        $("bodyB").classList.add("print"); [...$("bodyB").children].forEach((c,i)=>c.style.setProperty("--i",i));
+        beat("B","fills", "card lands as normal");
+        // then doubt arrives
+        after("B", T(900), ()=>{
+          const co = $("coB"); co.style.display="flex"; co.classList.add("arrive");
+          beat("B","⚠ doubt", "callout slides in — Fire becomes Fire anyway");
+          const fb = $("actB").querySelector(".fire-btn");
+          fb.disabled = false; fb.classList.add("warn","armed");
+          fb.innerHTML = `<span class="wg">⚠</span><span>FIRE ANYWAY</span><span class="kbd">↵</span>`;
+        });
+      }
+
+      // ════ C · IN THE WEEDS ════
+      function runC() {
+        clearD("C"); $("popC").className = "popup working"; $("bodyC").className = "popup-body";
+        $("bodyC").innerHTML = `
+          <div class="ticket-top"><span class="brand">MISE · EXTRACTING</span><span class="captured">2026-06-08 · 18:05</span></div>
+          <div class="source"><span class="url">youtube.com/watch?v=dQw4w9</span><span class="badge">📝 article</span></div>
+          <div class="chyron-bar"><span class="status"><span class="dot"></span> Extracting · parsing</span><span class="elapsed">0:03</span></div>
+          <div class="progress" style="--p:.4"></div>
+          <div class="title-skel"><span class="bar tallx" style="width:80%"></span><span class="bar tall" style="width:52%"></span></div>
+          <div class="facts-skel"><span class="bar"></span><span class="bar"></span><span class="bar"></span></div>
+          <ul class="ing-skel"><li><span class="bar" style="width:60%"></span><span class="bar" style="width:76%"></span></li><li><span class="bar" style="width:50%"></span><span class="bar" style="width:84%"></span></li></ul>`;
+        $("actC").innerHTML = `<button class="fire-btn" disabled><span>FIRE · save .md</span><span class="kbd">↵</span></button><button class="secondary-btn">Prep</button>`;
+        beat("C","extracting", "progress climbing…");
+        after("C", T(700), ()=>$("bodyC").querySelector(".progress").style.setProperty("--p",".72"));
+        // stall
+        after("C", T(1300), ()=>{ $("bodyC").querySelector(".chyron-bar .status").innerHTML = `<span class="dot"></span> Retrying · 3×`; beat("C","stall","529 · overloaded — retrying"); });
+        // fail → clear → stamp + callout + retry list arrive
+        after("C", T(2200), ()=>{
+          $("popC").classList.remove("working");
+          $("bodyC").innerHTML = `
+            <div class="ticket-top"><span class="brand">MISE · NO. ─────</span><span class="captured">18:05</span></div>
+            <div class="source"><span class="url">youtube.com/watch?v=dQw4w9</span><span class="badge pending">3× retry</span></div>
+            <div class="stamp err stamp-land"><span class="glyph-mark">${BROKEN}</span><h2 class="st">KITCHEN ERROR</h2></div>
+            <div class="callout error arrive" role="alert" style="--i:1"><div class="hdr"><span>▲ 529 · OVERLOADED</span><span class="code">try again</span></div><div class="body">Claude couldn't be reached after three retries. Try again in ~30s, or fall through to Haiku.</div></div>
+            <ul class="fallback"><li class="arrive" style="--i:2"><span class="gl">↻</span><span>Retry with the same model</span><span class="kbd">↵</span></li><li class="arrive" style="--i:3"><span class="gl">⎘</span><span>Copy raw page text</span><span class="kbd">⌘C</span></li></ul>`;
+          beat("C","error", "stamp lands, error + retry options arrive");
+          $("actC").innerHTML = `<button class="retry-btn"><span>RETRY</span><span class="kbd">↵</span></button><button class="secondary-btn">Copy text</button>`;
+          $("actC").querySelector(".retry-btn").addEventListener("click", ()=>runC());
+        });
+      }
+
+      // ════ D · OFF MENU ════
+      function runD() {
+        clearD("D"); $("popD").className = "popup"; $("bodyD").className = "popup-body";
+        $("bodyD").innerHTML = `
+          <div class="ticket-top"><span class="brand">MISE · NO RECIPE HERE</span><span class="captured">2026-06-08 · 18:02</span></div>
+          <div class="source"><span class="url">chrome://newtab</span><span class="badge pending">empty</span></div>
+          <div class="stamp stamp-land"><span class="glyph-mark">${OFFMENU}</span><h2 class="st">OFF MENU</h2></div>
+          <p class="off-note">Nothing to extract on <strong>chrome://newtab</strong>. Use a fallback below, or open a page with a recipe.</p>
+          <ul class="fallback"><li class="arrive" style="--i:2"><span class="gl">↵</span><span>Paste a recipe URL</span><span class="kbd">⌘V</span></li><li class="arrive" style="--i:3"><span class="gl">⇞</span><span>Upload a cookbook photo</span><span class="kbd">U</span></li><li class="arrive" style="--i:4"><span class="gl">⋆</span><span>Highlight text, re-open Mise</span><span class="kbd">—</span></li></ul>
+          <div class="ticket-bottom"><span>ESC · CLOSE</span><span><span class="glyph">✶</span> mise.app</span></div>`;
+        $("actD").innerHTML = `<button class="fire-btn"><span>PASTE URL</span><span class="kbd">⌘V</span></button><button class="secondary-btn">Prep</button>`;
+        // print top chrome, stamp + list arrive
+        const top = $("bodyD").querySelectorAll(".ticket-top, .source");
+        $("bodyD").classList.add("print"); top.forEach((c,i)=>c.style.setProperty("--i",i));
+        beat("D","off menu", "no card — stamp + fallbacks arrive");
+      }
+
+      document.querySelectorAll("[data-replay]").forEach(b => b.addEventListener("click", ()=>({A:runA,B:runB,C:runC,D:runD})[b.dataset.replay]()));
+      runA(); runB(); runC(); runD();
+    </script>
+  </body>
+</html>

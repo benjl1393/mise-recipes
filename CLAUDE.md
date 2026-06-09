@@ -93,7 +93,9 @@ Names are load-bearing. Use them in code, UI, docs, and commit messages.
 - **Fire** — primary save button / action
 - **The Pass** — full-tab history view
 - **Prep** — options/settings page
-- **In the Weeds** — error state when extraction fails
+- **Off Menu** — empty state: the page has no recipe to extract
+
+The error state uses **plain language** ("Extraction failed"), not a kitchen pun — "In the Weeds" was dropped 2026-06-08 as too specific/opaque for an error (the literal weed icon didn't read as "something went wrong"). Errors prioritise clarity over voice.
 
 ## Type + color + icons (locked — v2.1, 2026-04-24)
 

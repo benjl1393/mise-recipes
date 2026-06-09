@@ -410,7 +410,8 @@
       .popup.fired .popup-body { filter: grayscale(0.6); opacity: 0.35; pointer-events: none; }
 
       .fired-stamp {
-        position: absolute; inset: 0; display: grid; place-items: center;
+        position: absolute; inset: 0; display: flex; flex-direction: column;
+        align-items: center; justify-content: center; gap: 10px;
         padding: 18px; pointer-events: none; opacity: 0; z-index: 6;
       }
       .popup.fired .fired-stamp {
@@ -421,21 +422,23 @@
         from { opacity: 0; transform: scale(1.04); }
         to   { opacity: 1; transform: scale(1.0); }
       }
+      /* horizontal [flame] FIRED box — matches Figma order-up (24:91): 32px Regular,
+         +6% tracking, 2px border, 24/36 padding. Border = text (ink); flame stays accent. */
       .fired-stamp .mark {
-        border: 2px solid var(--ink-primary); padding: 18px 22px 16px;
-        display: flex; flex-direction: column; gap: 8px; align-items: center; background: var(--paper-100);
+        border: 2px solid var(--ink-primary); padding: 24px 36px; background: var(--paper-100);
+        display: flex; flex-direction: row; align-items: center; gap: 12px;
       }
       .fired-stamp .mark .stamp-glyph {
-        width: 28px; height: auto; color: var(--flame);   /* the one heat moment */
-        display: block; margin-bottom: 12px;
+        height: 32px; width: auto; color: var(--flame); flex-shrink: 0; display: flex;
       }
+      .fired-stamp .mark .stamp-glyph svg { display: block; height: 100%; width: auto; }
       .fired-stamp .mark .line1 {
-        font-family: var(--font-display); font-size: 28px; letter-spacing: 0.14em;
-        text-transform: uppercase; color: var(--ink-primary); line-height: 1.0;
+        font-family: var(--font-display); font-weight: 400; font-size: 32px;
+        letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-primary); line-height: 1.0;
       }
-      .fired-stamp .mark .line2 {
+      .fired-stamp .line2 {
         font-family: var(--font-mono); font-size: 11px; color: var(--ink-dim);
-        letter-spacing: 0.02em; max-width: 32ch; text-align: center; line-height: 1.4;
+        letter-spacing: 0.02em; max-width: 36ch; text-align: center; line-height: 1.4;
       }
 
       /* CLOSE — after the stamp holds, the card recedes and fades. A clean
@@ -641,8 +644,8 @@
                       <path d="M17 2H15V0H17V2Z"/>
                     </svg>
                     <div class="line1">FIRED</div>
-                    <div class="line2">saved to ~/Recipes/2026-06-08-gochujang-pork-belly.md</div>
                   </div>
+                  <div class="line2">saved to ~/Recipes/2026-06-08-gochujang-pork-belly.md</div>
                 </div>
               </div><!-- /popup -->
 

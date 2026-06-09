@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 104 112" width="104" height="112" role="img" aria-label="Kitchen error — broken plate">
+  <!-- Mise error glyph — BROKEN PLATE. Same 8px pixel grid as the plate logo, cracked.
+       Source: Ben's Figma redraw, node 122:1728. fill=currentColor (recolour per surface; error = flame-deep / #a40200). -->
+  <g fill="currentColor">
+    <rect x="32" y="0" width="8" height="8"/><rect x="40" y="0" width="8" height="8"/><rect x="48" y="0" width="8" height="8"/><rect x="56" y="0" width="8" height="8"/><rect x="64" y="0" width="8" height="8"/>
+    <rect x="40" y="8" width="8" height="8"/><rect x="16" y="8" width="8" height="8"/><rect x="24" y="8" width="8" height="8"/><rect x="72" y="8" width="8" height="8"/><rect x="80" y="8" width="8" height="8"/>
+    <rect x="48" y="16" width="8" height="8"/><rect x="64" y="16" width="8" height="8"/><rect x="8" y="16" width="8" height="8"/><rect x="16" y="16" width="8" height="8"/><rect x="80" y="16" width="8" height="8"/><rect x="88" y="16" width="8" height="8"/>
+    <rect x="56" y="24" width="8" height="8"/><rect x="8" y="24" width="8" height="8"/><rect x="88" y="24" width="8" height="8"/>
+    <rect x="56" y="32" width="8" height="8"/><rect x="48" y="32" width="8" height="8"/><rect x="16" y="32" width="8" height="8"/><rect x="0" y="32" width="8" height="8"/><rect x="96" y="32" width="8" height="8"/>
+    <rect x="40" y="40" width="8" height="8"/><rect x="24" y="40" width="8" height="8"/><rect x="0" y="40" width="8" height="8"/><rect x="96" y="40" width="8" height="8"/>
+    <rect x="32" y="48" width="8" height="8"/><rect x="88" y="48" width="8" height="8"/><rect x="0" y="48" width="8" height="8"/><rect x="96" y="48" width="8" height="8"/>
+    <rect x="48" y="56" width="8" height="8"/><rect x="80" y="56" width="8" height="8"/><rect x="40" y="56" width="8" height="8"/><rect x="0" y="56" width="8" height="8"/><rect x="96" y="56" width="8" height="8"/>
+    <rect x="56" y="64" width="8" height="8"/><rect x="72" y="64" width="8" height="8"/><rect x="40" y="64" width="8" height="8"/><rect x="0" y="64" width="8" height="8"/><rect x="96" y="64" width="8" height="8"/>
+    <rect x="64" y="72" width="8" height="8"/><rect x="32" y="72" width="8" height="8"/><rect x="0" y="72" width="8" height="8"/><rect x="96" y="72" width="8" height="8"/>
+    <rect x="72" y="80" width="8" height="8"/><rect x="40" y="80" width="8" height="8"/><rect x="24" y="80" width="8" height="8"/><rect x="8" y="80" width="8" height="8"/><rect x="88" y="80" width="8" height="8"/>
+    <rect x="48" y="88" width="8" height="8"/><rect x="8" y="88" width="8" height="8"/><rect x="16" y="88" width="8" height="8"/><rect x="80" y="88" width="8" height="8"/><rect x="88" y="88" width="8" height="8"/>
+    <rect x="56" y="96" width="8" height="8"/><rect x="16" y="96" width="8" height="8"/><rect x="24" y="96" width="8" height="8"/><rect x="72" y="96" width="8" height="8"/><rect x="80" y="96" width="8" height="8"/>
+    <rect x="32" y="104" width="8" height="8"/><rect x="40" y="104" width="8" height="8"/><rect x="48" y="104" width="8" height="8"/><rect x="56" y="104" width="8" height="8"/><rect x="64" y="104" width="8" height="8"/>
+  </g>
+</svg>
