@@ -19,7 +19,7 @@
         --paper-primary:oklch(0.965 0 0); --paper-dim:oklch(0.780 0 0); --paper-muted:oklch(0.620 0 0);
         --rule-cream:oklch(0.820 0 0); --rule-ink:oklch(0.280 0 0);
         --flame:oklch(0.533 0.212 30.4); --flame-deep:oklch(0.452 0.185 30.4); --ember:oklch(0.373 0.151 30.4);
-        --error-soft:oklch(0.940 0.025 30);
+        --error:var(--flame-deep); --error-soft:oklch(0.940 0.025 30);
         --bg-page:var(--ink-700); --bg-panel:var(--ink-600); --bg-card:var(--paper-100);
         --ink:var(--ink-primary); --rule:var(--rule-cream); --rule-dark:var(--rule-ink);
         --t-micro:100ms; --t-line:200ms; --t-std:300ms; --t-fire:180ms; --t-dismiss:200ms; --stagger:60ms;
@@ -73,11 +73,11 @@
       @keyframes dot-pulse { 0%,100%{opacity:1;} 50%{opacity:0.25;} }
       .progress { height:2px; background:var(--rule-cream); position:relative; overflow:hidden; }
       .progress::after { content:""; position:absolute; inset:0 0 0 0; background:var(--flame-deep); transform-origin:left center; transform:scaleX(var(--p,0)); transition:transform var(--t-std) var(--ease-arrive); }
-      .title { font-family:var(--font-display); font-size:24px; line-height:1.1; text-transform:uppercase; margin:16px 18px 6px; color:var(--ink); }
+      .title { font-family:var(--font-display); font-weight:400; font-size:24px; line-height:1.1; text-transform:uppercase; margin:16px 18px 6px; color:var(--ink); }
       .subtitle { margin:0 18px 14px; font-style:italic; font-size:12px; line-height:1.45; color:var(--ink-dim); }
       .facts { display:flex; gap:18px; padding:10px 18px; border-top:1px solid var(--rule); border-bottom:1px solid var(--rule); font-family:var(--font-mono); font-size:10px; color:var(--ink-dim); text-transform:uppercase; letter-spacing:0.08em; }
       .facts .fact strong { color:var(--ink); font-weight:400; font-size:11px; }
-      .section-h { font-family:var(--font-display); font-size:13px; margin:18px 18px 10px; letter-spacing:0.1em; text-transform:uppercase; color:var(--ink); border-bottom:1px solid var(--ink); padding-bottom:6px; }
+      .section-h { font-family:var(--font-display); font-weight:400; font-size:13px; margin:18px 18px 10px; letter-spacing:0.1em; text-transform:uppercase; color:var(--ink); border-bottom:1px solid var(--ink); padding-bottom:6px; }
       ul.ingredients { list-style:none; padding:0; margin:0 18px 18px; font-size:13px; line-height:1.5; }
       ul.ingredients li { display:grid; grid-template-columns:78px 1fr; gap:8px; align-items:baseline; padding:4px 0; border-bottom:1px dotted var(--rule); }
       ul.ingredients li .qty { font-family:var(--font-mono); font-size:11.5px; color:var(--ink); text-transform:uppercase; }
@@ -97,9 +97,9 @@
 
       /* callout */
       .callout { margin:14px 18px; border:1px solid var(--flame); padding:12px 14px; background:var(--paper-200); display:flex; flex-direction:column; gap:6px; }
-      .callout.error { border-color:var(--flame-deep); background:var(--error-soft); }
+      .callout.error { border-color:var(--error); background:var(--error-soft); }
       .callout .hdr { font-family:var(--font-display); font-size:10px; letter-spacing:0.16em; text-transform:uppercase; color:var(--flame); display:flex; justify-content:space-between; }
-      .callout.error .hdr { color:var(--flame-deep); }
+      .callout.error .hdr { color:var(--error); }
       .callout .hdr .code { font-family:var(--font-mono); color:var(--ink-dim); letter-spacing:0.04em; }
       .callout .body { font-size:12px; line-height:1.5; color:var(--ink-primary); }
 
@@ -107,7 +107,7 @@
          Departure Mono Regular 28px / +4% tracking, 2px border, 14/20 padding,
          icon ~30px tall, border colour = text colour (icon + text inherit it). */
       .stamp { margin:14px 18px; border:2px solid currentColor; background:var(--paper-100); padding:14px 20px; display:flex; flex-direction:row; align-items:center; justify-content:center; gap:12px; color:var(--ink-primary); }
-      .stamp.err { color:var(--flame-deep); }
+      .stamp.err { color:var(--error); }
       .stamp .glyph-mark { height:30px; flex-shrink:0; display:flex; }
       .stamp .glyph-mark svg { display:block; height:100%; width:auto; }
       .stamp h2.st { font-family:var(--font-display); font-weight:400; font-size:28px; line-height:1.0; letter-spacing:0.04em; text-transform:uppercase; margin:0; white-space:nowrap; }
@@ -115,7 +115,12 @@
 
       .fallback { list-style:none; padding:0; margin:12px 18px 18px; border-top:1px dashed var(--rule); }
       .fallback li { display:grid; grid-template-columns:24px 1fr auto; gap:10px; align-items:center; padding:12px 0; border-bottom:1px dashed var(--rule); font-size:13px; line-height:1.4; }
-      .fallback li .gl { font-family:var(--font-display); font-size:14px; color:var(--flame); }
+      .fallback li .gl { width:18px; height:18px; color:var(--ink-primary); display:flex; align-items:center; justify-content:center; }
+      .fallback li .gl svg { width:100%; height:100%; display:block; }
+      /* inline Phosphor icon in the callout header */
+      .callout .hdr .lbl { display:inline-flex; align-items:center; gap:6px; }
+      .callout .hdr .lbl .ico { width:13px; height:13px; display:inline-flex; }
+      .callout .hdr .lbl .ico svg { width:100%; height:100%; display:block; }
       .fallback li .kbd { font-family:var(--font-mono); font-size:10px; color:var(--ink-dim); border:1px solid var(--ink-dim); padding:1px 5px; }
 
       /* picker */
@@ -251,6 +256,17 @@
       const BROKEN = `<svg viewBox="0 0 104 112" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><rect x="32" y="0" width="8" height="8"/><rect x="40" y="0" width="8" height="8"/><rect x="48" y="0" width="8" height="8"/><rect x="40" y="8" width="8" height="8"/><rect x="48" y="16" width="8" height="8"/><rect x="56" y="32" width="8" height="8"/><rect x="48" y="32" width="8" height="8"/><rect x="56" y="24" width="8" height="8"/><rect x="64" y="16" width="8" height="8"/><rect x="40" y="40" width="8" height="8"/><rect x="32" y="48" width="8" height="8"/><rect x="24" y="40" width="8" height="8"/><rect x="16" y="32" width="8" height="8"/><rect x="48" y="56" width="8" height="8"/><rect x="56" y="64" width="8" height="8"/><rect x="64" y="72" width="8" height="8"/><rect x="72" y="64" width="8" height="8"/><rect x="80" y="56" width="8" height="8"/><rect x="88" y="48" width="8" height="8"/><rect x="72" y="80" width="8" height="8"/><rect x="40" y="56" width="8" height="8"/><rect x="40" y="64" width="8" height="8"/><rect x="40" y="80" width="8" height="8"/><rect x="48" y="88" width="8" height="8"/><rect x="56" y="96" width="8" height="8"/><rect x="32" y="72" width="8" height="8"/><rect x="24" y="80" width="8" height="8"/><rect x="56" y="0" width="8" height="8"/><rect x="64" y="0" width="8" height="8"/><rect x="16" y="8" width="8" height="8"/><rect x="24" y="8" width="8" height="8"/><rect x="72" y="8" width="8" height="8"/><rect x="80" y="8" width="8" height="8"/><rect x="8" y="16" width="8" height="8"/><rect x="16" y="16" width="8" height="8"/><rect x="80" y="16" width="8" height="8"/><rect x="88" y="16" width="8" height="8"/><rect x="8" y="24" width="8" height="8"/><rect x="88" y="24" width="8" height="8"/><rect x="0" y="32" width="8" height="8"/><rect x="96" y="32" width="8" height="8"/><rect x="0" y="40" width="8" height="8"/><rect x="96" y="40" width="8" height="8"/><rect x="0" y="48" width="8" height="8"/><rect x="96" y="48" width="8" height="8"/><rect x="0" y="56" width="8" height="8"/><rect x="96" y="56" width="8" height="8"/><rect x="0" y="64" width="8" height="8"/><rect x="0" y="72" width="8" height="8"/><rect x="96" y="64" width="8" height="8"/><rect x="96" y="72" width="8" height="8"/><rect x="8" y="80" width="8" height="8"/><rect x="88" y="80" width="8" height="8"/><rect x="8" y="88" width="8" height="8"/><rect x="16" y="88" width="8" height="8"/><rect x="80" y="88" width="8" height="8"/><rect x="88" y="88" width="8" height="8"/><rect x="16" y="96" width="8" height="8"/><rect x="24" y="96" width="8" height="8"/><rect x="72" y="96" width="8" height="8"/><rect x="80" y="96" width="8" height="8"/><rect x="32" y="104" width="8" height="8"/><rect x="40" y="104" width="8" height="8"/><rect x="48" y="104" width="8" height="8"/><rect x="56" y="104" width="8" height="8"/><rect x="64" y="104" width="8" height="8"/></svg>`;
       const OFFMENU = `<svg viewBox="0 0 27 34" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M9 26H7V24H9V26Z"/><path d="M21 26H19V24H21V26Z"/><path d="M11 24H9V22H11V24Z"/><path d="M19 24H17V22H19V24Z"/><path d="M13 22H11V20H13V22Z"/><path d="M17 22H15V20H17V22Z"/><path d="M15 20H13V18H15V20Z"/><path d="M13 18H11V16H13V18Z"/><path d="M17 18H15V16H17V18Z"/><path d="M11 16H9V14H11V16Z"/><path d="M19 16H17V14H19V16Z"/><path d="M9 14H7V12H9V14Z"/><path d="M21 14H19V12H21V14Z"/><path fill-rule="evenodd" clip-rule="evenodd" d="M27 34H0V7H1V5H3V7H7V3H5V1H7V0H27V34ZM9 9H2V32H25V2H9V9Z"/><path d="M5 5H3V3H5V5Z"/></svg>`;
 
+      // Tabler outline icons (vector — for the small functional icons; pixel art is stamps-only).
+      const tb = (p) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">${p}</svg>`;
+      const TB = {
+        warn: tb(`<path d="M12 9v4"/><path d="M10.363 3.591l-8.106 13.534a1.914 1.914 0 0 0 1.636 2.871h16.214a1.914 1.914 0 0 0 1.636 -2.87l-8.106 -13.536a1.914 1.914 0 0 0 -3.274 0"/><path d="M12 16h.01"/>`),
+        retry: tb(`<path d="M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4"/><path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4"/>`),
+        copy: tb(`<path d="M7 9.667a2.667 2.667 0 0 1 2.667 -2.667h8.666a2.667 2.667 0 0 1 2.667 2.667v8.666a2.667 2.667 0 0 1 -2.667 2.667h-8.666a2.667 2.667 0 0 1 -2.667 -2.667l0 -8.666"/><path d="M4.012 16.737a2.005 2.005 0 0 1 -1.012 -1.737v-10c0 -1.1 .9 -2 2 -2h10c.75 0 1.158 .385 1.5 1"/>`),
+        paste: tb(`<path d="M9 5h-2a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-12a2 2 0 0 0 -2 -2h-2"/><path d="M9 5a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2a2 2 0 0 1 -2 2h-2a2 2 0 0 1 -2 -2"/>`),
+        photo: tb(`<path d="M15 8h.01"/><path d="M3 6a3 3 0 0 1 3 -3h12a3 3 0 0 1 3 3v12a3 3 0 0 1 -3 3h-12a3 3 0 0 1 -3 -3v-12"/><path d="M3 16l5 -5c.928 -.893 2.072 -.893 3 0l5 5"/><path d="M14 14l1 -1c.928 -.893 2.072 -.893 3 0l3 3"/>`),
+        highlight: tb(`<path d="M3 19h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4"/><path d="M12.5 5.5l4 4"/><path d="M4.5 13.5l4 4"/><path d="M21 15v4h-8l4 -4l4 0"/>`),
+      };
+
       // ════ A · PICKER ════
       const PICKS = [
         { e:"🍜", t:"Chili-Crisp Cold Noodles", s:"section · recipe card · 9 ingredients" },
@@ -377,8 +393,8 @@
             <div class="ticket-top"><span class="brand">MISE · NO. ─────</span><span class="captured">18:05</span></div>
             <div class="source"><span class="url">youtube.com/watch?v=dQw4w9</span><span class="badge pending">3× retry</span></div>
             <div class="stamp err stamp-land"><span class="glyph-mark">${BROKEN}</span><h2 class="st">KITCHEN ERROR</h2></div>
-            <div class="callout error arrive" role="alert" style="--i:1"><div class="hdr"><span>▲ 529 · OVERLOADED</span><span class="code">try again</span></div><div class="body">Claude couldn't be reached after three retries. Try again in ~30s, or fall through to Haiku.</div></div>
-            <ul class="fallback"><li class="arrive" style="--i:2"><span class="gl">↻</span><span>Retry with the same model</span><span class="kbd">↵</span></li><li class="arrive" style="--i:3"><span class="gl">⎘</span><span>Copy raw page text</span><span class="kbd">⌘C</span></li></ul>`;
+            <div class="callout error arrive" role="alert" style="--i:1"><div class="hdr"><span class="lbl"><span class="ico">${TB.warn}</span>529 · OVERLOADED</span><span class="code">try again</span></div><div class="body">Claude couldn't be reached after three retries. Try again in ~30s, or fall through to Haiku.</div></div>
+            <ul class="fallback"><li class="arrive" style="--i:2"><span class="gl">${TB.retry}</span><span>Retry with the same model</span><span class="kbd">↵</span></li><li class="arrive" style="--i:3"><span class="gl">${TB.copy}</span><span>Copy raw page text</span><span class="kbd">⌘C</span></li></ul>`;
           beat("C","error", "stamp lands, error + retry options arrive");
           $("actC").innerHTML = `<button class="retry-btn"><span>RETRY</span><span class="kbd">↵</span></button><button class="secondary-btn">Copy text</button>`;
           $("actC").querySelector(".retry-btn").addEventListener("click", ()=>runC());
@@ -393,7 +409,7 @@
           <div class="source"><span class="url">chrome://newtab</span><span class="badge pending">empty</span></div>
           <div class="stamp stamp-land"><span class="glyph-mark">${OFFMENU}</span><h2 class="st">OFF MENU</h2></div>
           <p class="off-note">Nothing to extract on <strong>chrome://newtab</strong>. Use a fallback below, or open a page with a recipe.</p>
-          <ul class="fallback"><li class="arrive" style="--i:2"><span class="gl">↵</span><span>Paste a recipe URL</span><span class="kbd">⌘V</span></li><li class="arrive" style="--i:3"><span class="gl">⇞</span><span>Upload a cookbook photo</span><span class="kbd">U</span></li><li class="arrive" style="--i:4"><span class="gl">⋆</span><span>Highlight text, re-open Mise</span><span class="kbd">—</span></li></ul>
+          <ul class="fallback"><li class="arrive" style="--i:2"><span class="gl">${TB.paste}</span><span>Paste a recipe URL</span><span class="kbd">⌘V</span></li><li class="arrive" style="--i:3"><span class="gl">${TB.photo}</span><span>Upload a cookbook photo</span><span class="kbd">U</span></li><li class="arrive" style="--i:4"><span class="gl">${TB.highlight}</span><span>Highlight text, re-open Mise</span><span class="kbd">—</span></li></ul>
           <div class="ticket-bottom"><span>ESC · CLOSE</span><span><span class="glyph">✶</span> mise.app</span></div>`;
         $("actD").innerHTML = `<button class="fire-btn"><span>PASTE URL</span><span class="kbd">⌘V</span></button><button class="secondary-btn">Prep</button>`;
         // print top chrome, stamp + list arrive

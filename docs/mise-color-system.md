@@ -1,6 +1,6 @@
 # Mise — Color System
 
-**Status:** v2.1 (2026-04-24) — flame hue pivoted from coppery (35°) to sanguine (30.4°) after Figma crit
+**Status:** v2.1 (2026-04-24) — flame hue pivoted from coppery (35°) to sanguine (30.4°) after Figma crit. ⚠️ **Open decision (2026-06-09):** error currently reuses the flame hue (`--flame-deep`) and collides with the brand red. A char/near-black error (v2.2 attempt) was tried and **rejected** (too near-black). Resolution pending — either a **distinct error-red** (brand stays red) or **blue primary + red error**. The tables below still describe the v2.1 flame-deep error until that lands.
 **Scheme:** Neutral monochrome + single accent family. Flame (hue 30.4°, sanguine red) is the only chromatic color in the system, applied sparingly. Everything else is a neutral gray scale.
 **Color space:** OKLCH (perceptually uniform). All tokens defined in OKLCH; hex shown alongside where relevant.
 **Source principles:** Design for Hackers Chapters 8–9, applied to Mise's *Industrial / kitchen-after-hours* brief with a deliberate anti-AI-aesthetic stance.
@@ -148,7 +148,7 @@ All OKLCH. Legacy token names (`--copper`, `--success`, etc.) are retained as al
 |---|---|---|---|
 | `--flame` | `oklch(0.533 0.212 30.4)` | `#cb1200` | Fire button bg, ✶ brand glyph, warning text |
 | `--flame-bright` | `oklch(0.587 0.205 30.4)` | `#db3523` | Fire button hover (+0.054 L, same H) |
-| `--flame-deep` | `oklch(0.452 0.185 30.4)` | `#a40200` | Fire button pressed; error text. 7.32:1 ✅ AAA on paper-100 |
+| `--flame-deep` | `oklch(0.452 0.185 30.4)` | `#a40200` | Fire button pressed; error text (pending the open colour decision). 7.32:1 ✅ AAA on paper-100 |
 | `--ember` | `oklch(0.373 0.151 30.4)` | `#7e0400` | Extraction-badge bg (with paper-100 text). 9.94:1 AAA |
 
 Perceptually uniform L progression: ember (0.373) → flame-deep (0.452) → flame (0.533) → flame-bright (0.587). ~0.055–0.081 L between each step. Same hue (30.4°) throughout the family — no drift.
@@ -157,8 +157,8 @@ Perceptually uniform L progression: ember (0.373) → flame-deep (0.452) → fla
 
 | Token | Value | Usage |
 |---|---|---|
-| `--error` | `var(--flame-deep)` | Error text. Uses flame-deep because it's readable on cream AA and carries warmth without competing with `--flame` as primary action |
-| `--error-soft` | `oklch(0.940 0.025 30)` | Error callout bg — pale warm tint, faint enough that flame-deep text on it still reads cleanly |
+| `--error` | `var(--flame-deep)` | Error text/stamp/callout. **⚠️ Collides with the brand red — open decision (see Status).** |
+| `--error-soft` | `oklch(0.940 0.025 30)` | Error callout bg — pale warm tint, faint enough that error text on it still reads cleanly |
 
 **Success has no dedicated color.** Success callouts use `--paper-200` bg + `✓` glyph + `--ink-primary` text. The ✓ carries the meaning; color isn't needed.
 
@@ -199,7 +199,7 @@ Recomputed for the v2 neutral palette. AA normal = 4.5:1; AAA normal = 7.0:1; AA
 | `--paper-dim` | `--ink-700` | 9.0 | ✅ AAA | Secondary on dark |
 | `--paper-muted` | `--ink-700` | 5.0 | ✅ AA | Caption on dark |
 | `--ember` | `--paper-100` | 9.94 | ✅ AAA | Extraction badge |
-| `--flame-deep` (= error) | `--paper-100` | 7.32 | ✅ AAA | Error text on cream |
+| `--flame-deep` (= error, interim) | `--paper-100` | 7.32 | ✅ AAA | Fire pressed; error text |
 | `--flame` | `--paper-100` | 5.22 | ✅ AA | Fire button label |
 | `--flame` | `--ink-700` | 3.12 | ⚠️ fails AA-small | ✶ glyph on dark (brand-signature leeway) |
 
@@ -257,14 +257,20 @@ Prep button text         --paper-primary
 
 Flame appearances per card (happy path): 2 — extraction badge (ember technically, same hue) + ✶ glyph + Fire button. Three tonal spots. Everything else neutral.
 
-### Error state (In the Weeds)
+### Error state (Kitchen Error)
+
+Renamed from "In the Weeds" (2026-06-08 — too opaque as an error). Stamp icon = pixel broken plate; the small functional icons (warning, retry, copy) are Tabler outline, not pixel.
 
 ```
+stamp box border         --error (2px)
+stamp label "KITCHEN ERROR" --error (Departure Mono, Regular)
 callout bg               --error-soft
-callout full border      --flame-deep (1px, all four sides)
-label text               --flame-deep (Departure Mono)
+callout full border      --error (1px, all four sides)
+callout label            --error (Departure Mono) + Tabler alert-triangle
 body text                --ink-primary
 ```
+
+⚠️ `--error` currently = `--flame-deep`, which collides with the brand red — see the open decision in Status.
 
 ### Success state (Fired)
 
@@ -388,7 +394,7 @@ The result should read as *specific design judgment*, not *safe middle-ground*. 
   --flame-deep:   oklch(0.452 0.185 30.4);   /* #a40200 */
   --ember:        oklch(0.373 0.151 30.4);   /* #7e0400 */
 
-  /* Functional */
+  /* Functional — ⚠️ error currently reuses flame-deep (collides with brand); open decision */
   --error:      var(--flame-deep);
   --error-soft: oklch(0.940 0.025 30);
 

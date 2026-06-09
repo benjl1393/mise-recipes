@@ -103,7 +103,7 @@ Three systems defined; see canonical docs:
 
 - **Type**: Departure Mono (display) + Commit Mono (body + italic). See `type-specimens/index.html` + `type-specimens/snapshots/`.
 - **Color**: Brutalist monochrome + flame. Neutral grays + a single accent family (flame at hue 30.4°, sanguine red — like digital-clock LED digits). See `docs/mise-color-system.md`.
-- **Icons**: [Phosphor Icons](https://phosphoricons.com) — **thin weight** for functional chrome (keyboard-return, arrows, status glyphs, retry, close). Matches the hairline-rule aesthetic. Emojis are reserved for *content* (source-type badges like `🎬` for video, `📝` for article) where they function as cultural shorthand — never as functional chrome. Import hygiene: when pasting a Phosphor SVG into Figma, the enclosing 24×24 bounding frame sometimes comes in with a solid white fill as an import default — treat as chrome, leave as-is or scrub per case.
+- **Icons** (2026-06-09): two tiers. **Stamp glyphs = custom pixel art only** (broken plate, off-menu sheet, flame) — pixellation reads at large stamp size, NOT at small sizes. **All other functional chrome = [Tabler outline](https://tabler.io/icons) vector icons** (warning/alert, retry, copy, clipboard, photo, highlight, arrows, status, etc.) — clean technical strokes, referencing stove/oven control-panel iconography. (Switched from Phosphor → Tabler 2026-06-09.) Emojis are reserved for *content* (source-type badges like `🎬` video, `📝` article) — never functional chrome.
 
 ## Logo mark (locked — 2026-06-08, plate + mono-M)
 
