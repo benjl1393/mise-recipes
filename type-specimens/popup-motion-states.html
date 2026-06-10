@@ -211,10 +211,10 @@
           <div class="beat" id="beatB"></div>
         </article>
 
-        <!-- C · IN THE WEEDS -->
+        <!-- C · KITCHEN ERROR -->
         <article class="demo">
           <div class="demo-head">
-            <span class="ttl"><span class="id">C</span><span class="lbl">Error · in the weeds</span></span>
+            <span class="ttl"><span class="id">C</span><span class="lbl">Error · kitchen error</span></span>
             <span class="cap">Extraction stalls and fails. The skeleton clears, the weed stamp + error callout arrive, and the action row swaps Fire → Retry.</span>
           </div>
           <div class="controls"><button class="ctrl-btn" data-replay="C">▶ Replay</button></div>
@@ -370,13 +370,13 @@
         });
       }
 
-      // ════ C · IN THE WEEDS ════
+      // ════ C · KITCHEN ERROR ════
       function runC() {
         clearD("C"); $("popC").className = "popup working"; $("bodyC").className = "popup-body";
         $("bodyC").innerHTML = `
           <div class="ticket-top"><span class="brand">MISE · EXTRACTING</span><span class="captured">2026-06-08 · 18:05</span></div>
           <div class="source"><span class="url">youtube.com/watch?v=dQw4w9</span><span class="badge">📝 article</span></div>
-          <div class="chyron-bar"><span class="status"><span class="dot"></span> Extracting · parsing</span><span class="elapsed">0:03</span></div>
+          <div class="chyron-bar"><span class="status"><span class="dot"></span> Extracting · reading</span><span class="elapsed">0:03</span></div>
           <div class="progress" style="--p:.4"></div>
           <div class="title-skel"><span class="bar tallx" style="width:80%"></span><span class="bar tall" style="width:52%"></span></div>
           <div class="facts-skel"><span class="bar"></span><span class="bar"></span><span class="bar"></span></div>
@@ -385,7 +385,7 @@
         beat("C","extracting", "progress climbing…");
         after("C", T(700), ()=>$("bodyC").querySelector(".progress").style.setProperty("--p",".72"));
         // stall
-        after("C", T(1300), ()=>{ $("bodyC").querySelector(".chyron-bar .status").innerHTML = `<span class="dot"></span> Retrying · 3×`; beat("C","stall","529 · overloaded — retrying"); });
+        after("C", T(1300), ()=>{ $("bodyC").querySelector(".chyron-bar .status").innerHTML = `<span class="dot"></span> Retrying · 3×`; beat("C","stall","Claude overloaded — retrying"); });
         // fail → clear → stamp + callout + retry list arrive
         after("C", T(2200), ()=>{
           $("popC").classList.remove("working");
@@ -393,7 +393,7 @@
             <div class="ticket-top"><span class="brand">MISE · NO. ─────</span><span class="captured">18:05</span></div>
             <div class="source"><span class="url">youtube.com/watch?v=dQw4w9</span><span class="badge pending">3× retry</span></div>
             <div class="stamp err stamp-land"><span class="glyph-mark">${BROKEN}</span><h2 class="st">KITCHEN ERROR</h2></div>
-            <div class="callout error arrive" role="alert" style="--i:1"><div class="hdr"><span class="lbl"><span class="ico">${TB.warn}</span>529 · OVERLOADED</span><span class="code">try again</span></div><div class="body">Claude couldn't be reached after three retries. Try again in ~30s, or fall through to Haiku.</div></div>
+            <div class="callout error arrive" role="alert" style="--i:1"><div class="hdr"><span class="lbl"><span class="ico">${TB.warn}</span>CLAUDE OVERLOADED</span><span class="code">HTTP 529</span></div><div class="body">Claude's servers are busy right now. Retry in ~30s, or switch to Haiku in Prep.</div></div>
             <ul class="fallback"><li class="arrive" style="--i:2"><span class="gl">${TB.retry}</span><span>Retry with the same model</span><span class="kbd">↵</span></li><li class="arrive" style="--i:3"><span class="gl">${TB.copy}</span><span>Copy raw page text</span><span class="kbd">⌘C</span></li></ul>`;
           beat("C","error", "stamp lands, error + retry options arrive");
           $("actC").innerHTML = `<button class="retry-btn"><span>RETRY</span><span class="kbd">↵</span></button><button class="secondary-btn">Copy text</button>`;
@@ -409,7 +409,7 @@
           <div class="source"><span class="url">chrome://newtab</span><span class="badge pending">empty</span></div>
           <div class="stamp stamp-land"><span class="glyph-mark">${OFFMENU}</span><h2 class="st">OFF MENU</h2></div>
           <p class="off-note">Nothing to extract on <strong>chrome://newtab</strong>. Use a fallback below, or open a page with a recipe.</p>
-          <ul class="fallback"><li class="arrive" style="--i:2"><span class="gl">${TB.paste}</span><span>Paste a recipe URL</span><span class="kbd">⌘V</span></li><li class="arrive" style="--i:3"><span class="gl">${TB.photo}</span><span>Upload a cookbook photo</span><span class="kbd">U</span></li><li class="arrive" style="--i:4"><span class="gl">${TB.highlight}</span><span>Highlight text, re-open Mise</span><span class="kbd">—</span></li></ul>
+          <ul class="fallback"><li class="arrive" style="--i:2"><span class="gl">${TB.paste}</span><span>Paste a recipe URL</span><span class="kbd">⌘V</span></li><li class="arrive" style="--i:3"><span class="gl">${TB.photo}</span><span>Upload a cookbook photo</span><span class="kbd">U</span></li><li class="arrive" style="--i:4"><span class="gl">${TB.highlight}</span><span>Highlight text, open Mise again</span><span class="kbd">—</span></li></ul>
           <div class="ticket-bottom"><span>ESC · CLOSE</span><span><span class="glyph">✶</span> mise.app</span></div>`;
         $("actD").innerHTML = `<button class="fire-btn"><span>PASTE URL</span><span class="kbd">⌘V</span></button><button class="secondary-btn">Prep</button>`;
         // print top chrome, stamp + list arrive

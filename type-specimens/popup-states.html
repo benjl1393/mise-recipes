@@ -654,7 +654,7 @@
         border-color: var(--flame);
       }
 
-      /* ─── Stamp — FIRED / IN THE WEEDS / LOW CONFIDENCE ───────── */
+      /* ─── Stamp — FIRED / KITCHEN ERROR / OFF MENU ───────── */
 
       .stamp {
         padding: 18px;
@@ -1122,7 +1122,7 @@
                 <span class="badge">🎬 8 frames</span>
               </div>
               <div class="chyron-bar">
-                <span class="status"><span class="dot"></span> Opening · reading DOM</span>
+                <span class="status"><span class="dot"></span> Opening · reading the page</span>
                 <span class="elapsed">0:00</span>
               </div>
               <div class="progress" style="--progress: 8%"></div>
@@ -1258,10 +1258,10 @@
           </div>
         </article>
 
-        <!-- 1C — Empty · in the weeds -->
+        <!-- 1C — Empty · off menu -->
         <article class="variant">
           <header class="variant-head">
-            <span class="chyron"><span class="id">01C</span><span class="label">Empty · in the weeds</span></span>
+            <span class="chyron"><span class="id">01C</span><span class="label">Empty · off menu</span></span>
             <span class="caption">
               No recipe signal on page (new tab, random article, unsupported domain). Toolbar icon grays via <code>declarativeContent</code> — click anyway yields fallback affordances.
             </span>
@@ -1274,14 +1274,14 @@
               </div>
               <div class="source">
                 <span class="url">chrome://newtab</span>
-                <span class="badge pending">empty</span>
+                <span class="badge pending">no source</span>
               </div>
 
               <div class="stamp">
                 <span class="glyph" style="color: var(--ink-dim)">— STATE —</span>
-                <h2 class="stamp-title">In the Weeds</h2>
+                <h2 class="stamp-title">Off Menu</h2>
                 <p class="stamp-note">
-                  Nothing to extract on <strong>chrome://newtab</strong>. Use one of the fallbacks below, or navigate to a page with a recipe and re-open Mise.
+                  Nothing to extract on <strong>chrome://newtab</strong>. Use one of the options below, or open a recipe page and try again.
                 </p>
               </div>
 
@@ -1293,12 +1293,12 @@
                 </li>
                 <li>
                   <span class="gl">⇞</span>
-                  <span>Upload a cookbook photo (OCR + vision)</span>
+                  <span>Upload a cookbook photo (we'll read it)</span>
                   <span class="kbd">U</span>
                 </li>
                 <li>
                   <span class="gl">⋆</span>
-                  <span>Highlight text on the current page, then re-open Mise</span>
+                  <span>Highlight text on the current page, then open Mise again</span>
                   <span class="kbd">—</span>
                 </li>
               </ul>
@@ -1344,7 +1344,7 @@
                 <span class="badge">📝 article</span>
               </div>
               <div class="chyron-bar">
-                <span class="status"><span class="dot"></span> Extracting · parsing ingredients</span>
+                <span class="status"><span class="dot"></span> Extracting · reading ingredients</span>
                 <span class="elapsed">0:04</span>
               </div>
               <div class="progress" style="--progress: 62%"></div>
@@ -1416,7 +1416,7 @@
                 <span class="badge">🎬 11 / 24</span>
               </div>
               <div class="chyron-bar">
-                <span class="status"><span class="dot"></span> Scene-detected · frame 11 of 24</span>
+                <span class="status"><span class="dot"></span> Capturing · frame 11 of 24</span>
                 <span class="elapsed">0:07</span>
               </div>
               <div class="progress" style="--progress: 46%"></div>
@@ -1581,7 +1581,7 @@
                 <li>Toss with pecorino, pepper, 1 tbsp pasta water. Serve immediately.</li>
               </ol>
               <div class="tags">
-                <span class="tag">#cuisine/italian</span> · <span class="tag">#pasta</span> · <span class="tag">#cold</span> · <span class="tag">#low-confidence</span>
+                <span class="tag">#cuisine/italian</span> · <span class="tag">#pasta</span> · <span class="tag">#cold</span>
               </div>
               <div class="ticket-bottom">
                 <span>2026-04-24 · 18:04</span>
@@ -1596,10 +1596,10 @@
           </div>
         </article>
 
-        <!-- 3C — Error · in the weeds -->
+        <!-- 3C — Error · kitchen error -->
         <article class="variant">
           <header class="variant-head">
-            <span class="chyron"><span class="id">03C</span><span class="label">Error · in the weeds</span></span>
+            <span class="chyron"><span class="id">03C</span><span class="label">Error · kitchen error</span></span>
             <span class="caption">
               Extraction failed after retries (API overload, parse failure, network drop). Action row swaps Fire for Retry and Copy-raw.
             </span>
@@ -1607,7 +1607,7 @@
           <div class="popup-frame">
             <div class="popup">
               <div class="ticket-top">
-                <span class="brand">MISE · EXTRACTION FAILED</span>
+                <span class="brand">MISE · NO. ─────</span>
                 <span class="captured">2026-04-24 · 18:05</span>
               </div>
               <div class="source">
@@ -1617,16 +1617,13 @@
 
               <div class="stamp">
                 <span class="glyph" style="color: var(--flame-deep)">— STATE —</span>
-                <h2 class="stamp-title" style="color: var(--flame-deep)">In the Weeds</h2>
-                <p class="stamp-note">
-                  Mise reached Claude but the call returned <strong>529 · overloaded</strong> after three retries with backoff. The page source is cached — retry or copy the raw text and fire manually.
-                </p>
+                <h2 class="stamp-title" style="color: var(--flame-deep)">Kitchen Error</h2>
               </div>
 
               <div class="callout error" role="alert">
-                <div class="hdr"><span>▲ API ERROR · 529</span><span class="code">overloaded</span></div>
+                <div class="hdr"><span>▲ CLAUDE OVERLOADED</span><span class="code">HTTP 529</span></div>
                 <div class="body">
-                  Anthropic reported the model is over capacity. Try again in ~30s, or fall through to Haiku (Prep → Fallback model).
+                  Claude's servers are busy right now. Your page is saved — retry in ~30s, or switch to Haiku in Prep.
                 </div>
               </div>
 
@@ -1643,7 +1640,7 @@
                 </li>
                 <li>
                   <span class="gl">↓</span>
-                  <span>Fall through to Haiku (lower-cost, less nuance)</span>
+                  <span>Switch to Haiku (cheaper, less nuance)</span>
                   <span class="kbd">H</span>
                 </li>
               </ul>
