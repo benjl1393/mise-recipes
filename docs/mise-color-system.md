@@ -1,6 +1,6 @@
 # Mise — Color System
 
-**Status:** v2.1 (2026-04-24) — flame hue pivoted from coppery (35°) to sanguine (30.4°) after Figma crit. ⚠️ **Open decision (2026-06-09):** error currently reuses the flame hue (`--flame-deep`) and collides with the brand red. A char/near-black error (v2.2 attempt) was tried and **rejected** (too near-black). Resolution pending — either a **distinct error-red** (brand stays red) or **blue primary + red error**. The tables below still describe the v2.1 flame-deep error until that lands.
+**Status:** v2.2 (2026-06-10) — brand-vs-error collision **resolved**. Brand stays sanguine red (30.4°); error stays red (`--flame-deep`). The fix is *structural, not chromatic*: **red is contextually exclusive** — on any one screen red means *action* or *failure*, never both (see Principle 6). Two alternatives were explored and rejected first: a char/near-black error (Ben: "not working well as a near black" — too dead) and a gas-flame **blue** primary that would free red for error (prototyped side-by-side, but red is the stronger, more arresting brand — blue receded too much for the primary CTA). v2.1 (2026-04-24) pivoted flame from coppery (35°) to sanguine (30.4°) after Figma crit.
 **Scheme:** Neutral monochrome + single accent family. Flame (hue 30.4°, sanguine red) is the only chromatic color in the system, applied sparingly. Everything else is a neutral gray scale.
 **Color space:** OKLCH (perceptually uniform). All tokens defined in OKLCH; hex shown alongside where relevant.
 **Source principles:** Design for Hackers Chapters 8–9, applied to Mise's *Industrial / kitchen-after-hours* brief with a deliberate anti-AI-aesthetic stance.
@@ -71,6 +71,24 @@ Per Kadavy Ch 9: pure black "does not exist in nature." Even brutalist neutrals 
 ### 5. Color as grammar, not decoration
 
 Per the `.md` format spec's "Core principle — no invented styling": any typographic treatment (including color) in a rendered surface must correspond to a markup signal in the source. Tag hashtags are dim gray (matching body-text dim weight, because they're body-level metadata). The `✶` glyph is flame (because it's the brand stamp). The extraction badge is ember (because it marks how the capture was made). Nothing arbitrary.
+
+### 6. Red is contextually exclusive — action OR failure, never both on one screen
+
+Brand red (action) and error red (failure) are the *same* sanguine family — by design, because red is the single accent and both meanings are legitimately "the hot thing." The risk is that on one screen they collide and the eye can't tell "do this" from "this broke." The resolution is contextual, not a second hue:
+
+**On any single screen, red carries exactly one meaning, fixed by state:**
+
+| State | Fireable? | Red belongs to | Action row |
+|---|---|---|---|
+| Idle / extracting / success | yes | the **Fire button** (action) | red filled Fire |
+| Low confidence / warning | yes (with a flag) | the **Fire button** (action); the ⚠ flag is a thin flame *border* + glyph, not a competing fill | red filled "Fire anyway" |
+| **Error / failure** | **no** | the **stamp + callout** (failure) | **neutral** — Retry is a bone (`--paper-100`) filled button, no red |
+
+The mechanism: **when an error owns the screen, the action row gives up red.** Retry/recovery becomes a bone-filled button (`--paper-100` on the dark action strip). Red is then unambiguous — the only red on an error screen is the failure itself.
+
+Corollary worth keeping: **the action row's colour encodes fireability.** A red filled button = "you can still Fire" (success/warning); a bone filled button = "this failed, there's nothing to fire." The colour swap *is* the state signal — reinforced by glyph (✶/⚠/broken-plate) and label, never colour alone.
+
+Why not the alternatives: a *second* red for error (crimson/maroon ~15° off) reproduces the same too-close-to-tell failure; amber/orange breaks "red is the one heat," reads as warning not error, and drags in a second chromatic hue; char near-black read as dead, not alarming; a blue primary frees red but recedes too much for the primary CTA. Structural exclusivity keeps one accent, one hue, and full differentiation.
 
 ---
 
@@ -157,7 +175,7 @@ Perceptually uniform L progression: ember (0.373) → flame-deep (0.452) → fla
 
 | Token | Value | Usage |
 |---|---|---|
-| `--error` | `var(--flame-deep)` | Error text/stamp/callout. **⚠️ Collides with the brand red — open decision (see Status).** |
+| `--error` | `var(--flame-deep)` | Error text/stamp/callout. Same red as the brand by design — differentiation is structural (Principle 6: red is contextually exclusive; the error action row goes neutral). |
 | `--error-soft` | `oklch(0.940 0.025 30)` | Error callout bg — pale warm tint, faint enough that error text on it still reads cleanly |
 
 **Success has no dedicated color.** Success callouts use `--paper-200` bg + `✓` glyph + `--ink-primary` text. The ✓ carries the meaning; color isn't needed.
@@ -268,9 +286,11 @@ callout bg               --error-soft
 callout full border      --error (1px, all four sides)
 callout label            --error (Departure Mono) + Tabler alert-triangle
 body text                --ink-primary
+action row (Retry)       --paper-100 fill, --ink-primary text   ← NEUTRAL, not red (Principle 6)
+secondary (Prep/Copy)    transparent + --paper-muted border
 ```
 
-⚠️ `--error` currently = `--flame-deep`, which collides with the brand red — see the open decision in Status.
+Per Principle 6, the error action row drops red entirely — Retry is a bone (`--paper-100`) filled button so red on this screen means *only* failure. The absence of a red action is itself the "nothing to fire" signal.
 
 ### Success state (Fired)
 
@@ -394,7 +414,7 @@ The result should read as *specific design judgment*, not *safe middle-ground*. 
   --flame-deep:   oklch(0.452 0.185 30.4);   /* #a40200 */
   --ember:        oklch(0.373 0.151 30.4);   /* #7e0400 */
 
-  /* Functional — ⚠️ error currently reuses flame-deep (collides with brand); open decision */
+  /* Functional — error = flame-deep (same red as brand by design); differentiated structurally, see Principle 6 */
   --error:      var(--flame-deep);
   --error-soft: oklch(0.940 0.025 30);
 

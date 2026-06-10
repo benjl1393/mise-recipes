@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Mise — Resolving error vs brand (red stays)</title>
+    <style>
+      @font-face { font-family:"Departure Mono"; src:url("./fonts/DepartureMono-Regular.woff2") format("woff2"); font-weight:400; font-style:normal; font-display:swap; }
+      @font-face { font-family:"Commit Mono"; src:url("./fonts/CommitMono-400-Regular.otf") format("opentype"); font-weight:400; font-style:normal; font-display:swap; }
+      @font-face { font-family:"Commit Mono"; src:url("./fonts/CommitMono-400-Italic.otf") format("opentype"); font-weight:400; font-style:italic; font-display:swap; }
+
+      :root {
+        --font-display:"Departure Mono",ui-monospace,Menlo,monospace;
+        --font-body:"Commit Mono",ui-monospace,Menlo,monospace;
+        --ink-700:oklch(0.200 0 0); --ink-600:oklch(0.280 0 0);
+        --paper-100:oklch(0.965 0 0); --paper-200:oklch(0.920 0 0); --paper-250:oklch(0.885 0 0);
+        --ink-primary:oklch(0.120 0 0); --ink-dim:oklch(0.480 0 0); --ink-muted:oklch(0.620 0 0);
+        --paper-primary:oklch(0.965 0 0); --paper-dim:oklch(0.780 0 0); --paper-muted:oklch(0.620 0 0);
+        --rule-cream:oklch(0.820 0 0); --rule-ink:oklch(0.280 0 0);
+        /* brand red stays (v2.1) */
+        --flame:        oklch(0.533 0.212 30.4);  /* #cb1200 */
+        --flame-bright: oklch(0.587 0.205 30.4);  /* #db3523 */
+        --flame-deep:   oklch(0.452 0.185 30.4);  /* #a40200 */
+        --ember:        oklch(0.373 0.151 30.4);  /* #7e0400 */
+        --error:        var(--flame-deep);        /* error stays red — unchanged */
+        --error-soft:   oklch(0.940 0.025 30);
+      }
+
+      * { box-sizing:border-box; }
+      html,body { margin:0; background:var(--ink-700); color:var(--paper-primary); font-family:var(--font-body); -webkit-font-smoothing:antialiased; }
+      .page { max-width:1180px; margin:0 auto; padding:clamp(24px,5vw,56px) clamp(16px,4vw,40px) 140px; }
+      .page-head { border-bottom:1px solid var(--rule-ink); padding-bottom:24px; margin-bottom:32px; }
+      .page-head h1 { font-family:var(--font-display); font-weight:400; font-size:clamp(20px,3vw,30px); line-height:1.05; letter-spacing:0.02em; text-transform:uppercase; margin:0 0 12px; }
+      .page-head .lead { max-width:80ch; font-size:13px; line-height:1.65; color:var(--paper-dim); margin:0; }
+      .page-head .lead em { font-style:normal; color:var(--paper-primary); }
+      .page-head .lead .r { color:oklch(0.66 0.18 30.4); }
+
+      .row { display:grid; grid-template-columns:repeat(3,1fr); gap:40px; align-items:start; }
+      @media (max-width:1000px){ .row { grid-template-columns:1fr; max-width:420px; } }
+      .col { display:flex; flex-direction:column; gap:14px; min-width:0; }
+      .col-head { display:flex; flex-direction:column; gap:5px; padding-bottom:11px; border-bottom:1px solid var(--rule-ink); }
+      .col-head .ttl { font-family:var(--font-display); font-size:12px; letter-spacing:0.12em; text-transform:uppercase; }
+      .col-head .sub { font-family:var(--font-body); font-size:11px; line-height:1.4; }
+      .sub.neu { color:var(--paper-muted); }
+      .sub.bad { color:oklch(0.62 0.16 30.4); }
+      .sub.good { color:oklch(0.80 0 0); }
+
+      .popup { width:100%; max-width:400px; background:var(--paper-100); color:var(--ink-primary); border:1px solid var(--rule-cream); box-shadow:0 20px 60px -20px oklch(0.100 0.015 240/0.35); overflow:hidden; }
+      .ticket-top { padding:13px 18px; border-bottom:1px dashed var(--rule-cream); display:flex; justify-content:space-between; align-items:baseline; }
+      .ticket-top .brand { font-family:var(--font-display); font-size:10px; letter-spacing:0.08em; text-transform:uppercase; color:var(--ink-primary); }
+      .ticket-top .captured { font-family:var(--font-display); font-size:10px; color:var(--ink-dim); text-transform:uppercase; letter-spacing:0.08em; }
+      .source { padding:11px 18px; border-bottom:1px dashed var(--rule-cream); font-family:var(--font-body); font-size:10px; color:var(--ink-dim); display:flex; justify-content:space-between; align-items:center; gap:12px; }
+      .source .url { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+      .source .badge { background:var(--ember); color:var(--paper-100); padding:3px 7px 2px; letter-spacing:0.06em; text-transform:uppercase; white-space:nowrap; flex-shrink:0; }
+      .source .badge.pending { background:transparent; color:var(--ink-dim); border:1px solid var(--ink-dim); padding:2px 6px 1px; }
+      .title { font-family:var(--font-display); font-weight:400; font-size:23px; line-height:1.1; text-transform:uppercase; margin:15px 18px 6px; color:var(--ink-primary); }
+      .subtitle { margin:0 18px 13px; font-style:italic; font-size:12px; line-height:1.45; color:var(--ink-dim); }
+      .facts { display:flex; gap:18px; padding:10px 18px; border-top:1px solid var(--rule-cream); border-bottom:1px solid var(--rule-cream); font-family:var(--font-body); font-size:10px; color:var(--ink-dim); text-transform:uppercase; letter-spacing:0.08em; }
+      .facts .fact strong { color:var(--ink-primary); font-weight:400; font-size:11px; margin-left:4px; }
+      .section-h { font-family:var(--font-display); font-weight:400; font-size:13px; margin:16px 18px 9px; letter-spacing:0.1em; text-transform:uppercase; color:var(--ink-primary); border-bottom:1px solid var(--ink-primary); padding-bottom:6px; }
+      ul.ingredients { list-style:none; padding:0; margin:0 18px 16px; font-size:13px; line-height:1.5; }
+      ul.ingredients li { display:grid; grid-template-columns:78px 1fr; gap:8px; align-items:baseline; padding:4px 0; border-bottom:1px dotted var(--rule-cream); }
+      ul.ingredients li .qty { font-family:var(--font-body); font-size:11.5px; color:var(--ink-primary); text-transform:uppercase; }
+      .ticket-bottom { padding:9px 18px 12px; font-family:var(--font-display); font-size:10px; color:var(--ink-dim); letter-spacing:0.08em; text-transform:uppercase; display:flex; justify-content:space-between; }
+      .ticket-bottom .glyph { color:var(--flame); }
+
+      .stamp.err { margin:14px 18px; border:2px solid var(--error); background:var(--paper-100); padding:13px 18px; display:flex; align-items:center; justify-content:center; gap:11px; color:var(--error); }
+      .stamp.err .pmark { width:28px; height:28px; flex-shrink:0; }
+      .stamp.err h2 { font-family:var(--font-display); font-weight:400; font-size:25px; line-height:1; letter-spacing:0.04em; text-transform:uppercase; margin:0; white-space:nowrap; }
+      .callout.error { margin:14px 18px; border:1px solid var(--error); background:var(--error-soft); padding:11px 13px; display:flex; flex-direction:column; gap:6px; }
+      .callout.error .hdr { font-family:var(--font-display); font-size:10px; letter-spacing:0.16em; text-transform:uppercase; color:var(--error); display:flex; justify-content:space-between; align-items:center; }
+      .callout.error .hdr .lbl { display:flex; align-items:center; gap:7px; }
+      .callout.error .hdr .code { font-family:var(--font-body); color:var(--ink-dim); letter-spacing:0.04em; }
+      .callout.error .body { font-size:12px; line-height:1.5; color:var(--ink-primary); }
+      .ico { width:14px; height:14px; flex-shrink:0; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+
+      .fire-row { display:flex; gap:8px; padding:12px 14px; background:var(--ink-700); border:1px solid var(--rule-ink); }
+      .btn { border:none; padding:10px 12px; font-family:var(--font-body); font-size:11px; letter-spacing:0.14em; text-transform:uppercase; cursor:pointer; }
+      .btn.fire     { flex:1; background:var(--flame); color:var(--paper-100); }
+      .btn.retry-red{ flex:1; background:var(--flame); color:var(--paper-100); }
+      .btn.retry-neu{ flex:1; background:var(--paper-100); color:var(--ink-primary); }
+      .btn.prep-dark{ background:transparent; border:1px solid var(--ink-600); color:var(--paper-dim); }
+      .btn.prep-out { background:transparent; border:1px solid var(--paper-muted); color:var(--paper-dim); }
+
+      .note { font-family:var(--font-body); font-size:11.5px; line-height:1.6; color:var(--paper-dim); margin:2px 0 0; }
+      .note strong { color:var(--paper-primary); }
+      .note .r { color:oklch(0.66 0.18 30.4); }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <header class="page-head">
+        <h1>Mise — Red stays. Resolving error vs brand.</h1>
+        <p class="lead">
+          Brand red is keeping its job. The collision was never on the happy path — it only exists <em>on the error screen</em>, where a red <span class="r">RETRY</span> button competes with the red error stamp + callout. Fix: <em>red is contextually exclusive</em> — on any one screen it means action OR error, never both. When an error owns the screen, the recovery action gives up red. No hue change, no new token, one-accent discipline intact.
+        </p>
+      </header>
+
+      <div class="row">
+
+        <!-- 1 — HAPPY PATH (red = action, no error present) -->
+        <div class="col">
+          <div class="col-head">
+            <span class="ttl">1 · Happy path</span>
+            <span class="sub neu">No error on screen → red = action. Fire stays hot red. Unchanged.</span>
+          </div>
+          <div class="popup">
+            <div class="ticket-top"><span class="brand">MISE · NO. 00427</span><span class="captured">2026-06-09 · 14:32</span></div>
+            <div class="source"><span class="url">instagram.com/p/C9xK2</span><span class="badge">🎬 8 frames</span></div>
+            <h2 class="title">Gochujang-Glazed Pork Belly</h2>
+            <p class="subtitle">slow-rendered, sharply-sauced, served over rice with a soft egg.</p>
+            <div class="facts"><span class="fact">SERVES <strong>4</strong></span><span class="fact">HANDS-ON <strong>25m</strong></span><span class="fact">TOTAL <strong>2h 10m</strong></span></div>
+            <h3 class="section-h">Ingredients</h3>
+            <ul class="ingredients">
+              <li><span class="qty">800 g</span><span>pork belly, skin-on</span></li>
+              <li><span class="qty">3 tbsp</span><span>gochujang paste</span></li>
+              <li><span class="qty">2 tbsp</span><span>honey or maltose</span></li>
+            </ul>
+            <div class="ticket-bottom"><span>2026-06-09 · 14:32</span><span><span class="glyph">✶</span> mise.app</span></div>
+          </div>
+          <div class="fire-row"><button class="btn fire">FIRE · save .md</button><button class="btn prep-dark">Prep</button></div>
+          <p class="note">Red is the hottest thing on screen — and it's the action. Correct: appetite + urgency on the primary CTA.</p>
+        </div>
+
+        <!-- 2 — ERROR, CURRENT (collision) -->
+        <div class="col">
+          <div class="col-head">
+            <span class="ttl">2 · Error — current</span>
+            <span class="sub bad">⚠ red RETRY competes with red error — one alarm wash</span>
+          </div>
+          <div class="popup">
+            <div class="ticket-top"><span class="brand">MISE · NO. 00428</span><span class="captured">2026-06-09 · 14:36</span></div>
+            <div class="source"><span class="url">gourmettraveller.com.au/…</span><span class="badge pending">no frames</span></div>
+            <div class="stamp err">
+              <svg class="pmark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M7 8 L11 12 M13 9 L17 13 M9 16 L12 13"/></svg>
+              <h2>KITCHEN ERROR</h2>
+            </div>
+            <div class="callout error">
+              <div class="hdr"><span class="lbl"><svg class="ico" viewBox="0 0 24 24"><path d="M12 9v4M12 17h.01M10.3 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.7 3.86a2 2 0 0 0-3.42 0z"/></svg>COULDN'T READ PAGE</span><span class="code">ERR · 422</span></div>
+              <div class="body">No recipe found behind the paywall. Try the original video, or paste the text into Prep.</div>
+            </div>
+            <div class="fire-row"><button class="btn retry-red">RETRY · re-fire</button><button class="btn prep-dark">Prep</button></div>
+          </div>
+          <p class="note">Three reds stacked — <span class="r">stamp</span>, <span class="r">callout</span>, <span class="r">button</span>. The action dissolves into the failure. Which red is "do this," which is "this broke"?</p>
+        </div>
+
+        <!-- 3 — ERROR, PROPOSED (red exclusive) -->
+        <div class="col">
+          <div class="col-head">
+            <span class="ttl">3 · Error — proposed</span>
+            <span class="sub good">✓ red = error only · recovery action goes neutral</span>
+          </div>
+          <div class="popup">
+            <div class="ticket-top"><span class="brand">MISE · NO. 00428</span><span class="captured">2026-06-09 · 14:36</span></div>
+            <div class="source"><span class="url">gourmettraveller.com.au/…</span><span class="badge pending">no frames</span></div>
+            <div class="stamp err">
+              <svg class="pmark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M7 8 L11 12 M13 9 L17 13 M9 16 L12 13"/></svg>
+              <h2>KITCHEN ERROR</h2>
+            </div>
+            <div class="callout error">
+              <div class="hdr"><span class="lbl"><svg class="ico" viewBox="0 0 24 24"><path d="M12 9v4M12 17h.01M10.3 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.7 3.86a2 2 0 0 0-3.42 0z"/></svg>COULDN'T READ PAGE</span><span class="code">ERR · 422</span></div>
+              <div class="body">No recipe found behind the paywall. Try the original video, or paste the text into Prep.</div>
+            </div>
+            <div class="fire-row"><button class="btn retry-neu">RETRY · re-fire</button><button class="btn prep-out">Prep</button></div>
+          </div>
+          <p class="note"><strong>Now red means exactly one thing here: failure.</strong> The bone RETRY button is still the obvious primary — the user's eye is already on the red error, and the recovery is the only filled action below it. No hue invented, no token added.</p>
+        </div>
+
+      </div>
+    </div>
+  </body>
+</html>

@@ -95,7 +95,7 @@ Names are load-bearing. Use them in code, UI, docs, and commit messages.
 - **Prep** — options/settings page
 - **Off Menu** — empty state: the page has no recipe to extract
 
-The error state uses **plain language** ("Extraction failed"), not a kitchen pun — "In the Weeds" was dropped 2026-06-08 as too specific/opaque for an error (the literal weed icon didn't read as "something went wrong"). Errors prioritise clarity over voice.
+The error-state stamp reads **"Kitchen Error"** — the kitchen register is kept, but the word "Error" makes the failure unmistakable. Renamed from **"In the Weeds"** (dropped 2026-06-08 — too opaque; the weed pun didn't read as "something went wrong"). The refinement keeps a little voice while prioritising clarity. (The ticket-top status line may still read "EXTRACTION FAILED" as a plain descriptor; the *stamp* is "Kitchen Error".)
 
 ## Type + color + icons (locked — v2.1, 2026-04-24)
 
@@ -120,6 +120,7 @@ The brand mark is a **top-down plate** — a single-pixel rounded rim — with t
 **Pivot history:**
 - **v1** (through 2026-04-22): warm-cream split-complementary. Rejected for hitting the AI-default "warm cream + rust + serif+sans" aesthetic.
 - **v2 / v2.1** (2026-04-23/24): brutalist monochrome + flame; flame hue settled at 30.4° sanguine red.
+- **v2.2** (2026-06-10): brand-vs-error collision resolved. Brand stays sanguine red; error stays red; differentiation is *structural* — **red is contextually exclusive** (action OR failure per screen; the error action row goes neutral/bone). Rejected en route: char near-black error, and a gas-flame blue primary (prototyped in `type-specimens/color-blue-flame.html` — red won as the stronger CTA). See `docs/mise-color-system.md` Principle 6.
 - **"The Spike"** (2026-06-07, retired): a kitchen order-ticket glyph — negative-space notch + flame fired-bar + torn edge (Figma `92:1381`, 80×76 grid). Committed at `7a2a72e`, then reopened. Old masters archived at `type-specimens/mark/_archive-spike/`.
 - **plate + mono-M** (2026-06-08, current): the Mono-M direction (rejected earlier as "a lone M is too generic") revived and fixed by plating it. Monochrome. The spike-themed motion signature (ticket speared onto a rail) was dropped in the same pivot — the FIRED stamp landing is now the motion signature instead.
 
