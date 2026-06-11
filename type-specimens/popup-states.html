@@ -656,32 +656,39 @@
 
       /* ─── Stamp — FIRED / KITCHEN ERROR / OFF MENU ───────── */
 
+      /* Horizontal [icon] LABEL stamp — border = icon = text (currentColor), matches popup-motion-states */
       .stamp {
-        padding: 18px;
+        margin: 14px 18px;
+        border: 2px solid currentColor;
+        background: var(--paper-100);
+        padding: 14px 20px;
         display: flex;
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 8px;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        color: var(--ink-primary);
       }
 
-      .stamp .glyph {
-        font-family: var(--font-display);
-        font-size: 10px;
-        letter-spacing: 0.18em;
-        text-transform: uppercase;
-      }
+      .stamp.err { color: var(--flame-deep); }
+
+      .stamp .glyph-mark { height: 30px; flex-shrink: 0; display: flex; }
+      .stamp .glyph-mark svg { display: block; height: 100%; width: auto; }
 
       .stamp h2.stamp-title {
         font-family: var(--font-display);
         font-weight: 400;
         font-size: 28px;
         line-height: 1.0;
-        letter-spacing: 0;
+        letter-spacing: 0.04em;
         text-transform: uppercase;
         margin: 0;
+        white-space: nowrap;
       }
 
-      .stamp .stamp-note {
+      /* off-menu explanatory note — sits below the stamp box, not inside it */
+      .off-note {
+        margin: 6px 18px 0;
         font-family: var(--font-body);
         font-style: italic;
         font-size: 12px;
@@ -1278,12 +1285,12 @@
               </div>
 
               <div class="stamp">
-                <span class="glyph" style="color: var(--ink-dim)">— STATE —</span>
+                <span class="glyph-mark"><svg viewBox="0 0 27 34" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M9 26H7V24H9V26Z"/><path d="M21 26H19V24H21V26Z"/><path d="M11 24H9V22H11V24Z"/><path d="M19 24H17V22H19V24Z"/><path d="M13 22H11V20H13V22Z"/><path d="M17 22H15V20H17V22Z"/><path d="M15 20H13V18H15V20Z"/><path d="M13 18H11V16H13V18Z"/><path d="M17 18H15V16H17V18Z"/><path d="M11 16H9V14H11V16Z"/><path d="M19 16H17V14H19V16Z"/><path d="M9 14H7V12H9V14Z"/><path d="M21 14H19V12H21V14Z"/><path fill-rule="evenodd" clip-rule="evenodd" d="M27 34H0V7H1V5H3V7H7V3H5V1H7V0H27V34ZM9 9H2V32H25V2H9V9Z"/><path d="M5 5H3V3H5V5Z"/></svg></span>
                 <h2 class="stamp-title">Off Menu</h2>
-                <p class="stamp-note">
-                  Nothing to extract on <strong>chrome://newtab</strong>. Use one of the options below, or open a recipe page and try again.
-                </p>
               </div>
+              <p class="off-note">
+                Nothing to extract on <strong>chrome://newtab</strong>. Use one of the options below, or open a recipe page and try again.
+              </p>
 
               <ul class="fallback-list">
                 <li>
@@ -1615,9 +1622,9 @@
                 <span class="badge pending">3× retry</span>
               </div>
 
-              <div class="stamp">
-                <span class="glyph" style="color: var(--flame-deep)">— STATE —</span>
-                <h2 class="stamp-title" style="color: var(--flame-deep)">Kitchen Error</h2>
+              <div class="stamp err">
+                <span class="glyph-mark"><svg viewBox="0 0 104 112" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><rect x="32" y="0" width="8" height="8"/><rect x="40" y="0" width="8" height="8"/><rect x="48" y="0" width="8" height="8"/><rect x="40" y="8" width="8" height="8"/><rect x="48" y="16" width="8" height="8"/><rect x="56" y="32" width="8" height="8"/><rect x="48" y="32" width="8" height="8"/><rect x="56" y="24" width="8" height="8"/><rect x="64" y="16" width="8" height="8"/><rect x="40" y="40" width="8" height="8"/><rect x="32" y="48" width="8" height="8"/><rect x="24" y="40" width="8" height="8"/><rect x="16" y="32" width="8" height="8"/><rect x="48" y="56" width="8" height="8"/><rect x="56" y="64" width="8" height="8"/><rect x="64" y="72" width="8" height="8"/><rect x="72" y="64" width="8" height="8"/><rect x="80" y="56" width="8" height="8"/><rect x="88" y="48" width="8" height="8"/><rect x="72" y="80" width="8" height="8"/><rect x="40" y="56" width="8" height="8"/><rect x="40" y="64" width="8" height="8"/><rect x="40" y="80" width="8" height="8"/><rect x="48" y="88" width="8" height="8"/><rect x="56" y="96" width="8" height="8"/><rect x="32" y="72" width="8" height="8"/><rect x="24" y="80" width="8" height="8"/><rect x="56" y="0" width="8" height="8"/><rect x="64" y="0" width="8" height="8"/><rect x="16" y="8" width="8" height="8"/><rect x="24" y="8" width="8" height="8"/><rect x="72" y="8" width="8" height="8"/><rect x="80" y="8" width="8" height="8"/><rect x="8" y="16" width="8" height="8"/><rect x="16" y="16" width="8" height="8"/><rect x="80" y="16" width="8" height="8"/><rect x="88" y="16" width="8" height="8"/><rect x="8" y="24" width="8" height="8"/><rect x="88" y="24" width="8" height="8"/><rect x="0" y="32" width="8" height="8"/><rect x="96" y="32" width="8" height="8"/><rect x="0" y="40" width="8" height="8"/><rect x="96" y="40" width="8" height="8"/><rect x="0" y="48" width="8" height="8"/><rect x="96" y="48" width="8" height="8"/><rect x="0" y="56" width="8" height="8"/><rect x="96" y="56" width="8" height="8"/><rect x="0" y="64" width="8" height="8"/><rect x="0" y="72" width="8" height="8"/><rect x="96" y="64" width="8" height="8"/><rect x="96" y="72" width="8" height="8"/><rect x="8" y="80" width="8" height="8"/><rect x="88" y="80" width="8" height="8"/><rect x="8" y="88" width="8" height="8"/><rect x="16" y="88" width="8" height="8"/><rect x="80" y="88" width="8" height="8"/><rect x="88" y="88" width="8" height="8"/><rect x="16" y="96" width="8" height="8"/><rect x="24" y="96" width="8" height="8"/><rect x="72" y="96" width="8" height="8"/><rect x="80" y="96" width="8" height="8"/><rect x="32" y="104" width="8" height="8"/><rect x="40" y="104" width="8" height="8"/><rect x="48" y="104" width="8" height="8"/><rect x="56" y="104" width="8" height="8"/><rect x="64" y="104" width="8" height="8"/></svg></span>
+                <h2 class="stamp-title">Kitchen Error</h2>
               </div>
 
               <div class="callout error" role="alert">
