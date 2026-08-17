@@ -15,7 +15,7 @@ await mkdir(outdir, { recursive: true });
 
 // Static assets: manifest, HTML/CSS, fonts, icons.
 await cp(from("manifest.json"), `${outdir}/manifest.json`);
-for (const dir of ["popup", "pass", "prep"]) {
+for (const dir of ["popup"]) {
   await cp(from("src", dir), `${outdir}/${dir}`, {
     recursive: true,
     filter: (src) => !src.endsWith(".ts"),
@@ -39,8 +39,6 @@ await cp(from("../type-specimens/mark/png"), `${outdir}/icons`, { recursive: tru
 const ctx = await esbuild.context({
   entryPoints: {
     "popup/popup": from("src/popup/popup.ts"),
-    "pass/pass": from("src/pass/pass.ts"),
-    "prep/prep": from("src/prep/prep.ts"),
     "background/service-worker": from("src/background/service-worker.ts"),
     "content/extract": from("src/content/extract.ts"),
   },

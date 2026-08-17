@@ -17,9 +17,9 @@ export function filenameFor(recipe: Recipe, fm: Frontmatter): string {
 }
 
 /**
- * Write the .md to disk, then record the ticket on The Pass.
+ * Write the .md to disk, then record the ticket in the Archive.
  *
- * Order matters: a ticket on The Pass claims a file exists on disk, so the
+ * Order matters: a ticket in the Archive claims a file exists on disk, so the
  * download has to succeed first.
  */
 export async function fire(recipe: Recipe, fm: Frontmatter): Promise<void> {

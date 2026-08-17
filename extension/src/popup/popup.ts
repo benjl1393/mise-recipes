@@ -16,20 +16,36 @@ import {
   type Phase,
 } from "./render";
 import { classify, NoKeyError } from "./errors";
+import { mountPrep, submitPrep } from "./views/prep";
+import { mountArchive } from "./views/archive";
 
 const card = document.getElementById("card") as HTMLElement;
-const actions = document.querySelector(".popup-actions") as HTMLElement;
+const prepView = document.getElementById("prep-view") as HTMLElement;
+const archiveView = document.getElementById("archive-view") as HTMLElement;
+const actions = document.getElementById("actions") as HTMLElement;
 
-/**
- * The action row is rebuilt for the error and fired states, which detaches
- * any element reference held across that swap — so buttons are always looked
- * up fresh rather than captured once at load.
- */
 const byId = <T extends HTMLElement>(id: string) => document.getElementById(id) as T | null;
 const fireBtn = () => byId<HTMLButtonElement>("fire");
 
-/** Pristine markup for the default row, so a retry can restore it. */
-const DEFAULT_ACTIONS = actions.innerHTML;
+/**
+ * Action rows, one per view. Prep and Archive are panes rather than tabs, so
+ * the row has to change with the view — there is no window chrome to carry
+ * navigation.
+ */
+const ACTIONS = {
+  extract:
+    `<button id="fire" class="fire-btn" type="button" disabled>` +
+    `<span>FIRE · save .md</span><span class="kbd">↵</span></button>` +
+    `<button id="prep" class="secondary-btn" type="button">Prep</button>` +
+    `<button id="archive" class="secondary-btn" type="button">Archive</button>`,
+  prep:
+    `<button id="save" class="fire-btn" type="button">` +
+    `<span>SAVE</span><span class="kbd">↵</span></button>` +
+    `<button id="back" class="secondary-btn" type="button">Back</button>`,
+  archive: `<button id="back" class="secondary-btn" type="button">Back</button>`,
+} as const;
+
+type View = keyof typeof ACTIONS;
 
 /**
  * How long the FIRED receipt sits before the popup closes behind it.
@@ -37,14 +53,20 @@ const DEFAULT_ACTIONS = actions.innerHTML;
  */
 const SPIKE_MS = 2000;
 
+let view: View = "extract";
+/**
+ * The extract view's action row as it stood when we left it. Prep and Archive
+ * are detours, not new pages: coming back must restore whatever state the
+ * card was in — a filled card, an error row, or the fired receipt — and must
+ * never re-run extraction, which would cost another billed call.
+ */
+let extractActions: string = ACTIONS.extract;
+
 let current: { recipe: Recipe; fm: Frontmatter } | null = null;
 let activeTabId: number | null = null;
 let activeTabUrl = "";
-
-/** Kept so a failed extraction can still hand the user the raw page text. */
 let lastPageText = "";
 
-/** Ticks the chyron's elapsed clock while a skeleton is on screen. */
 let elapsedTimer: number | null = null;
 let phaseStartedAt = 0;
 
@@ -74,21 +96,46 @@ function settle() {
   card.setAttribute("aria-busy", "false");
 }
 
-/** Wire the default action row. Re-run whenever that row is rebuilt. */
+/** Install the extract view's action row, remembering it for the trip back. */
+function setExtractActions(html: string) {
+  extractActions = html;
+  if (view === "extract") {
+    actions.innerHTML = html;
+    bindActions();
+  }
+}
+
+function showView(next: View) {
+  view = next;
+  card.hidden = next !== "extract";
+  prepView.hidden = next !== "prep";
+  archiveView.hidden = next !== "archive";
+
+  actions.innerHTML = next === "extract" ? extractActions : ACTIONS[next];
+  bindActions();
+
+  // Mounted fresh each time so the Archive reflects a recipe fired moments
+  // ago, and Prep reloads settings that may have changed.
+  if (next === "prep") mountPrep(prepView);
+  if (next === "archive") mountArchive(archiveView);
+}
+
+/** Wire whichever action row is currently mounted. */
 function bindActions() {
   fireBtn()?.addEventListener("click", () => void onFire());
-  byId("prep")?.addEventListener("click", () => chrome.runtime.openOptionsPage());
-  byId("pass")?.addEventListener("click", () =>
-    chrome.tabs.create({ url: chrome.runtime.getURL("pass/pass.html") }),
-  );
+  byId("prep")?.addEventListener("click", () => showView("prep"));
+  byId("archive")?.addEventListener("click", () => showView("archive"));
+  byId("back")?.addEventListener("click", () => showView("extract"));
+  byId("save")?.addEventListener("click", () => submitPrep(prepView));
+  byId("retry")?.addEventListener("click", () => void run());
+  byId("copy")?.addEventListener("click", () => void copyPageText());
+  byId("keep")?.addEventListener("click", () => cancelCountdown());
 }
 
 function showStamp(kind: "error" | "offmenu", detail?: string) {
   settle();
   card.innerHTML = renderStamp(kind, detail);
-  // Colour v2.2 wants red contextually exclusive — action OR failure per
-  // screen. Disabling Fire already drops it to neutral ink, so a stamped
-  // card never shows two reds.
+  setExtractActions(ACTIONS.extract);
   const btn = fireBtn();
   if (btn) btn.disabled = true;
 }
@@ -118,15 +165,16 @@ function showError(error: unknown) {
     ? `<button id="retry" class="retry-btn" type="button">` +
       `<span>RETRY</span><span class="kbd">↵</span></button>`
     : "";
-  const copy = lastPageText
-    ? `<button id="copy" class="secondary-btn" type="button">Copy text</button>`
-    : "";
-  actions.innerHTML =
-    retry + copy + `<button id="prep" class="secondary-btn" type="button">Prep</button>`;
-
-  byId("retry")?.addEventListener("click", () => void run());
-  byId("prep")?.addEventListener("click", () => chrome.runtime.openOptionsPage());
-  byId("copy")?.addEventListener("click", () => void copyPageText());
+  // Deviation from the specimen's error row, which read RETRY · Copy text ·
+  // Prep. Prep and Archive are panes now rather than tabs, so they are the
+  // only navigation this window has — dropping Archive here would strand the
+  // user in a failed extraction with no route to their saved recipes. Copy
+  // keeps its ⌘C binding and its line in the fallback list above.
+  setExtractActions(
+    retry +
+      `<button id="prep" class="secondary-btn" type="button">Prep</button>` +
+      `<button id="archive" class="secondary-btn" type="button">Archive</button>`,
+  );
 
   (byId("retry") ?? byId("prep"))?.focus();
 }
@@ -210,17 +258,17 @@ function present(recipe: Recipe, fm: Frontmatter) {
   current = { recipe, fm };
   settle();
   card.innerHTML = renderCard(recipe, fm);
+  setExtractActions(ACTIONS.extract);
   const btn = fireBtn();
   if (btn) {
     btn.disabled = false;
-    btn.focus();
+    if (view === "extract") btn.focus();
   }
 }
 
 async function run() {
-  // A retry re-enters here with the error row on screen; put Fire back.
-  actions.innerHTML = DEFAULT_ACTIONS;
-  bindActions();
+  showView("extract");
+  setExtractActions(ACTIONS.extract);
   current = null;
   showSkeleton("reading");
 
@@ -301,31 +349,36 @@ async function run() {
   }
 }
 
+let countdownTimer: number | null = null;
+
+function cancelCountdown() {
+  if (countdownTimer !== null) clearInterval(countdownTimer);
+  countdownTimer = null;
+  setExtractActions(`<span class="countdown">Saved · Esc to close</span>`);
+}
+
 /**
  * Swap the action row for the receipt's countdown. "Keep open" exists because
  * the auto-close is a convenience, not a decision the user has to accept —
- * they may want to read the path before it goes.
+ * they may want to read the path, or open the Archive.
  */
 function startCountdown() {
   let remaining = Math.round(SPIKE_MS / 1000);
-  actions.innerHTML =
+  setExtractActions(
     `<span class="countdown">Closing in <strong>${remaining}s</strong></span>` +
-    `<button id="keep" class="secondary-btn" type="button">Keep open</button>`;
+      `<button id="keep" class="secondary-btn" type="button">Keep open</button>`,
+  );
 
-  const timer = setInterval(() => {
+  countdownTimer = setInterval(() => {
     remaining -= 1;
     const slot = actions.querySelector(".countdown strong");
     if (slot) slot.textContent = `${Math.max(0, remaining)}s`;
     if (remaining <= 0) {
-      clearInterval(timer);
+      if (countdownTimer !== null) clearInterval(countdownTimer);
+      countdownTimer = null;
       window.close();
     }
-  }, 1000);
-
-  byId("keep")?.addEventListener("click", () => {
-    clearInterval(timer);
-    actions.innerHTML = `<span class="countdown">Saved · Esc to close</span>`;
-  });
+  }, 1000) as unknown as number;
 }
 
 async function onFire() {
@@ -334,7 +387,7 @@ async function onFire() {
   if (btn) btn.disabled = true;
   try {
     // Claim the ticket now, at the moment the artifact is actually written,
-    // so The Pass numbers stay gapless across abandoned extractions.
+    // so Archive numbers stay gapless across abandoned extractions.
     const fm = { ...current.fm, ticket: await nextTicket() };
     await fire(current.recipe, fm);
 
@@ -356,12 +409,23 @@ async function onFire() {
 
 document.addEventListener("keydown", (event) => {
   if (event.key === "Escape") {
+    // Esc backs out of a detour before it closes the window.
+    if (view !== "extract") {
+      showView("extract");
+      return;
+    }
     window.close();
     return;
   }
 
-  // Enter drives whichever primary the current state offers.
   if (event.key === "Enter") {
+    if (view === "prep") {
+      event.preventDefault();
+      submitPrep(prepView);
+      return;
+    }
+    if (view === "archive") return;
+
     const retry = byId<HTMLButtonElement>("retry");
     if (retry) {
       event.preventDefault();
@@ -376,11 +440,15 @@ document.addEventListener("keydown", (event) => {
     return;
   }
 
-  // The error card's fallback list advertises P and ⌘C; honour them.
-  if (byId("retry") || byId("copy")) {
+  if (view !== "extract") return;
+
+  // The error card's fallback list advertises P and ⌘C; honour them. Keyed
+  // off the card itself, not off the Retry button — an unretryable failure
+  // (a rejected key) has no Retry but still lists both shortcuts.
+  if (card.querySelector(".callout.error")) {
     if (event.key === "p" && !event.metaKey && !event.ctrlKey) {
       event.preventDefault();
-      chrome.runtime.openOptionsPage();
+      showView("prep");
       return;
     }
     const copying = event.key === "c" && (event.metaKey || event.ctrlKey);
@@ -392,5 +460,5 @@ document.addEventListener("keydown", (event) => {
   }
 });
 
-bindActions();
+showView("extract");
 void run();

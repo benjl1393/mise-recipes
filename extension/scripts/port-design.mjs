@@ -2,14 +2,14 @@
  * Port the locked design system out of type-specimens/ into the extension.
  *
  * The specimen is the source of truth for type, colour, and icons (locked at
- * v2.2). Nothing under src/popup/popup.css, src/prep/prep.css,
- * src/pass/pass.css, or src/popup/glyphs.ts should be hand-edited — change the
- * specimen, run a desk crit, then re-run this:
+ * v2.2). Nothing under src/popup/popup.css or src/popup/glyphs.ts should be
+ * hand-edited — change the specimen, run a desk crit, then re-run this:
  *
  *   npm run port:design
  *
- * Extension-only chrome (the popup window box, The Pass list, the Prep form)
- * has no specimen equivalent and is authored here, clearly separated.
+ * Extension-only chrome (the popup window box, the Archive list, the Prep
+ * form) has no specimen equivalent and is authored here, clearly separated.
+ * All three views ship in one stylesheet because they share one window.
  */
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { dirname, resolve } from "node:path";
@@ -59,6 +59,10 @@ const banner = (surface, note) => `/* ══════════════
 `;
 
 // ── 2. popup.css ─────────────────────────────────────────────────
+// Prep and Archive are panes in this window, not pages. They used to open
+// tabs; Ben's note (2026-08-17) was that leaving the popup to change a
+// setting or check a past recipe breaks the "fire and leave" gesture the
+// product is built around. So there is one stylesheet and one window.
 const popupWindow = `
 /* ─── Popup window (extension-only; the specimen had no window) ── */
 
@@ -101,6 +105,42 @@ body {
 
 .popup-actions { flex: 0 0 auto; }
 
+/* ─── View routing ───────────────────────────────────────────────
+   Three surfaces share one window: the extraction card, Prep, and the
+   Archive. Only one is mounted at a time. [hidden] has to win over the
+   flex display below, hence !important. */
+[hidden] { display: none !important; }
+
+.surface {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  background: var(--bg-card);
+  color: var(--ink);
+}
+
+/* Every surface wears the ticket header, so switching views reads as
+   turning the ticket over rather than opening a different app. */
+.surface .ticket-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 18px;
+  border-bottom: 1px dashed var(--rule);
+  position: sticky;
+  top: 0;
+  background: var(--bg-card);
+  z-index: 1;
+}
+
+.surface .ticket-top .brand {
+  font-family: var(--font-display);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
 :focus-visible {
   outline: 2px solid var(--flame);
   outline-offset: 2px;
@@ -115,60 +155,19 @@ body {
 }
 `;
 
-writeFileSync(
-  `${ext}/src/popup/popup.css`,
-  [
-    banner("popup", "Tokens + every .popup rule; gallery chrome dropped."),
-    tokens,
-    popupRules,
-    popupWindow,
-  ].join("\n"),
-);
+// ── 3. Prep view — the form, scoped into the popup ───────────────
+// Was a full-width options page at max-width 560px; inside a 400px popup it
+// loses the centring wrapper and tightens its rhythm.
+const prepView = `
+/* ─── Prep (extension-only chrome) ───────────────────────────────── */
 
-// ── 3. prep.css — tokens plus a form, no card ────────────────────
-const prep = `${banner("Prep (options page)", "Tokens only; the form is extension-only.")}
-${tokens}
-
-* { box-sizing: border-box; }
-
-body {
-  margin: 0;
-  padding: var(--space-3xl) var(--space-xl);
-  background: var(--bg-page);
-  color: var(--paper-primary);
-  font-family: var(--font-body);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-.prep {
-  max-width: 560px;
-  margin: 0 auto;
-  background: var(--bg-card);
-  color: var(--ink);
-  border: 1px solid var(--rule);
-}
-
-.prep .ticket-top {
-  padding: 14px 18px;
-  border-bottom: 1px dashed var(--rule);
-}
-
-.prep .ticket-top .brand {
-  font-family: var(--font-display);
-  font-size: 10px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--ink);
-}
-
-form {
-  padding: var(--space-xl) 18px var(--space-2xl);
+#prep-view form {
+  padding: var(--space-lg) 18px var(--space-xl);
   display: grid;
-  gap: var(--space-xl);
+  gap: var(--space-lg);
 }
 
-.field {
+#prep-view .field {
   display: grid;
   gap: var(--space-sm);
   border: 0;
@@ -176,8 +175,8 @@ form {
   padding: 0;
 }
 
-.field .label,
-.field legend.label {
+#prep-view .field .label,
+#prep-view .field legend.label {
   font-family: var(--font-display);
   font-size: 10px;
   letter-spacing: 0.08em;
@@ -186,217 +185,190 @@ form {
   padding: 0;
 }
 
-.field input[type="password"],
-.field select {
+#prep-view .field input[type="password"],
+#prep-view .field select {
   font-family: var(--font-mono);
   font-size: 13px;
-  padding: 10px 12px;
+  padding: 9px 11px;
+  width: 100%;
   color: var(--ink);
   background: var(--paper-50);
   border: 1px solid var(--rule);
   border-radius: 0;
 }
 
-.field .hint {
+#prep-view .field .hint {
   font-family: var(--font-mono);
   font-size: 11px;
-  line-height: 1.5;
+  line-height: 1.45;
   color: var(--ink-dim);
 }
 
-.radios {
+#prep-view .radios {
   display: flex;
-  gap: var(--space-xl);
+  gap: var(--space-lg);
   font-family: var(--font-mono);
   font-size: 13px;
 }
 
 /* Form controls default to OS blue, which is the one colour the brutalist
    monochrome + flame system does not contain. Pull them onto the accent. */
-input[type="radio"],
-input[type="checkbox"] {
+#prep-view input[type="radio"],
+#prep-view input[type="checkbox"] {
   accent-color: var(--flame);
 }
 
-.field.checkbox {
+#prep-view .field.checkbox {
   grid-auto-flow: column;
   grid-template-columns: auto 1fr;
   justify-content: start;
   align-items: center;
   gap: var(--space-sm);
   font-family: var(--font-mono);
-  font-size: 13px;
+  font-size: 12px;
+  line-height: 1.4;
 }
 
-.actions { display: flex; align-items: center; gap: var(--space-lg); }
-
-.actions .fire-btn {
-  font-family: var(--font-display);
-  font-size: 11px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  padding: 11px 20px;
-  color: var(--paper-primary);
-  background: var(--flame);
-  border: 0;
-  border-radius: 0;
-  cursor: pointer;
-}
-
-.status {
+#prep-view .status {
   font-family: var(--font-mono);
   font-size: 11px;
   color: var(--flame);
   margin: 0;
+  padding: 0 18px var(--space-lg);
   min-height: 1em;
 }
-
-:focus-visible {
-  outline: 2px solid var(--flame);
-  outline-offset: 2px;
-}
 `;
-writeFileSync(`${ext}/src/prep/prep.css`, prep);
 
-// ── 4. pass.css — tokens + every .popup rule (an expanded row IS the card) ──
-const pass = `${banner("The Pass (full-tab history)", "Tokens + .popup rules; an expanded row IS the card.")}
-${tokens}
+// ── 4. Archive view — the list, rebuilt for 400px ────────────────
+// The full-tab layout used a 7ch/1fr/12ch/22ch row and a 240px search field;
+// neither survives a 400px window. Rows stack to two lines instead, and an
+// expanded row still renders the real card.
+const archiveView = `
+/* ─── Archive (extension-only chrome) ────────────────────────────── */
 
-${popupRules}
-
-/* ─── The Pass (extension-only chrome) ────────────────────────── */
-
-* { box-sizing: border-box; }
-
-body {
-  margin: 0;
-  background: var(--bg-page);
-  color: var(--paper-primary);
-  font-family: var(--font-body);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-.pass-head {
+#archive-view .arch-tools {
   display: grid;
-  grid-template-columns: 1fr auto auto;
-  gap: var(--space-lg);
-  align-items: center;
-  padding: var(--space-xl) var(--space-2xl);
-  border-bottom: 1px solid var(--rule-dark);
+  grid-template-columns: 1fr auto;
+  gap: var(--space-sm);
+  padding: 10px 18px;
+  border-bottom: 1px solid var(--rule);
+  position: sticky;
+  top: 41px;
+  background: var(--bg-card);
+  z-index: 1;
 }
 
-.pass-head h1 {
-  font-family: var(--font-display);
-  font-weight: 400;
-  font-size: clamp(20px, 3vw, 32px);
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
-  margin: 0;
-}
-
-.pass-head input {
+#archive-view .arch-tools input {
   font-family: var(--font-mono);
   font-size: 12px;
-  padding: 8px 10px;
-  min-width: 240px;
-  color: var(--paper-primary);
-  background: var(--bg-panel);
-  border: 1px solid var(--rule-dark);
+  padding: 7px 9px;
+  width: 100%;
+  color: var(--ink);
+  background: var(--paper-50);
+  border: 1px solid var(--rule);
   border-radius: 0;
 }
 
-.pass-head button {
+#archive-view .arch-tools button {
   font-family: var(--font-display);
   font-size: 10px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  padding: 9px 14px;
-  color: var(--paper-primary);
+  padding: 7px 11px;
+  color: var(--ink-secondary);
   background: transparent;
-  border: 1px solid var(--rule-dark);
+  border: 1px solid var(--rule);
   border-radius: 0;
   cursor: pointer;
 }
 
-.pass-head button:hover { border-color: var(--paper-muted); }
-
-.pass-list {
-  padding: var(--space-2xl);
-  display: grid;
-  gap: 1px;
-  background: var(--rule-dark);
-  max-width: 1100px;
-  margin: 0 auto;
+#archive-view .arch-tools button:hover {
+  color: var(--flame);
+  border-color: var(--flame);
 }
 
-.pass-row {
+#archive-view .arch-list { display: block; }
+
+#archive-view .arch-row {
   display: grid;
-  grid-template-columns: 7ch 1fr 12ch 22ch;
-  gap: var(--space-lg);
+  grid-template-columns: 6ch 1fr;
+  column-gap: var(--space-md);
+  row-gap: 2px;
   align-items: baseline;
-  padding: var(--space-md) var(--space-lg);
-  background: var(--bg-page);
-  font-family: var(--font-mono);
-  font-size: 12px;
-  cursor: pointer;
-  border: 0;
+  padding: 10px 18px;
   width: 100%;
   text-align: left;
-  color: inherit;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px dashed var(--rule);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--ink);
+  cursor: pointer;
 }
 
-.pass-row:hover,
-.pass-row:focus-visible,
-.pass-row[aria-expanded="true"] { background: var(--bg-panel); }
+#archive-view .arch-row:hover,
+#archive-view .arch-row[aria-expanded="true"] { background: var(--paper-50); }
 
-.pass-row .no { font-family: var(--font-display); color: var(--paper-muted); }
-.pass-row .title { color: var(--paper-primary); }
-.pass-row .meta {
-  color: var(--paper-muted);
+#archive-view .arch-row .no {
+  grid-row: span 2;
+  font-family: var(--font-display);
+  font-size: 11px;
+  color: var(--ink-dim);
+}
+
+#archive-view .arch-row .title {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--ink);
+}
+
+#archive-view .arch-row .meta {
+  grid-column: 2;
+  font-size: 10px;
+  color: var(--ink-dim);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.pass-detail {
-  background: var(--bg-page);
-  padding: var(--space-xl);
-  display: flex;
-  justify-content: center;
+/* An expanded row shows the real card, so the Archive and the extraction
+   screen are never two renderings of the same recipe. */
+#archive-view .arch-detail {
+  border-bottom: 1px solid var(--rule);
+  background: var(--paper-50);
 }
 
-.pass-detail .popup {
-  width: 400px;
-  border: 1px solid var(--rule);
-  box-shadow: 0 20px 60px -20px var(--shadow);
+#archive-view .arch-detail .popup {
+  width: 100%;
+  border: 0;
+  box-shadow: none;
+  overflow: visible;
 }
 
-.pass-empty {
-  background: var(--bg-page);
-  padding: var(--space-4xl);
+#archive-view .arch-empty {
+  padding: var(--space-3xl) var(--space-xl);
   text-align: center;
   font-family: var(--font-display);
-  font-size: 12px;
+  font-size: 11px;
   letter-spacing: 0.08em;
-  color: var(--paper-muted);
+  text-transform: uppercase;
+  color: var(--ink-dim);
   margin: 0;
 }
-
-:focus-visible {
-  outline: 2px solid var(--flame);
-  outline-offset: 2px;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
-}
 `;
-writeFileSync(`${ext}/src/pass/pass.css`, pass);
+
+writeFileSync(
+  `${ext}/src/popup/popup.css`,
+  [
+    banner("popup", "Tokens + every .popup rule, plus the Prep and Archive views."),
+    tokens,
+    popupRules,
+    popupWindow,
+    prepView,
+    archiveView,
+  ].join("\n"),
+);
 
 // ── 5. glyphs.ts — the pixel-art stamp marks ─────────────────────
 const svgs = [...html.matchAll(/<span class="glyph-mark">(<svg[\s\S]*?<\/svg>)<\/span>/g)].map(

@@ -39,7 +39,7 @@ export interface Frontmatter {
   scaled?: number;
 }
 
-/** One fired ticket, as stored in The Pass. */
+/** One fired ticket, as stored in the Archive. */
 export interface Ticket {
   frontmatter: Omit<Frontmatter, "captured"> & { captured: string };
   recipe: Recipe;

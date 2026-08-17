@@ -74,7 +74,7 @@ describe("fire", () => {
     });
   });
 
-  it("records the ticket in The Pass", async () => {
+  it("records the ticket in the Archive", async () => {
     await fire(recipe, fm);
     const tickets = await listTickets();
     expect(tickets).toHaveLength(1);

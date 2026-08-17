@@ -7,7 +7,7 @@ import {
   peekTicket,
   saveTicket,
   listTickets,
-  clearPass,
+  clearArchive,
 } from "../src/lib/storage";
 import type { Ticket } from "../src/lib/types";
 
@@ -85,7 +85,7 @@ describe("nextTicket", () => {
   });
 });
 
-describe("The Pass", () => {
+describe("the Archive", () => {
   it("returns an empty list before anything is fired", async () => {
     expect(await listTickets()).toEqual([]);
   });
@@ -107,7 +107,42 @@ describe("The Pass", () => {
 
   it("clears", async () => {
     await saveTicket(ticket(1));
-    await clearPass();
+    await clearArchive();
+    expect(await listTickets()).toEqual([]);
+  });
+});
+
+/**
+ * "The Pass" became "Archive" on 2026-08-17, which moved the storage key.
+ * Anything already fired has to survive that — the whole product promise is
+ * that these artifacts persist.
+ */
+describe("archive migration from mise:pass", () => {
+  it("reads a legacy archive when the new key is absent", async () => {
+    installChromeMock({ "mise:pass": [ticket(2), ticket(1)] });
+    const tickets = await listTickets();
+    expect(tickets).toHaveLength(2);
+    expect(tickets[0]!.frontmatter.ticket).toBe(2);
+  });
+
+  it("rewrites legacy entries under the new key on the next save", async () => {
+    const store = installChromeMock({ "mise:pass": [ticket(1)] });
+    await saveTicket(ticket(2));
+    expect((store["mise:archive"] as unknown[]).length).toBe(2);
+    expect(await listTickets()).toHaveLength(2);
+  });
+
+  it("prefers the new key once it exists", async () => {
+    installChromeMock({ "mise:pass": [ticket(9)], "mise:archive": [ticket(1)] });
+    const tickets = await listTickets();
+    expect(tickets).toHaveLength(1);
+    expect(tickets[0]!.frontmatter.ticket).toBe(1);
+  });
+
+  // Without dropping the legacy key, a cleared archive would come back.
+  it("does not resurrect the legacy archive after clearing", async () => {
+    installChromeMock({ "mise:pass": [ticket(1), ticket(2)] });
+    await clearArchive();
     expect(await listTickets()).toEqual([]);
   });
 });

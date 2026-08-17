@@ -1,7 +1,7 @@
 # Mise — `.md` Format Specification
 
 **Status:** v1 draft (2026-04-22)
-**Source of truth:** this document. Popup, PDF, and The Pass history view are typographic renderings of the format defined here. Nothing may appear in a rendered surface without a corresponding `.md` field.
+**Source of truth:** this document. Popup, PDF, and the Archive view are typographic renderings of the format defined here. Nothing may appear in a rendered surface without a corresponding `.md` field.
 
 ---
 
@@ -249,7 +249,7 @@ total: 2h 10m
 
 ## Rendering Rules
 
-The `.md` is the source. Popup, PDF, and The Pass are typographic renderings. Content parity is mandatory.
+The `.md` is the source. Popup, PDF, and the Archive are typographic renderings. Content parity is mandatory.
 
 ### Core principle — no invented styling
 
@@ -305,7 +305,7 @@ Case follows font: chrome rows are `uppercase` via CSS (source stays normal-case
 - Cream card on white page.
 - Footer gains a small Mise wordmark + source URL + captured timestamp for provenance.
 
-### The Pass (chrome-extension:// full-tab history view)
+### Archive (a pane in the popup; renamed from The Pass 2026-08-17)
 
 - List view: one row per ticket. Row shows `NO. <number>` · title · captured · source domain. Mono throughout.
 - Click row → expand in-place to the same popup card layout.

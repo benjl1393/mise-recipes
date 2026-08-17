@@ -40,7 +40,7 @@ if (!sw) {
 
 const extId = sw ? new URL(sw.url()).host : null;
 
-async function visit(name, path, prep) {
+async function visit(name, path, prep, clickSelector) {
   if (!extId) return;
   const page = await ctx.newPage();
   page.on("console", (m) => {
@@ -50,30 +50,25 @@ async function visit(name, path, prep) {
   if (prep) await page.addInitScript(prep);
   await page.goto(`chrome-extension://${extId}/${path}`, { waitUntil: "load" });
   await page.waitForTimeout(1200);
+  if (clickSelector) {
+    const button = page.locator(clickSelector);
+    if ((await button.count()) === 0) {
+      note(name, `no route to this view: ${clickSelector} is not in the action row`);
+      await page.close();
+      return;
+    }
+    await button.click();
+    await page.waitForTimeout(600);
+  }
   await page.screenshot({ path: `${SHOTS}/smoke-${name}.png`, fullPage: true });
   const text = (await page.locator("body").innerText()).replace(/\s+/g, " ").trim();
   console.log(`✓ ${name}: ${text.slice(0, 110)}`);
   await page.close();
 }
 
-// Popup with no key configured — should land on the Kitchen Error stamp.
-await visit("popup-nokey", "popup/popup.html");
-
-// Prep, pre-seeded so the form has something to load.
-await visit("prep", "prep/prep.html", () => {
-  // eslint-disable-next-line no-undef
-  chrome.storage.local.set({
-    "mise:settings": {
-      apiKey: "sk-ant-fake",
-      units: "imperial",
-      model: "claude-opus-5",
-      captureFrames: false,
-    },
-  });
-});
-
-// The Pass, pre-seeded with two tickets.
-await visit("pass", "pass/pass.html", () => {
+// Prep and Archive are panes in the popup now, not pages — there is one
+// document to load and the views are reached by clicking the action row.
+const seed = () => {
   const t = (n, title) => ({
     frontmatter: {
       ticket: n,
@@ -92,9 +87,22 @@ await visit("pass", "pass/pass.html", () => {
   });
   // eslint-disable-next-line no-undef
   chrome.storage.local.set({
-    "mise:pass": [t(2, "Cacio e Pepe"), t(1, "Gochujang-Glazed Pork Belly")],
+    "mise:settings": {
+      apiKey: "",
+      units: "imperial",
+      model: "claude-opus-5",
+      captureFrames: false,
+    },
+    "mise:archive": [t(2, "Cacio e Pepe"), t(1, "Gochujang-Glazed Pork Belly")],
   });
-});
+};
+
+// No key configured — should land on the Kitchen Error card.
+await visit("popup-nokey", "popup/popup.html", seed);
+
+// Then the two panes, reached the way a user reaches them.
+await visit("prep", "popup/popup.html", seed, "#prep");
+await visit("archive", "popup/popup.html", seed, "#archive");
 
 await ctx.close();
 

@@ -21,7 +21,6 @@
     "service_worker": "background/service-worker.js",
     "type": "module"
   },
-  "options_page": "prep/prep.html",
   "permissions": ["activeTab", "contextMenus", "downloads", "scripting", "storage"],
   "host_permissions": ["https://api.anthropic.com/*"],
   "optional_host_permissions": ["<all_urls>"],

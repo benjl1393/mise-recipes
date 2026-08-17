@@ -82,7 +82,7 @@ This means NONE of:
 - `prefers-reduced-motion` respected on the skeleton→filled transition
 
 **Design-system reuse:**
-- Same type + color system powers: the popup card, the `.md` frontmatter rendering, the PDF template, The Pass history view, and the Next.js fallback site
+- Same type + color system powers: the popup card, the `.md` frontmatter rendering, the PDF template, the Archive view, and the Next.js fallback site
 - One palette, one type scale, three surfaces
 
 ## The internal kitchen language
@@ -91,8 +91,8 @@ Names are load-bearing. Use them in code, UI, docs, and commit messages.
 
 - **Mise** — product name (pronounced "meez")
 - **Fire** — primary save button / action
-- **The Pass** — full-tab history view
-- **Prep** — options/settings page
+- **Archive** — the list of everything fired from this device. A pane in the popup, not a tab. Renamed from **The Pass** (2026-08-17) for the same reason In the Weeds became Kitchen Error: the kitchen term did not say what the view held. Archive also names the product promise — artifacts owned in perpetuity — rather than the mechanism.
+- **Prep** — settings. Also a pane in the popup; the `options_page` was removed 2026-08-17
 - **Off Menu** — empty state: the page has no recipe to extract
 
 The error-state stamp reads **"Kitchen Error"** — the kitchen register is kept, but the word "Error" makes the failure unmistakable. Renamed from **"In the Weeds"** (dropped 2026-06-08 — too opaque; the weed pun didn't read as "something went wrong"). The refinement keeps a little voice while prioritising clarity. (The ticket-top status line may still read "EXTRACTION FAILED" as a plain descriptor; the *stamp* is "Kitchen Error".)
@@ -180,12 +180,36 @@ fallback list was missing. Remaining `MISSING` entries are the unbuilt picker
 / filmstrip states plus dead specimen scaffolding (`.popup-frame`,
 `.chrome-caption`) — treat a *new* entry as a regression.
 
-**The design system is generated, not hand-written.** `src/popup/popup.css`,
-`src/prep/prep.css`, `src/pass/pass.css`, and `src/popup/glyphs.ts` all come
-out of `type-specimens/popup-states.html` via `extension/scripts/port-design.mjs`.
-Never hand-edit them: change the specimen, run a desk crit, then `npm run
-port:design`. Extension-only chrome (the popup window box, the Prep form, The
-Pass list) has no specimen equivalent and is authored inside that script.
+**The design system is generated, not hand-written.** `src/popup/popup.css`
+and `src/popup/glyphs.ts` come out of `type-specimens/popup-states.html` via
+`extension/scripts/port-design.mjs`. Never hand-edit them: change the specimen,
+run a desk crit, then `npm run port:design`. Extension-only chrome (the popup
+window box, the Prep form, the Archive list) has no specimen equivalent and is
+authored inside that script.
+
+### One window, three panes
+
+Prep and Archive were separate pages that opened tabs. Ben's note (2026-08-17):
+leaving the popup to change a setting or check a past recipe breaks the
+fire-and-leave gesture the product is built around. They are panes now —
+`src/popup/views/prep.ts` and `views/archive.ts`, mounted into `#prep-view` /
+`#archive-view`, routed by `showView()`. There is one stylesheet, one document,
+and no `options_page`.
+
+Consequences worth knowing:
+
+- **Returning from a pane must never re-run `run()`.** The extract view's
+  action row is remembered in `extractActions` and restored on the way back,
+  so a filled card, an error row or the fired receipt all survive the detour.
+  Re-running would cost another billed call.
+- **Prep and Archive are the only navigation this window has**, so both buttons
+  persist in the error row too. That deviates from the specimen's error row
+  (RETRY · Copy text · Prep); dropping Archive there would strand the user in a
+  failed extraction with no route to their recipes. Copy keeps ⌘C and its line
+  in the fallback list. **Owed a desk crit.**
+- **`Esc` backs out of a pane before it closes the window.**
+- The Archive list is authored for 400px — two-line rows, not the old
+  7ch/1fr/12ch/22ch full-tab grid.
 
 **Markup must match the specimen's tags**, because the ported CSS keys off
 them: `h2.title`, `h3.section`, `.facts .fact > strong`, `ul.ingredients li >
@@ -255,6 +279,22 @@ home cook nothing, which is why the taxonomy exists.
   shows only the chyron and progress meter.
 - **Safari** — `safari-web-extension-converter` wraps a finished Chrome build.
 - **Landing page.**
+
+### Deferred to launch — multi-provider keys
+
+**Decided 2026-08-17, explicitly not to be built yet.** At launch Prep should
+accept a token from any AI provider — OpenAI, Grok, Anthropic, and whatever
+else — not Anthropic alone. Until then Ben is the only user and BYOK-Anthropic
+is sufficient.
+
+Why it is worth noting now rather than discovering later: BYOK already means
+the user brings their own credential, so provider choice is the same shape of
+decision, not a new one. But it does touch three places that are currently
+Anthropic-shaped — `createClient`, the structured-output call in
+`extractRecipe` (`output_config.format`, `parsed_output`), and the vision
+content blocks. Those are the seams to keep clean; a provider adapter is the
+obvious form. Do not generalise them speculatively before the feature is
+actually scheduled.
 
 ### Process — desk crits, not handoffs
 

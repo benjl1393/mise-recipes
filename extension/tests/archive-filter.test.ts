@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { filterTickets } from "../src/lib/pass-filter";
+import { filterTickets } from "../src/lib/archive-filter";
 import type { Ticket } from "../src/lib/types";
 
 const make = (n: number, title: string, tags: string[], source: string): Ticket => ({
