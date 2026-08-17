@@ -147,7 +147,7 @@ Three elements, in order: horizontal rule, tag line, blank line, footer.
 
 ### Tag line
 
-- One line of inline hashtags, joined by `  ·  ` (same separator as ingredients).
+- One line of inline hashtags, joined by ` · ` — **single** spaces around the middle-dot, unlike the five-character ingredient separator. The ingredient separator is wide because it doubles as the qty/item column gutter; the tag line is an inline run with nothing to align, so it takes the narrow form. (Corrected 2026-08-17: this line previously claimed the ingredient separator, contradicting every rendered example in this document and in `type-specimens/`.)
 - Tags are Mise-generated at extraction time; user can add/remove/custom-add via the Prep panel.
 - Indexed natively by Obsidian (tag pane + Dataview), Apple Notes (tag system), and Notion (hashtag chips).
 - Stored **only inline** — not duplicated in frontmatter. Obsidian indexes inline hashtags identically to frontmatter `tags:` fields.
