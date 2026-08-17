@@ -11,7 +11,8 @@
     "test:watch": "vitest",
     "build:ext": "node extension/build.mjs",
     "watch:ext": "node extension/build.mjs --watch",
-    "test:ext": "vitest run --root extension"
+    "test:ext": "vitest run --root extension",
+    "port:design": "node extension/scripts/port-design.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.89.0",
