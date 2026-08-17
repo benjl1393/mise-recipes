@@ -14,7 +14,8 @@
     "test:ext": "vitest run --root extension",
     "port:design": "node extension/scripts/port-design.mjs",
     "smoke:ext": "node extension/scripts/smoke.mjs",
-    "audit:ext": "node extension/scripts/audit-port.mjs"
+    "audit:ext": "node extension/scripts/audit-port.mjs",
+    "test:live": "vitest run --root extension --config vitest.live.config.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.89.0",

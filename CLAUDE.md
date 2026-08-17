@@ -152,6 +152,23 @@ npm run test:ext       # vitest, 145 tests
 npm run port:design    # re-port CSS + glyphs from type-specimens/
 npm run smoke:ext      # load in real Chromium, assert all surfaces boot
 npm run audit:ext      # diff popup.css classes against what the renderer emits
+npm run test:live      # REAL billed calls to api.anthropic.com — opt-in, needs a key
+```
+
+**`test:live` is the only thing that proves the API contract.** Every test in
+`tests/*.test.ts` mocks `client.messages.parse`, so they prove this code
+handles a well-formed response and nothing about whether Anthropic produces
+one. The live tests cover request shape, `parsed_output`, unit switching, the
+`found: false` decline, and the vision blocks. They live in `tests/live/` under
+a separate filename pattern (`*.live.ts`) and a separate config, so
+`test:ext` can never run them by accident and bill you.
+
+The key is read from `ANTHROPIC_API_KEY` in the environment, or a gitignored
+`.env.local`. **Nothing in this repo ever writes the key** — creating that
+file is the user's job:
+
+```
+ANTHROPIC_API_KEY=sk-ant-... npm run test:live
 ```
 
 **`audit:ext` exists because unit tests cannot see an unstyled card.** It
