@@ -78,3 +78,70 @@ describe("pickSource", () => {
     expect(JSON_LD_SELECTOR).toBe('script[type="application/ld+json"]');
   });
 });
+
+/**
+ * Instagram and TikTok are React shells: Readability finds no article, so the
+ * raw body text is navigation, sidebar and comment chrome. Its length says
+ * nothing about whether the page has prose — which is how a Reel used to be
+ * classified "article text" and sent to Claude as a wall of menu items.
+ */
+describe("social video pages", () => {
+  const CHROME =
+    "Search Home Reels Messages Notifications Create Profile Log in Sign up ".repeat(20);
+
+  const reel = (caption: string) =>
+    docFrom(
+      `<html><head><meta property="og:description" content="${caption}" /></head>` +
+        `<body><div>${CHROME}</div><video src="v.mp4"></video></body></html>`,
+    );
+
+  it("reads the caption from og:description rather than the page shell", () => {
+    const doc = reel("Crispy gochujang pork belly — 800g pork belly, 3 tbsp gochujang.");
+    const payload = pickSource(doc, "https://instagram.com/reel/C9xK2");
+    expect(payload.via).toBe("caption only");
+    expect(payload.text).toContain("gochujang pork belly");
+    expect(payload.text).not.toContain("Notifications");
+  });
+
+  it("does not let a long UI shell masquerade as an article", () => {
+    expect(CHROME.length).toBeGreaterThan(400);
+    expect(pickSource(reel("Short caption."), "https://instagram.com/reel/x").via).toBe(
+      "caption only",
+    );
+  });
+
+  it("falls back to twitter:description when og is absent", () => {
+    const doc = docFrom(
+      `<html><head><meta name="twitter:description" content="Tteokbokki in 15 minutes." />` +
+        `</head><body><video></video></body></html>`,
+    );
+    const payload = pickSource(doc, "https://tiktok.com/@x/video/1");
+    expect(payload.via).toBe("caption only");
+    expect(payload.text).toBe("Tteokbokki in 15 minutes.");
+  });
+
+  it("still reports hasVideo so frames are captured", () => {
+    expect(pickSource(reel("A caption."), "https://instagram.com/reel/x").hasVideo).toBe(true);
+  });
+
+  it("leaves a real article page on the article path", () => {
+    const doc = docFrom(
+      `<html><head><meta property="og:description" content="A teaser blurb." /></head>` +
+        `<body><article><h1>Pork Belly</h1>` +
+        "<p>Real prose about roasting pork belly slowly until the skin shatters.</p>".repeat(12) +
+        `</article></body></html>`,
+    );
+    const payload = pickSource(doc, "https://example.com/pork");
+    expect(payload.via).toBe("article text");
+    expect(payload.text).toContain("skin shatters");
+  });
+
+  it("keeps schema data ahead of any caption", () => {
+    const doc = docFrom(
+      `<html><head><script type="application/ld+json">{"@type":"Recipe","name":"Japchae"}</script>` +
+        `<meta property="og:description" content="ignore me" />` +
+        `</head><body><video></video></body></html>`,
+    );
+    expect(pickSource(doc, "https://example.com").via).toBe("schema data");
+  });
+});

@@ -191,6 +191,30 @@ Consequence for ticket numbers: the card shows its number *before* the user
 fires, so display calls `peekTicket()` and only `fire()` calls `nextTicket()`.
 Allocating at extract time burned a number on every popup re-open.
 
+### Video capture and social pages
+
+**Never call `chrome.permissions.request()` from the extraction flow.** It
+requires a live user gesture, and by the time the video branch is reached the
+popup has awaited settings, the tab query, the cache and the content script —
+the gesture is long gone, so it throws and takes the whole extraction with it.
+It is also unnecessary: `activeTab` already grants `tabs.captureVisibleTab` on
+the tab the user invoked Mise from. (Proof it is granted: `executeScript`
+works on the same tab, via the same permission.) `optional_host_permissions`
+stays in the manifest per spec but nothing requests it.
+
+Frame capture failures are caught and swallowed — a caption with no frames
+still beats no recipe, because on a Reel the caption usually *is* the recipe.
+
+**Social video hosts are matched by hostname, not by heuristic**
+(`SOCIAL_VIDEO_HOSTS` in `page-source.ts`). Readability frequently *succeeds*
+on Instagram/TikTok/YouTube — it latches onto a sidebar or comment column and
+returns a confident block of navigation — so neither "did parsing work" nor
+"is the text long" can detect an app shell; both are satisfied by chrome. On
+those hosts the caption comes from `og:description` (then `twitter:description`,
+then `description`), which is where these platforms actually publish the post
+text. Caveat: on long-form YouTube `og:description` can be a truncated video
+description, so the frames carry most of the signal there by design.
+
 ### Failure states
 
 `src/popup/errors.ts` classifies a thrown error into a shouted label, an HTTP

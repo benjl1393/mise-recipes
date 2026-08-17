@@ -251,9 +251,13 @@ async function run() {
 
     let frames: string[] = [];
     if (reply && payload.hasVideo && settings.captureFrames) {
-      const granted = await chrome.permissions.request({ origins: ["<all_urls>"] });
-      if (granted) {
-        showSkeleton("capturing", { url: activeTabUrl, via: payload.via });
+      showSkeleton("capturing", { url: activeTabUrl, via: payload.via });
+      try {
+        // No permissions.request() here. `activeTab` already grants
+        // captureVisibleTab on the tab the user invoked us from, and
+        // permissions.request() requires a live user gesture — which is long
+        // gone after awaiting settings, the tab query, the cache and the
+        // content script. Asking here threw and killed every video capture.
         frames = await captureFrames(tab.id, {
           crop: reply.videoRect,
           devicePixelRatio: reply.devicePixelRatio,
@@ -261,6 +265,9 @@ async function run() {
         if (frames.length > 0) {
           payload.via = `${frames.length} video frames` as ViaMethod;
         }
+      } catch {
+        // A caption plus no frames still beats no recipe at all — the caption
+        // on a Reel is usually the recipe. Fall through with what we have.
       }
     }
 
