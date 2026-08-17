@@ -132,9 +132,51 @@ See the global `design-anti-ai-defaults.md` rule and `design-studio-principles.m
 2. ~~Logo mark + extension icon set~~ — done; "The Spike" (2026-06-07) → repivoted to **plate + mono-M** (2026-06-08, see "Logo mark" section above)
 3. Motion (`/flow` → `impeccable:animate`)
 4. Microcopy pass (`ux-copywriter`)
-5. Adversarial critique (`impeccable:critique` + `web-design-guidelines`)
-6. Final polish
-7. Build track — Chrome MV3 scaffold + Next.js landing (`superpowers:writing-plans`)
+5. Adversarial critique (`impeccable:critique` + `web-design-guidelines`) — **still owed a desk crit**
+6. Final polish — **still owed a desk crit**
+7. ~~Build track — Chrome MV3 extension~~ — done 2026-08-17, see `extension/` and the plan at `docs/superpowers/plans/2026-08-17-mise-extension.md`
+
+Steps 5 and 6 were skipped, not completed: the build ran ahead of them because
+crits need Ben in the room. The extension is a working target to crit against
+now — which is a better artifact to critique than the specimens were.
+
+## The extension (`extension/`)
+
+Chrome MV3, TypeScript, esbuild, no framework. Zero backend — the popup calls
+the Anthropic API directly with the user's key from `chrome.storage.local`.
+
+```
+npm run build:ext      # bundle to extension/dist (load unpacked from there)
+npm run watch:ext      # rebuild on change
+npm run test:ext       # vitest, 105 tests
+npm run port:design    # re-port CSS + glyphs from type-specimens/
+npm run smoke:ext      # load in real Chromium, assert all surfaces boot
+```
+
+**The design system is generated, not hand-written.** `src/popup/popup.css`,
+`src/prep/prep.css`, `src/pass/pass.css`, and `src/popup/glyphs.ts` all come
+out of `type-specimens/popup-states.html` via `extension/scripts/port-design.mjs`.
+Never hand-edit them: change the specimen, run a desk crit, then `npm run
+port:design`. Extension-only chrome (the popup window box, the Prep form, The
+Pass list) has no specimen equivalent and is authored inside that script.
+
+**Markup must match the specimen's tags**, because the ported CSS keys off
+them: `h2.title`, `h3.section`, `.facts .fact > strong`, `ul.ingredients li >
+.qty`, `ol.method` (numbering via `::before` — never hand-number), `.tags .tag`,
+`.stamp` + `.glyph-mark` + `h2.stamp-title`.
+
+**Model:** `claude-haiku-4-5` by default, switchable to `claude-opus-5` in Prep.
+Haiku 4.5 supports structured outputs and vision but **not** `output_config.effort`
+or adaptive thinking — sending either is a 400.
+
+### Not built yet
+
+- **PDF export** — the `.pdf` action in the specimen needs the Next.js
+  `/api/export/pdf` route; the button is not in the extension's action row.
+- **Servings scaler, unit re-toggle, and the ambiguous/low-confidence picker
+  states** — designed in `popup-states.html`, not wired.
+- **Safari** — `safari-web-extension-converter` wraps a finished Chrome build.
+- **Landing page.**
 
 ### Process — desk crits, not handoffs
 
