@@ -2,6 +2,8 @@
 
 # dependencies
 /node_modules
+# Unanchored so nested workspaces (extension/) are covered too.
+node_modules/
 /.pnp
 .pnp.*
 .yarn/*

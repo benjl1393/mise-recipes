@@ -211,6 +211,13 @@ form {
   font-size: 13px;
 }
 
+/* Form controls default to OS blue, which is the one colour the brutalist
+   monochrome + flame system does not contain. Pull them onto the accent. */
+input[type="radio"],
+input[type="checkbox"] {
+  accent-color: var(--flame);
+}
+
 .field.checkbox {
   grid-auto-flow: column;
   grid-template-columns: auto 1fr;
