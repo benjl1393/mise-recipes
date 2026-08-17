@@ -44,3 +44,6 @@ next-env.d.ts
 # scratch + tool trails
 .scratch/
 .playwright-mcp/
+
+# Mise extension build output
+extension/dist/

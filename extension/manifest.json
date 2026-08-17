@@ -1,0 +1,37 @@
+{
+  "manifest_version": 3,
+  "name": "Mise",
+  "version": "0.1.0",
+  "description": "Fire recipes from anywhere to portable .md files you own.",
+  "icons": {
+    "16": "icons/mise-icon-16.png",
+    "32": "icons/mise-icon-32.png",
+    "48": "icons/mise-icon-48.png",
+    "128": "icons/mise-icon-128.png"
+  },
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_title": "Fire this recipe to Mise",
+    "default_icon": {
+      "16": "icons/mise-icon-16.png",
+      "32": "icons/mise-icon-32.png"
+    }
+  },
+  "background": {
+    "service_worker": "background/service-worker.js",
+    "type": "module"
+  },
+  "options_page": "prep/prep.html",
+  "permissions": ["activeTab", "contextMenus", "downloads", "scripting", "storage"],
+  "host_permissions": ["https://api.anthropic.com/*"],
+  "optional_host_permissions": ["<all_urls>"],
+  "commands": {
+    "_execute_action": {
+      "suggested_key": { "default": "Ctrl+Shift+M", "mac": "Command+Shift+M" },
+      "description": "Fire the current page to Mise"
+    }
+  },
+  "web_accessible_resources": [
+    { "resources": ["fonts/*"], "matches": ["<all_urls>"] }
+  ]
+}
