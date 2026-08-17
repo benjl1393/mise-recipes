@@ -27,11 +27,21 @@ export function liveKey(): string | null {
 
   for (const path of candidates) {
     if (!existsSync(path)) continue;
-    const match = /^\s*ANTHROPIC_API_KEY\s*=\s*(.+)$/m.exec(readFileSync(path, "utf8"));
-    if (!match?.[1]) continue;
-    // Tolerate quoted values and trailing comments.
-    const value = match[1].trim().replace(/\s+#.*$/, "").replace(/^["']|["']$/g, "");
-    if (value) return value;
+    const contents = readFileSync(path, "utf8");
+
+    const assigned = /^\s*ANTHROPIC_API_KEY\s*=\s*(.+)$/m.exec(contents);
+    if (assigned?.[1]) {
+      // Tolerate quoted values and trailing comments.
+      const value = assigned[1].trim().replace(/\s+#.*$/, "").replace(/^["']|["']$/g, "");
+      if (value) return value;
+    }
+
+    // Also accept a file that is just the key. Writing the bare secret is the
+    // obvious thing to do when told "put your key in this file", and failing
+    // with "no key found" while staring at a file containing the key is a
+    // needlessly bad experience.
+    const bare = /^\s*(sk-ant-[A-Za-z0-9_-]+)\s*$/m.exec(contents);
+    if (bare?.[1]) return bare[1];
   }
   return null;
 }

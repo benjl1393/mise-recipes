@@ -81,7 +81,10 @@ PAGE TITLE: ${payload.title}
 Rules:
 - Output ${units} units throughout, temperatures in ${temperature}.
 - Convert by ingredient density, not naive math: "⅓ cup" becomes "80 ml", "1 cup flour" becomes "125 g flour" (weight is preferred for baking). Round to culturally natural increments — use vulgar fractions (½, ⅓, ¼, ¾) rather than decimals where a cook would.
-- Quantities put a space between number and unit. Use the em-dash "—" as the quantity for finishing garnishes with no measurable amount.
+- Quantities put a space between number and unit. Abbreviate MEASUREMENT units to their short form — g, kg, ml, l, tbsp, tsp, oz, lb, cup — even when the source spells them out: write "3 tbsp", never "3 tablespoons".
+- Countable and descriptive units belong in the quantity and keep their word: "4 cloves" + "garlic, crushed", "1 thumb" + "ginger, julienned", "2 sprigs", "1 can". Never push these into the item.
+- Use vulgar fractions (½ ⅓ ¼ ⅔ ¾) rather than decimals. Write "1½ tbsp", never "1.5 tbsp". Do not normalise the source's own style — normalise to this one.
+- Use the em-dash "—" as the quantity for finishing garnishes with no measurable amount.
 - Ingredient items are lowercase prose; brief modifiers like "crushed" or "skin-on" are welcome.
 - Method steps are flat prose. If the source nests sub-steps, flatten them into one paragraph with em-dashes or semicolons.
 - Notes are only for genuine extra context — substitutions, source tips, provenance. Omit the field rather than padding it.

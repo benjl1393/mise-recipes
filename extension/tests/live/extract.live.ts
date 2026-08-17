@@ -88,6 +88,20 @@ live("live extraction — text", () => {
       expect(ing.item.length).toBeGreaterThan(0);
     }
 
+    // docs/mise-md-format.md:104 locks the quantity format to "1½ tbsp".
+    // Left to itself the model mirrors the source's style, so a page written
+    // in longhand yielded "1.5 tablespoons" until the prompt forbade it.
+    const qtys = recipe.ingredients.map((i) => i.qty).join(" | ");
+    expect(qtys).not.toMatch(/\b\d+\.\d/);
+    expect(qtys).not.toMatch(/tablespoon|teaspoon|gram|millilit|ounce|pound/i);
+
+    // Countable units stay in the qty column ("4 cloves" + "garlic"), not
+    // shoved into the item — tightening the abbreviation rule above once
+    // caused exactly that regression.
+    for (const ing of recipe.ingredients) {
+      expect(ing.item.toLowerCase()).not.toMatch(/^(cloves?|sprigs?|thumbs?|cans?|bunch)\b/);
+    }
+
     // The whole point of the product: a serializable artifact.
     const md = serializeRecipe(recipe, {
       ticket: 1,
