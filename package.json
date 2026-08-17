@@ -13,7 +13,8 @@
     "watch:ext": "node extension/build.mjs --watch",
     "test:ext": "vitest run --root extension",
     "port:design": "node extension/scripts/port-design.mjs",
-    "smoke:ext": "node extension/scripts/smoke.mjs"
+    "smoke:ext": "node extension/scripts/smoke.mjs",
+    "audit:ext": "node extension/scripts/audit-port.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.89.0",

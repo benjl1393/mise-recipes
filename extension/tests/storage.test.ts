@@ -4,6 +4,7 @@ import {
   getSettings,
   setSettings,
   nextTicket,
+  peekTicket,
   saveTicket,
   listTickets,
   clearPass,
@@ -48,6 +49,26 @@ describe("settings", () => {
     expect(settings.apiKey).toBe("sk-ant-test");
     expect(settings.units).toBe("imperial");
     expect(settings.model).toBe("claude-haiku-4-5");
+  });
+});
+
+describe("peekTicket", () => {
+  // The bug this guards: the card shows its ticket number before the user
+  // fires, so display used to call nextTicket() and permanently consume a
+  // number on every popup open — including the re-opens caused by a tab
+  // switch. Peeking must be free.
+  it("reports the next number without consuming it", async () => {
+    expect(await peekTicket()).toBe(1);
+    expect(await peekTicket()).toBe(1);
+    expect(await peekTicket()).toBe(1);
+    expect(await nextTicket()).toBe(1);
+    expect(await peekTicket()).toBe(2);
+  });
+
+  it("agrees with nextTicket across the rollover boundary", async () => {
+    await chrome.storage.local.set({ "mise:counter": 99999 });
+    expect(await peekTicket()).toBe(1);
+    expect(await nextTicket()).toBe(1);
   });
 });
 

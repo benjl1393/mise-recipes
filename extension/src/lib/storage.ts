@@ -34,6 +34,20 @@ export async function setSettings(patch: Partial<Settings>): Promise<void> {
   await chrome.storage.local.set({ [KEY_SETTINGS]: next });
 }
 
+/**
+ * What the next ticket *would* be, without claiming it.
+ *
+ * The filled card shows its ticket number before the user fires, but an
+ * extraction the user abandons must not consume one — otherwise re-opening
+ * the popup on the same page (or any tab switch) leaves permanent gaps in
+ * The Pass. Display peeks; only fire() commits.
+ */
+export async function peekTicket(): Promise<number> {
+  const stored = await chrome.storage.local.get(KEY_COUNTER);
+  const current = (stored[KEY_COUNTER] as number | undefined) ?? 0;
+  return current >= MAX_TICKET ? 1 : current + 1;
+}
+
 /** Device-local counter, incremented per capture. */
 export async function nextTicket(): Promise<number> {
   const stored = await chrome.storage.local.get(KEY_COUNTER);

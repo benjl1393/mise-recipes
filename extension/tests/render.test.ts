@@ -8,6 +8,7 @@ import {
   displayUrl,
   viaBadge,
   stampTime,
+  formatElapsed,
 } from "../src/popup/render";
 import type { Recipe, Frontmatter } from "../src/lib/types";
 
@@ -43,6 +44,23 @@ describe("displayUrl", () => {
 
   it("drops a bare trailing slash", () => {
     expect(displayUrl("https://example.com/")).toBe("example.com");
+  });
+
+  // On YouTube the query string is the source's identity — youtube.com/watch
+  // on its own names every video ever posted.
+  it("keeps a meaningful query string", () => {
+    expect(displayUrl("https://www.youtube.com/watch?v=dQw4w9")).toBe(
+      "youtube.com/watch?v=dQw4w9",
+    );
+  });
+
+  it("strips tracking params so the common case stays readable", () => {
+    expect(displayUrl("https://example.com/recipe?utm_source=news&utm_medium=email")).toBe(
+      "example.com/recipe",
+    );
+    expect(displayUrl("https://youtube.com/watch?v=abc&feature=share&si=xyz")).toBe(
+      "youtube.com/watch?v=abc",
+    );
   });
 
   it("passes through anything unparseable", () => {
@@ -146,9 +164,74 @@ describe("renderSkeleton", () => {
     expect(doc.querySelector("h2.title")).toBeNull();
   });
 
-  it("shows a pending badge carrying the current phase", () => {
-    const doc = parse(renderSkeleton("capturing"));
-    expect(doc.querySelector(".badge.pending")!.textContent).toBe("capturing");
+  // The shimmer is scoped to `.skel .bar` in CSS, so the bars are only ever
+  // animated if the controller also puts `skel` on the container. These
+  // assertions pin the structure the animation depends on.
+  it("emits the chyron status line and progress meter", () => {
+    const doc = parse(renderSkeleton("extracting"));
+    expect(doc.querySelector(".chyron-bar .status .dot")).not.toBeNull();
+    expect(doc.querySelector(".chyron-bar .status")!.textContent).toContain(
+      "Claude is reading",
+    );
+    expect(doc.querySelector(".chyron-bar .elapsed")!.textContent).toBe("0:00");
+    expect(doc.querySelector(".progress")!.getAttribute("style")).toContain("--progress: 74%");
+  });
+
+  it("advances the progress meter across phases", () => {
+    const progress = (phase: "reading" | "capturing" | "extracting") =>
+      parse(renderSkeleton(phase)).querySelector(".progress")!.getAttribute("style");
+    expect(progress("reading")).toContain("8%");
+    expect(progress("capturing")).toContain("42%");
+    expect(progress("extracting")).toContain("74%");
+  });
+
+  it("uses the specimen's bar size modifiers rather than uniform bars", () => {
+    const doc = parse(renderSkeleton());
+    expect(doc.querySelector(".title-skel .bar.tallx")).not.toBeNull();
+    expect(doc.querySelector(".title-skel .bar.tall")).not.toBeNull();
+    expect(doc.querySelectorAll(".subtitle-skel .bar.thin").length).toBe(2);
+  });
+
+  it("gives ingredients two columns and method steps a body block", () => {
+    const doc = parse(renderSkeleton());
+    expect(doc.querySelectorAll("ul.ingredients-skel li").length).toBe(4);
+    // qty bar + item bar, matching the filled card's two-column grid.
+    expect(doc.querySelectorAll("ul.ingredients-skel li:first-child .bar").length).toBe(2);
+    expect(doc.querySelectorAll("ol.method-skel li .body-skel").length).toBe(3);
+  });
+
+  it("keeps the section headings so the card does not reflow on fill", () => {
+    const headings = [...parse(renderSkeleton()).querySelectorAll("h3.section")].map(
+      (n) => n.textContent,
+    );
+    expect(headings).toEqual(["Ingredients", "Method"]);
+  });
+
+  it("marks the source pending until a via is known, then shows it", () => {
+    expect(parse(renderSkeleton("reading")).querySelector(".badge.pending")!.textContent).toBe(
+      "detecting",
+    );
+    const resolved = parse(renderSkeleton("capturing", { via: "8 video frames" }));
+    expect(resolved.querySelector(".badge.pending")).toBeNull();
+    expect(resolved.querySelector(".badge")!.textContent).toBe("🎬 8 frames");
+  });
+
+  it("shows the page url once the tab is known", () => {
+    const doc = parse(renderSkeleton("reading", { url: "https://www.example.com/pork/" }));
+    expect(doc.querySelector(".url")!.textContent).toBe("example.com/pork");
+  });
+});
+
+describe("formatElapsed", () => {
+  it("counts seconds then minutes, zero-padded", () => {
+    expect(formatElapsed(0)).toBe("0:00");
+    expect(formatElapsed(7_000)).toBe("0:07");
+    expect(formatElapsed(65_000)).toBe("1:05");
+    expect(formatElapsed(600_000)).toBe("10:00");
+  });
+
+  it("never renders a negative clock", () => {
+    expect(formatElapsed(-5_000)).toBe("0:00");
   });
 });
 

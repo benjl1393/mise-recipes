@@ -148,10 +148,20 @@ the Anthropic API directly with the user's key from `chrome.storage.local`.
 ```
 npm run build:ext      # bundle to extension/dist (load unpacked from there)
 npm run watch:ext      # rebuild on change
-npm run test:ext       # vitest, 105 tests
+npm run test:ext       # vitest, 145 tests
 npm run port:design    # re-port CSS + glyphs from type-specimens/
 npm run smoke:ext      # load in real Chromium, assert all surfaces boot
+npm run audit:ext      # diff popup.css classes against what the renderer emits
 ```
+
+**`audit:ext` exists because unit tests cannot see an unstyled card.** It
+reports classes styled in `popup.css` but never emitted (a designed state that
+was not built, or a name that drifted) and the inverse. Two real bugs were
+found this way: the skeleton shimmer never ran because the animation is scoped
+to `.skel .bar` and nothing added `skel`, and the whole error callout +
+fallback list was missing. Remaining `MISSING` entries are the unbuilt picker
+/ filmstrip states plus dead specimen scaffolding (`.popup-frame`,
+`.chrome-caption`) — treat a *new* entry as a regression.
 
 **The design system is generated, not hand-written.** `src/popup/popup.css`,
 `src/prep/prep.css`, `src/pass/pass.css`, and `src/popup/glyphs.ts` all come
@@ -169,12 +179,39 @@ them: `h2.title`, `h3.section`, `.facts .fact > strong`, `ul.ingredients li >
 Haiku 4.5 supports structured outputs and vision but **not** `output_config.effort`
 or adaptive thinking — sending either is a 400.
 
+### Popup lifecycle — the popup is destroyed on every tab switch
+
+An MV3 popup is a document Chrome tears down the moment it loses focus. Without
+a cache, re-opening it re-runs the entire pipeline including a **billed** API
+call. `src/lib/cache.ts` keys extractions by tab id in `chrome.storage.session`
+(in-memory, never on disk — extraction results are derived data; the artifact is
+the `.md`), guarded by both the tab's URL and a 1h TTL.
+
+Consequence for ticket numbers: the card shows its number *before* the user
+fires, so display calls `peekTicket()` and only `fire()` calls `nextTicket()`.
+Allocating at extract time burned a number on every popup re-open.
+
+### Failure states
+
+`src/popup/errors.ts` classifies a thrown error into a shouted label, an HTTP
+code, one actionable sentence, and `canRetry`. The card then renders
+`.callout.error` + `ul.fallback-list`, and the action row swaps Fire for
+**RETRY** — there is no artifact to save, and the swap is what keeps colour
+v2.2's rule that red is contextually exclusive (failure owns the red, so the
+primary button goes bone). A raw SDK message like "400 Bad Request" tells a
+home cook nothing, which is why the taxonomy exists.
+
 ### Not built yet
 
 - **PDF export** — the `.pdf` action in the specimen needs the Next.js
   `/api/export/pdf` route; the button is not in the extension's action row.
 - **Servings scaler, unit re-toggle, and the ambiguous/low-confidence picker
-  states** — designed in `popup-states.html`, not wired.
+  states** — designed in `popup-states.html`, not wired. Their orphaned CSS is
+  the `.picker` / `.arrow` / `.active` / `.meta` / `.ptitle` / `.psub` /
+  `.recipe` / `.warn` / `.warn-glyph` block that `audit:ext` reports.
+- **Capture filmstrip** (`.filmstrip` / `.frame` / `.thumb`) — frame thumbnails
+  during video capture. Styled, never emitted; the capture phase currently
+  shows only the chyron and progress meter.
 - **Safari** — `safari-web-extension-converter` wraps a finished Chrome build.
 - **Landing page.**
 
