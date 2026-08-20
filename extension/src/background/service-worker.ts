@@ -1,5 +1,4 @@
 import { iconFrame } from "../lib/mark";
-import { HOST_ACCESS, HOST_MATCHES } from "../lib/host-access";
 
 const MENU_ID = "mise-fire-selection";
 
@@ -29,7 +28,6 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
 // Recipe detection → toolbar pulse
 // ---------------------------------------------------------------------------
 
-const DETECTOR_ID = "mise-detect";
 
 const DEFAULT_ICON = { 16: "icons/mise-icon-16.png", 32: "icons/mise-icon-32.png" };
 const DEFAULT_TITLE = "Fire this recipe to Mise";
@@ -123,67 +121,3 @@ chrome.tabs.onRemoved.addListener((tabId) => {
   armed.delete(tabId);
 });
 
-// ---------------------------------------------------------------------------
-// Detector registration
-// ---------------------------------------------------------------------------
-
-/**
- * Seeing every page requires broad host access, which Mise keeps *optional* so a
- * plain install asks for nothing and the extraction path keeps working on
- * `activeTab` alone. The pulse is therefore a progressive enhancement: register
- * the detector when the user grants the permission, tear it down if they take
- * it back.
- */
-export async function syncDetector(): Promise<void> {
-  try {
-    const granted = await chrome.permissions.contains(HOST_ACCESS);
-    const registered = await chrome.scripting.getRegisteredContentScripts({ ids: [DETECTOR_ID] });
-    if (granted && registered.length === 0) {
-      await chrome.scripting.registerContentScripts([
-        {
-          id: DETECTOR_ID,
-          js: ["content/detect.js"],
-          matches: [...HOST_MATCHES],
-          runAt: "document_idle",
-          allFrames: false,
-        },
-      ]);
-      console.info("[mise] recipe detector registered");
-    } else if (!granted && registered.length > 0) {
-      await chrome.scripting.unregisterContentScripts({ ids: [DETECTOR_ID] });
-      console.info("[mise] recipe detector unregistered");
-    } else {
-      console.info(
-        `[mise] detector unchanged — host access ${granted ? "granted" : "NOT granted"}, ` +
-          `${registered.length} script(s) registered`,
-      );
-    }
-  } catch (error) {
-    // Registration is best-effort: a failure costs the pulse, never extraction.
-    // But it must not be silent — a detector that never registers looks
-    // identical to a feature that does not work, and the service-worker
-    // console is the only place that difference is visible.
-    console.warn("[mise] detector registration failed:", error);
-  }
-}
-
-chrome.runtime.onInstalled.addListener(() => void syncDetector());
-chrome.runtime.onStartup.addListener(() => void syncDetector());
-chrome.permissions.onAdded.addListener(() => void syncDetector());
-chrome.permissions.onRemoved.addListener(() => void syncDetector());
-
-/**
- * And once on every wake, not only on those four events.
- *
- * Host access can also be granted outside this extension entirely — Chrome's
- * "Site access" menu, and whatever equivalent a Chromium fork ships. Those do
- * not reliably fire `permissions.onAdded`, and when they don't, the detector
- * is never registered: the permission reads as granted, the toggle looks on,
- * and nothing pulses, with no error anywhere to explain it. That was a real
- * report, on Dia.
- *
- * An MV3 worker re-runs its top level every time it wakes, and this worker is
- * woken by tab updates already, so this makes registration self-healing rather
- * than dependent on a single event firing.
- */
-void syncDetector();

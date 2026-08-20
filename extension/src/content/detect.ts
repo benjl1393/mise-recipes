@@ -1,4 +1,5 @@
 import { hasRecipe } from "../lib/detect-recipe";
+import { getSettings } from "../lib/storage";
 
 /**
  * Tell the service worker when the page declares itself a recipe, so the
@@ -27,7 +28,15 @@ function announce(): boolean {
   return true;
 }
 
-if (!announce()) {
+async function start(): Promise<void> {
+  // The script is declared in the manifest, so it runs on every page. The
+  // toggle is now a stored setting rather than a permission, which means the
+  // off switch has to be honoured here — bail before doing any work.
+  const { pulseOnDetect } = await getSettings();
+  if (!pulseOnDetect) return;
+
+  if (announce()) return;
+
   // Recipe sites are overwhelmingly server-rendered, but a handful of SPA food
   // apps mount their JSON-LD after hydration. Watch briefly, then stop — a
   // permanent observer on every page the user visits is not a fair trade for
@@ -38,3 +47,5 @@ if (!announce()) {
   observer.observe(document.documentElement, { childList: true, subtree: true });
   setTimeout(() => observer.disconnect(), LATE_INJECTION_WINDOW_MS);
 }
+
+void start();

@@ -1,5 +1,4 @@
 import { getSettings, setSettings } from "../../lib/storage";
-import { HOST_ACCESS } from "../../lib/host-access";
 import type { Units } from "../../lib/types";
 
 /**
@@ -55,8 +54,8 @@ export function mountPrep(root: HTMLElement): void {
         <input id="watchPages" type="checkbox" />
         <span>Pulse the icon when a page has a recipe</span>
         <span class="hint">
-          Needs permission to read the pages you visit. Detection runs on this
-          device and no page leaves it.
+          Only pages that declare a recipe. Detection runs on this device and
+          no page ever leaves it.
         </span>
       </label>
     </form>
@@ -69,41 +68,28 @@ export function mountPrep(root: HTMLElement): void {
   const watchPages = root.querySelector("#watchPages") as HTMLInputElement;
   const status = root.querySelector("#prep-status") as HTMLElement;
 
-  // Not a setting — a live browser permission, so it reads from and writes to
-  // chrome.permissions rather than storage, and never goes through save().
-  void chrome.permissions.contains(HOST_ACCESS).then((granted) => {
-    watchPages.checked = granted;
-  });
-
   const say = (text: string, hold = 4000) => {
     status.textContent = text;
     setTimeout(() => (status.textContent = ""), hold);
   };
 
+  /*
+   * This was a permission toggle until 2026-08-20 — it called
+   * chrome.permissions.request() for optional host access. Dia never showed a
+   * prompt and never fired permissions.onAdded, so the feature was simply dead
+   * there with nothing to see. The detector is declared in the manifest now, so
+   * this is an ordinary stored setting and works in any Chromium.
+   *
+   * Written immediately rather than on SAVE: a switch that needs a second,
+   * separate confirmation to take effect reads as broken.
+   */
   watchPages.addEventListener("change", () => {
-    const wanted = watchPages.checked;
-    // request() only counts inside the click's user gesture, which an await
-    // before it would spend. Call it first, resolve the UI afterwards.
-    const settled = wanted
-      ? chrome.permissions.request(HOST_ACCESS)
-      : chrome.permissions.remove(HOST_ACCESS).then((removed) => !removed);
-
-    void settled
-      .then((granted) => {
-        watchPages.checked = granted;
-        if (!granted) return say(wanted ? "Chrome declined that." : "No longer watching.");
-        // Registered content scripts only attach on the next navigation, so
-        // whatever is already open stays dark until it is reloaded. Saying so
-        // here is cheaper than the user concluding the feature is broken.
-        say("Watching. Reload any open tabs to arm them.", 6000);
-      })
-      .catch((error: unknown) => {
-        // A rejected request() used to disappear entirely — no prompt, no
-        // error, and a checkbox still sitting there looking switched on.
-        // Whatever Chrome objects to, the user should be able to see it.
-        watchPages.checked = !wanted;
-        say(`Couldn't: ${(error as Error)?.message ?? String(error)}`, 8000);
-      });
+    const on = watchPages.checked;
+    void setSettings({ pulseOnDetect: on }).then(() => {
+      // The content script reads this at document_idle, so a tab that is
+      // already open has already made its decision.
+      say(on ? "Watching. Reload any open tabs to arm them." : "No longer watching.", 6000);
+    });
   });
 
   void (async () => {
@@ -111,6 +97,7 @@ export function mountPrep(root: HTMLElement): void {
     apiKey.value = settings.apiKey;
     model.value = settings.model;
     captureFrames.checked = settings.captureFrames;
+    watchPages.checked = settings.pulseOnDetect;
     const radio = form.querySelector<HTMLInputElement>(
       `input[name="units"][value="${settings.units}"]`,
     );

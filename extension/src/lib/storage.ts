@@ -22,6 +22,8 @@ export interface Settings {
   units: Units;
   model: string;
   captureFrames: boolean;
+  /** Whether a detected recipe pulses the toolbar icon. */
+  pulseOnDetect: boolean;
 }
 
 const DEFAULTS: Settings = {
@@ -29,6 +31,7 @@ const DEFAULTS: Settings = {
   units: "metric",
   model: "claude-haiku-4-5",
   captureFrames: true,
+  pulseOnDetect: true,
 };
 
 /**
