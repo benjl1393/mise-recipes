@@ -50,13 +50,12 @@ export function parseMarkSvg(path) {
   if (!viewBox) throw new Error(`${path}: no viewBox`);
   const size = Number(viewBox[1]);
 
+  // A ground rect is optional and, since 2026-08-20, absent: the icon frame is
+  // transparent so the mark sits on any browser chrome, light or dark.
   const ground = svg.match(/<rect width="\d+" height="\d+" fill="(#[0-9a-fA-F]{6})"\/>/);
-  if (!ground) throw new Error(`${path}: no ground rect`);
 
-  // The plate SVG carries two groups; the 16px variant carries one. A group
-  // tagged data-part="letter" is the mono-M — the part the pulse heats. An
-  // untagged group in a single-group file is all letter, because at 16px the
-  // rim is dropped and the M *is* the mark.
+  // Two groups, tagged. `plate` is the filled disc — the part that catches
+  // fire. `letter` is the mono-M knocked out of it, and stays paper.
   const groups = [
     ...svg.matchAll(
       /<g fill="(#[0-9a-fA-F]{6})" transform="translate\((-?\d+) (-?\d+)\)"([^>]*)>([\s\S]*?)<\/g>/g,
@@ -64,23 +63,29 @@ export function parseMarkSvg(path) {
   ];
   if (groups.length === 0) throw new Error(`${path}: no translated mark group`);
 
-  const rim = [];
+  const plate = [];
   const letter = [];
   let ink = null;
+  // `paper` is the LETTER's colour; `ground` is what sits behind the whole
+  // mark. They were briefly the same variable, which quietly made the frame
+  // opaque white — the one thing the transparent frame exists to avoid.
+  let paper = null;
   for (const [, fill, dxRaw, dyRaw, attrs, body] of groups) {
-    ink ??= fill;
+    const isLetter = attrs.includes('data-part="letter"');
+    if (isLetter) paper = fill;
+    else ink ??= fill;
     const dx = Number(dxRaw);
     const dy = Number(dyRaw);
-    const into = attrs.includes('data-part="letter"') || groups.length === 1 ? letter : rim;
+    const into = isLetter ? letter : plate;
     const rect = /<rect x="(-?\d+)" y="(-?\d+)" width="(\d+)" height="(\d+)"\/>/g;
     for (let m = rect.exec(body); m; m = rect.exec(body)) {
       // Bake the group transform in so consumers never have to know about it.
       into.push({ x: Number(m[1]) + dx, y: Number(m[2]) + dy, w: Number(m[3]), h: Number(m[4]) });
     }
   }
-  if (rim.length + letter.length === 0) throw new Error(`${path}: mark groups have no rects`);
+  if (plate.length + letter.length === 0) throw new Error(`${path}: mark groups have no rects`);
 
-  return { size, paper: ground[1], ink, rim, letter };
+  return { size, ground: ground?.[1] ?? null, paper, ink, plate, letter };
 }
 
 // ---------------------------------------------------------------------------
@@ -106,12 +111,12 @@ const SS = 4;
  */
 export function render(geometry, out, colors = {}) {
   const { size } = geometry;
-  const paper = colors.paper ?? geometry.paper;
-  const rimInk = colors.rim ?? geometry.ink;
-  const letterInk = colors.letter ?? geometry.ink;
+  const plateInk = colors.plate ?? geometry.ink;
+  const letterInk = colors.letter ?? geometry.paper ?? "#fafafa";
+  // Null ground = transparent frame. A colour here paints a tile behind the
+  // mark instead, which is only useful for contact sheets.
+  const ground = colors.ground === undefined ? geometry.ground : colors.ground;
 
-  // Coverage is tracked per part so rim and letter can take different colours —
-  // the pulse heats only the M, per the toolbar-states spec.
   const hi = out * SS;
   const scale = hi / size;
   const coverageOf = (cells) => {
@@ -128,36 +133,54 @@ export function render(geometry, out, colors = {}) {
     return covered;
   };
 
-  const parts = [
-    { covered: coverageOf(geometry.rim), rgb: hexToRgb(rimInk) },
-    { covered: coverageOf(geometry.letter), rgb: hexToRgb(letterInk) },
-  ];
-  const [pr, pg, pb] = hexToRgb(paper);
+  const plateCover = coverageOf(geometry.plate);
+  const letterCover = coverageOf(geometry.letter);
+  const [plr, plg, plb] = hexToRgb(plateInk);
+  const [ltr, ltg, ltb] = hexToRgb(letterInk);
+  const groundRgb = ground ? hexToRgb(ground) : null;
 
   const rgba = Buffer.alloc(out * out * 4);
   const samples = SS * SS;
+  const coverage = (map, x, y) => {
+    let hits = 0;
+    for (let sy = 0; sy < SS; sy++) {
+      const row = (y * SS + sy) * hi + x * SS;
+      for (let sx = 0; sx < SS; sx++) hits += map[row + sx];
+    }
+    return hits / samples;
+  };
+
   for (let y = 0; y < out; y++) {
     for (let x = 0; x < out; x++) {
-      let r = pr;
-      let g = pg;
-      let b = pb;
-      for (const { covered, rgb } of parts) {
-        let hits = 0;
-        for (let sy = 0; sy < SS; sy++) {
-          const row = (y * SS + sy) * hi + x * SS;
-          for (let sx = 0; sx < SS; sx++) hits += covered[row + sx];
-        }
-        if (hits === 0) continue;
-        const a = hits / samples;
-        r = Math.round(r + (rgb[0] - r) * a);
-        g = Math.round(g + (rgb[1] - g) * a);
-        b = Math.round(b + (rgb[2] - b) * a);
-      }
+      const plateA = coverage(plateCover, x, y);
+      const letterA = coverage(letterCover, x, y);
       const i = (y * out + x) * 4;
-      rgba[i] = r;
-      rgba[i + 1] = g;
-      rgba[i + 2] = b;
-      rgba[i + 3] = 255; // the tile is a solid ground, per the black-on-white brief
+
+      // The mark's own colour: the letter composited over the plate. Where the
+      // plate is absent the letter carries its own colour rather than blending
+      // toward a plate that isn't there.
+      let r = plateA > 0 ? plr : ltr;
+      let g = plateA > 0 ? plg : ltg;
+      let b = plateA > 0 ? plb : ltb;
+      if (letterA > 0 && plateA > 0) {
+        r = Math.round(r + (ltr - r) * letterA);
+        g = Math.round(g + (ltg - g) * letterA);
+        b = Math.round(b + (ltb - b) * letterA);
+      }
+
+      const markA = Math.max(plateA, letterA);
+      if (groundRgb) {
+        // Opaque tile: composite the mark onto it.
+        rgba[i] = Math.round(groundRgb[0] + (r - groundRgb[0]) * markA);
+        rgba[i + 1] = Math.round(groundRgb[1] + (g - groundRgb[1]) * markA);
+        rgba[i + 2] = Math.round(groundRgb[2] + (b - groundRgb[2]) * markA);
+        rgba[i + 3] = 255;
+      } else {
+        rgba[i] = r;
+        rgba[i + 1] = g;
+        rgba[i + 2] = b;
+        rgba[i + 3] = Math.round(markA * 255);
+      }
     }
   }
   return rgba;
@@ -223,7 +246,6 @@ export function encodePng(rgba, width, height = width) {
 // ---------------------------------------------------------------------------
 
 export const PLATE_SVG = `${MARK_DIR}/mise-plate-icon.svg`;
-export const SMALL_SVG = `${MARK_DIR}/mise-plate-icon-16.svg`;
 
 /**
  * Guarded so the renderer above can be imported — by a test, or by the pulse
@@ -231,27 +253,28 @@ export const SMALL_SVG = `${MARK_DIR}/mise-plate-icon-16.svg`;
  */
 function main() {
 const full = parseMarkSvg(PLATE_SVG);
-const small = parseMarkSvg(SMALL_SVG);
 
+// One geometry for the whole ladder now. The rim-less 16px variant existed
+// because a 1px outline breaks up when downscaled — a filled disc does not, so
+// the plate carries every size and there is one shape to keep in step.
 mkdirSync(PNG_DIR, { recursive: true });
 for (const size of SIZES) {
-  const geometry = size <= 16 ? small : full;
-  writeFileSync(`${PNG_DIR}/mise-icon-${size}.png`, encodePng(render(geometry, size), size));
-  console.log(`[mise] icons/mise-icon-${size}.png  (${geometry === small ? "rim-less" : "plate"})`);
+  writeFileSync(`${PNG_DIR}/mise-icon-${size}.png`, encodePng(render(full, size), size));
+  console.log(`[mise] icons/mise-icon-${size}.png`);
 }
 
 const list = (cells) =>
   cells.map((c) => `    { x: ${c.x}, y: ${c.y}, w: ${c.w}, h: ${c.h} },`).join("\n");
 
 const serialise = (geometry) =>
-  `{\n  size: ${geometry.size},\n  rim: [\n${list(geometry.rim)}\n  ],\n` +
+  `{\n  size: ${geometry.size},\n  plate: [\n${list(geometry.plate)}\n  ],\n` +
   `  letter: [\n${list(geometry.letter)}\n  ],\n}`;
 
 writeFileSync(
   GEOMETRY_OUT,
   `// GENERATED by extension/scripts/gen-icons.mjs — do not edit by hand.
-// Source of truth: type-specimens/mark/mise-plate-icon{,-16}.svg
-// Regenerate with: node extension/scripts/gen-icons.mjs
+// Source of truth: type-specimens/mark/mise-plate-icon.svg
+// Regenerate with: npm run gen:icons
 
 export interface MarkCell {
   x: number;
@@ -263,20 +286,17 @@ export interface MarkCell {
 export interface MarkGeometry {
   /** Edge length of the coordinate space the cells are expressed in. */
   size: number;
-  /** The plate. Stays ink — it is the container, not the content. */
-  rim: MarkCell[];
-  /** The mono-M. This is the part the toolbar pulse heats. */
+  /** The filled disc. This is the part the toolbar pulse heats. */
+  plate: MarkCell[];
+  /** The mono-M, knocked out of the plate. Stays paper. */
   letter: MarkCell[];
 }
 
-/** Plate rim + mono-M. The mark proper. */
+/** Filled plate + knocked-out mono-M, on a transparent frame. */
 export const MARK_PLATE: MarkGeometry = ${serialise(full)};
-
-/** M only. Below ~20px the 1px plate rim turns to mush, so it is dropped. */
-export const MARK_SMALL: MarkGeometry = ${serialise(small)};
 `,
 );
-console.log(`[mise] src/lib/mark-geometry.ts  (rim ${full.rim.length} + letter ${full.letter.length}, small ${small.letter.length})`);
+console.log(`[mise] src/lib/mark-geometry.ts  (plate ${full.plate.length} + letter ${full.letter.length})`);
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) main();

@@ -1,4 +1,4 @@
-import { MARK_PLATE, MARK_SMALL, type MarkGeometry } from "./mark-geometry";
+import { MARK_PLATE } from "./mark-geometry";
 
 /**
  * Drawing the mark at runtime, in colours no exported asset contains.
@@ -14,10 +14,14 @@ export const PAPER = "#fafafa"; // --paper-50
 export const INK = "#232323"; // --ink-700
 export const FLAME = "#cb1200"; // --flame
 
-/** Below ~20px the 1px plate rim turns to mush, so the M ships alone. */
-export function geometryFor(size: number): MarkGeometry {
-  return size <= 20 ? MARK_SMALL : MARK_PLATE;
-}
+/**
+ * One geometry for every size now.
+ *
+ * The rim-less 16px variant existed because a 1px outline breaks up when
+ * downscaled. The plate is filled since 2026-08-20, and a solid disc survives
+ * downscaling, so there is one shape to keep in step instead of two.
+ */
+export const GEOMETRY = MARK_PLATE;
 
 const channel = (hex: string, at: number): number => parseInt(hex.slice(at, at + 2), 16);
 
@@ -39,9 +43,10 @@ export function mix(from: string, to: string, amount: number): string {
 }
 
 export interface MarkColors {
-  rim: string;
+  /** The filled disc. */
+  plate: string;
+  /** The mono-M knocked out of it. */
   letter: string;
-  paper: string;
 }
 
 export function drawMark(
@@ -49,13 +54,13 @@ export function drawMark(
   size: number,
   colors: MarkColors,
 ): void {
-  const geometry = geometryFor(size);
-  const scale = size / geometry.size;
-  ctx.fillStyle = colors.paper;
-  ctx.fillRect(0, 0, size, size);
+  const scale = size / GEOMETRY.size;
+  // No ground fill: the frame stays transparent so the mark sits on whatever
+  // browser chrome it lands on rather than carrying its own tile.
+  ctx.clearRect(0, 0, size, size);
   for (const [cells, fill] of [
-    [geometry.rim, colors.rim],
-    [geometry.letter, colors.letter],
+    [GEOMETRY.plate, colors.plate],
+    [GEOMETRY.letter, colors.letter],
   ] as const) {
     ctx.fillStyle = fill;
     for (const cell of cells) {
@@ -79,13 +84,13 @@ export const ICON_SIZES = [16, 32] as const;
 /**
  * The icon at one point on the heat ramp.
  *
- * Only the M catches fire. The plate is the container and stays ink — per the
- * toolbar-states line in CLAUDE.md, and because it is the same "smooth
- * container, mechanical contents" split the motion spec uses everywhere else.
- * At 16px there is no rim to hold steady, so the whole mark heats.
+ * The whole plate catches fire and the M stays paper, knocked out of it. This
+ * replaced heating only the M on 2026-08-20: a filled disc changing colour is a
+ * far larger signal than a few thin strokes changing colour, which is what a
+ * 16px toolbar affordance needs.
  */
 export function iconFrame(heat: number): Record<number, ImageData> {
-  const colors: MarkColors = { rim: INK, letter: mix(INK, FLAME, heat), paper: PAPER };
+  const colors: MarkColors = { plate: mix(INK, FLAME, heat), letter: PAPER };
   const frame: Record<number, ImageData> = {};
   for (const size of ICON_SIZES) frame[size] = markImageData(size, colors);
   return frame;

@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { mix, geometryFor, INK, FLAME, PAPER } from "../src/lib/mark";
-import { MARK_PLATE, MARK_SMALL } from "../src/lib/mark-geometry";
+import { mix, GEOMETRY, INK, FLAME, PAPER } from "../src/lib/mark";
+import { MARK_PLATE } from "../src/lib/mark-geometry";
 
 describe("mix", () => {
   it("returns the endpoints unchanged", () => {
@@ -30,54 +30,49 @@ describe("mix", () => {
 });
 
 describe("geometryFor", () => {
-  it("drops the plate rim at toolbar sizes and keeps it above", () => {
-    expect(geometryFor(16)).toBe(MARK_SMALL);
-    expect(geometryFor(32)).toBe(MARK_PLATE);
-    expect(geometryFor(128)).toBe(MARK_PLATE);
+  it("uses one geometry for the whole ladder", () => {
+    // The rim-less 16px variant is gone: a filled disc downscales where a 1px
+    // outline did not, so there is one shape rather than two to keep in step.
+    expect(GEOMETRY).toBe(MARK_PLATE);
   });
 });
 
 describe("mark geometry", () => {
-  it("carries cells for both variants", () => {
-    expect(MARK_PLATE.rim.length).toBeGreaterThan(0);
+  it("carries both parts", () => {
+    expect(MARK_PLATE.plate.length).toBeGreaterThan(0);
     expect(MARK_PLATE.letter.length).toBeGreaterThan(0);
-    expect(MARK_SMALL.letter.length).toBeGreaterThan(0);
   });
 
-  it("drops the rim on the small variant, so the whole mark can heat", () => {
-    expect(MARK_SMALL.rim).toEqual([]);
+  it("has a filled plate, not an outline", () => {
+    // A filled disc has far more cells than its own perimeter. If a future edit
+    // reverted the SVG to a rim outline this would catch it, and the pulse
+    // would silently go back to being a thin-stroke colour change.
+    const rows = new Set(MARK_PLATE.plate.map((c) => c.y)).size;
+    expect(MARK_PLATE.plate.length).toBeGreaterThan(rows * 4);
   });
 
-  it("splits the plate into the same M the 16px variant ships alone", () => {
-    // Both are the mono-M in different coordinate spaces. If a future edit to
-    // the SVG moves a cell across the rim/letter boundary, these diverge.
-    expect(MARK_PLATE.letter.length).toBe(MARK_SMALL.letter.length);
-  });
-
-  it("keeps every cell inside its own coordinate space", () => {
-    for (const geometry of [MARK_PLATE, MARK_SMALL]) {
-      for (const cell of [...geometry.rim, ...geometry.letter]) {
-        expect(cell.x).toBeGreaterThanOrEqual(0);
-        expect(cell.y).toBeGreaterThanOrEqual(0);
-        expect(cell.x + cell.w).toBeLessThanOrEqual(geometry.size);
-        expect(cell.y + cell.h).toBeLessThanOrEqual(geometry.size);
-      }
+  it("keeps every cell inside the coordinate space", () => {
+    for (const cell of [...MARK_PLATE.plate, ...MARK_PLATE.letter]) {
+      expect(cell.x).toBeGreaterThanOrEqual(0);
+      expect(cell.y).toBeGreaterThanOrEqual(0);
+      expect(cell.x + cell.w).toBeLessThanOrEqual(MARK_PLATE.size);
+      expect(cell.y + cell.h).toBeLessThanOrEqual(MARK_PLATE.size);
     }
   });
 
-  it("keeps the letter inside the rim's bounding box", () => {
+  it("keeps the letter inside the plate's bounding box", () => {
     const bound = (cells: { x: number; y: number; w: number; h: number }[]) => ({
       x0: Math.min(...cells.map((c) => c.x)),
       y0: Math.min(...cells.map((c) => c.y)),
       x1: Math.max(...cells.map((c) => c.x + c.w)),
       y1: Math.max(...cells.map((c) => c.y + c.h)),
     });
-    const rim = bound(MARK_PLATE.rim);
+    const plate = bound(MARK_PLATE.plate);
     const letter = bound(MARK_PLATE.letter);
-    expect(letter.x0).toBeGreaterThan(rim.x0);
-    expect(letter.y0).toBeGreaterThan(rim.y0);
-    expect(letter.x1).toBeLessThan(rim.x1);
-    expect(letter.y1).toBeLessThan(rim.y1);
+    expect(letter.x0).toBeGreaterThan(plate.x0);
+    expect(letter.y0).toBeGreaterThan(plate.y0);
+    expect(letter.x1).toBeLessThan(plate.x1);
+    expect(letter.y1).toBeLessThan(plate.y1);
   });
 
   it("is black-on-white, not the old paper-on-ink", () => {
