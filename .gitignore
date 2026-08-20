@@ -2,6 +2,8 @@
 
 # dependencies
 /node_modules
+# Unanchored so nested workspaces (extension/) are covered too.
+node_modules/
 /.pnp
 .pnp.*
 .yarn/*
@@ -44,3 +46,13 @@ next-env.d.ts
 # scratch + tool trails
 .scratch/
 .playwright-mcp/
+
+# Mise extension build output
+extension/dist/
+
+# Secrets. api_key.txt sat untracked and unignored in the repo root until
+# 2026-08-20 — one `git add -A` away from being published.
+api_key.txt
+*.key
+.env
+.env.*

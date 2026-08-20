@@ -1,7 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128" role="img" aria-label="Mise">
-  <!-- Mise app / extension / favicon icon — ink tile, paper mark. Plate + mono-M. Source: Figma node 107:1447. -->
-  <rect width="128" height="128" fill="#232323"/>
-  <g fill="#f3f3f3" transform="translate(12 8)">
+  <!-- Mise app / extension / favicon icon — paper tile, ink mark. Plate + mono-M. Source: Figma node 107:1447. -->
+  <rect width="128" height="128" fill="#fafafa"/>
+  <g fill="#232323" transform="translate(12 8)">
+    <!-- rim: the plate. Stays ink; it is the container. -->
     <rect x="32" y="0" width="8" height="8"/>
     <rect x="40" y="0" width="8" height="8"/>
     <rect x="48" y="0" width="8" height="8"/>
@@ -16,40 +17,20 @@
     <rect x="80" y="16" width="8" height="8"/>
     <rect x="88" y="16" width="8" height="8"/>
     <rect x="8" y="24" width="8" height="8"/>
-    <rect x="32" y="24" width="8" height="8"/>
-    <rect x="64" y="24" width="8" height="8"/>
     <rect x="88" y="24" width="8" height="8"/>
     <rect x="0" y="32" width="8" height="8"/>
-    <rect x="32" y="32" width="8" height="8"/>
-    <rect x="64" y="32" width="8" height="8"/>
     <rect x="96" y="32" width="8" height="8"/>
     <rect x="0" y="40" width="8" height="8"/>
-    <rect x="32" y="40" width="8" height="8"/>
-    <rect x="40" y="40" width="8" height="8"/>
-    <rect x="56" y="40" width="8" height="8"/>
-    <rect x="64" y="40" width="8" height="8"/>
     <rect x="96" y="40" width="8" height="8"/>
     <rect x="0" y="48" width="8" height="8"/>
-    <rect x="32" y="48" width="8" height="8"/>
-    <rect x="48" y="48" width="8" height="8"/>
-    <rect x="64" y="48" width="8" height="8"/>
     <rect x="96" y="48" width="8" height="8"/>
     <rect x="0" y="56" width="8" height="8"/>
-    <rect x="32" y="56" width="8" height="8"/>
-    <rect x="48" y="56" width="8" height="8"/>
-    <rect x="64" y="56" width="8" height="8"/>
     <rect x="96" y="56" width="8" height="8"/>
     <rect x="0" y="64" width="8" height="8"/>
-    <rect x="32" y="64" width="8" height="8"/>
-    <rect x="64" y="64" width="8" height="8"/>
     <rect x="96" y="64" width="8" height="8"/>
     <rect x="0" y="72" width="8" height="8"/>
-    <rect x="32" y="72" width="8" height="8"/>
-    <rect x="64" y="72" width="8" height="8"/>
     <rect x="96" y="72" width="8" height="8"/>
     <rect x="8" y="80" width="8" height="8"/>
-    <rect x="32" y="80" width="8" height="8"/>
-    <rect x="64" y="80" width="8" height="8"/>
     <rect x="88" y="80" width="8" height="8"/>
     <rect x="8" y="88" width="8" height="8"/>
     <rect x="16" y="88" width="8" height="8"/>
@@ -64,5 +45,28 @@
     <rect x="48" y="104" width="8" height="8"/>
     <rect x="56" y="104" width="8" height="8"/>
     <rect x="64" y="104" width="8" height="8"/>
+  </g>
+  <g fill="#232323" transform="translate(12 8)" data-part="letter">
+    <!-- letter: the mono-M. This is the part that catches fire. -->
+    <rect x="32" y="24" width="8" height="8"/>
+    <rect x="64" y="24" width="8" height="8"/>
+    <rect x="32" y="32" width="8" height="8"/>
+    <rect x="64" y="32" width="8" height="8"/>
+    <rect x="32" y="40" width="8" height="8"/>
+    <rect x="40" y="40" width="8" height="8"/>
+    <rect x="56" y="40" width="8" height="8"/>
+    <rect x="64" y="40" width="8" height="8"/>
+    <rect x="32" y="48" width="8" height="8"/>
+    <rect x="48" y="48" width="8" height="8"/>
+    <rect x="64" y="48" width="8" height="8"/>
+    <rect x="32" y="56" width="8" height="8"/>
+    <rect x="48" y="56" width="8" height="8"/>
+    <rect x="64" y="56" width="8" height="8"/>
+    <rect x="32" y="64" width="8" height="8"/>
+    <rect x="64" y="64" width="8" height="8"/>
+    <rect x="32" y="72" width="8" height="8"/>
+    <rect x="64" y="72" width="8" height="8"/>
+    <rect x="32" y="80" width="8" height="8"/>
+    <rect x="64" y="80" width="8" height="8"/>
   </g>
 </svg>

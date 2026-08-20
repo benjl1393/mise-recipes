@@ -1,7 +1,7 @@
 # Mise — `.md` Format Specification
 
 **Status:** v1 draft (2026-04-22)
-**Source of truth:** this document. Popup, PDF, and The Pass history view are typographic renderings of the format defined here. Nothing may appear in a rendered surface without a corresponding `.md` field.
+**Source of truth:** this document. Popup, PDF, and the Archive view are typographic renderings of the format defined here. Nothing may appear in a rendered surface without a corresponding `.md` field.
 
 ---
 
@@ -25,6 +25,7 @@ ticket: 00427
 captured: 2026-04-22T16:28
 source: https://instagram.com/p/C9xK2
 via: 8 video frames
+author: J. Kenji López-Alt   # optional — only when the source credits someone
 serves: 4
 hands_on: 25m
 total: 2h 10m
@@ -41,6 +42,7 @@ scaled: 1.0              # optional — only if user changed servings
 | `captured` | ISO 8601 datetime | yes | extension generates at save time |
 | `source` | URL | yes | tab URL at capture time |
 | `via` | string (vocabulary below) | yes | inferred from successful extraction path |
+| `author` | string | no | Mise-extracted — the recipe's credited writer, as the source names them, without titles or affiliations. Omitted when the source attributes nobody; never inferred from the site or channel name. Rendered on the card as a byline beneath the subtitle. |
 | `serves` | string | yes | Mise-extracted, Claude-normalized (`"4"`, `"makes 12"`, `"serves 6-8"`). Rendered as `SERVES X`. |
 | `hands_on` | string | no | hands-on cooking time — time at counter/stove, excluding passive waits (marinating, oven-braising, rising). Rendered as `HANDS-ON 25m`. Underscore key for JS-identifier compatibility. |
 | `total` | string | no | total elapsed time including passive. Rendered as `TOTAL 2h 10m`. |
@@ -147,7 +149,7 @@ Three elements, in order: horizontal rule, tag line, blank line, footer.
 
 ### Tag line
 
-- One line of inline hashtags, joined by `  ·  ` (same separator as ingredients).
+- One line of inline hashtags, joined by ` · ` — **single** spaces around the middle-dot, unlike the five-character ingredient separator. The ingredient separator is wide because it doubles as the qty/item column gutter; the tag line is an inline run with nothing to align, so it takes the narrow form. (Corrected 2026-08-17: this line previously claimed the ingredient separator, contradicting every rendered example in this document and in `type-specimens/`.)
 - Tags are Mise-generated at extraction time; user can add/remove/custom-add via the Prep panel.
 - Indexed natively by Obsidian (tag pane + Dataview), Apple Notes (tag system), and Notion (hashtag chips).
 - Stored **only inline** — not duplicated in frontmatter. Obsidian indexes inline hashtags identically to frontmatter `tags:` fields.
@@ -249,7 +251,7 @@ total: 2h 10m
 
 ## Rendering Rules
 
-The `.md` is the source. Popup, PDF, and The Pass are typographic renderings. Content parity is mandatory.
+The `.md` is the source. Popup, PDF, and the Archive are typographic renderings. Content parity is mandatory.
 
 ### Core principle — no invented styling
 
@@ -305,7 +307,7 @@ Case follows font: chrome rows are `uppercase` via CSS (source stays normal-case
 - Cream card on white page.
 - Footer gains a small Mise wordmark + source URL + captured timestamp for provenance.
 
-### The Pass (chrome-extension:// full-tab history view)
+### Archive (a pane in the popup; renamed from The Pass 2026-08-17)
 
 - List view: one row per ticket. Row shows `NO. <number>` · title · captured · source domain. Mono throughout.
 - Click row → expand in-place to the same popup card layout.

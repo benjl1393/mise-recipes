@@ -82,7 +82,7 @@ This means NONE of:
 - `prefers-reduced-motion` respected on the skeleton→filled transition
 
 **Design-system reuse:**
-- Same type + color system powers: the popup card, the `.md` frontmatter rendering, the PDF template, The Pass history view, and the Next.js fallback site
+- Same type + color system powers: the popup card, the `.md` frontmatter rendering, the PDF template, the Archive view, and the Next.js fallback site
 - One palette, one type scale, three surfaces
 
 ## The internal kitchen language
@@ -91,8 +91,8 @@ Names are load-bearing. Use them in code, UI, docs, and commit messages.
 
 - **Mise** — product name (pronounced "meez")
 - **Fire** — primary save button / action
-- **The Pass** — full-tab history view
-- **Prep** — options/settings page
+- **Archive** — the list of everything fired from this device. A pane in the popup, not a tab. Renamed from **The Pass** (2026-08-17) for the same reason In the Weeds became Kitchen Error: the kitchen term did not say what the view held. Archive also names the product promise — artifacts owned in perpetuity — rather than the mechanism.
+- **Prep** — settings. Also a pane in the popup; the `options_page` was removed 2026-08-17
 - **Off Menu** — empty state: the page has no recipe to extract
 
 The error-state stamp reads **"Kitchen Error"** — the kitchen register is kept, but the word "Error" makes the failure unmistakable. Renamed from **"In the Weeds"** (dropped 2026-06-08 — too opaque; the weed pun didn't read as "something went wrong"). The refinement keeps a little voice while prioritising clarity. (The ticket-top status line may still read "EXTRACTION FAILED" as a plain descriptor; the *stamp* is "Kitchen Error".)
@@ -110,12 +110,26 @@ Three systems defined; see canonical docs:
 The brand mark is a **top-down plate** — a single-pixel rounded rim — with the **Departure Mono "M" plated in the centre**. The M is the *actual* Departure Mono glyph, so the mark and the wordmark are one face: the type IS the identity. Drawn on the same coarse pixel grid (8px cells) as the Fire / In-the-Weeds / Off-Menu icons. **Monochrome** — the flame pixel was deliberately removed (Ben: "it makes it harder to read it as an 'M'"), so the single flame accent lives only in the UI (Fire button, FIRED stamp), never baked into the glyph. Source vector: Figma `Mise` node `107:1447`.
 
 - **Geometry**: 13 cols × 14 rows pixel grid @ 8px/cell. The M letter occupies rows 3–10, cols 4–8; everything else is the plate rim.
-- **Masters**: `type-specimens/mark/` — `mise-plate-on-dark.svg` (paper mark, for dark surfaces), `mise-plate-on-light.svg` (ink mark `#1e1e1e`, for light surfaces), `mise-plate-icon.svg` (ink tile `#232323` + paper mark, for app/extension/favicon — reads on any theme), `mise-plate-icon-16.svg` (M-only 16px variant).
+- **Masters**: `type-specimens/mark/` — `mise-plate-on-dark.svg` (paper mark, for dark surfaces), `mise-plate-on-light.svg` (ink mark `#1e1e1e`, for light surfaces), `mise-plate-icon.svg` (paper tile `#fafafa` + ink mark `#232323`, for app/extension/favicon), `mise-plate-icon-16.svg` (M-only 16px variant).
+
+  **Polarity flipped 2026-08-20** on Ben's direct call: the icon was a dark tile
+  with a paper mark, chosen because it read on any theme. It is now black-on-white.
+  The tradeoff that buys back: a paper tile is a bright chip on a dark browser
+  toolbar rather than disappearing into it — **owed a desk crit**. Note this is
+  the *icon* only; `mise-plate-on-dark.svg` and `-on-light.svg` are unchanged and
+  still carry the surface-appropriate variants.
+
+  **The PNG ladder is generated, not exported.** `npm run gen:icons` rasterises
+  both SVGs into `type-specimens/mark/png/` and emits
+  `extension/src/lib/mark-geometry.ts`. The toolbar icon animates (see "Recipe
+  pulse"), so the mark must be drawable at runtime in colours no exported asset
+  contains — one geometry source keeps the pulse and the shipped PNGs in step.
+  Change the SVG, then run `gen:icons`; never hand-edit the PNGs or the geometry.
 - **PNG ladder**: `type-specimens/mark/png/mise-icon-{16,32,48,128}.png` (ready for the MV3 manifest at build time). Re-export by rasterizing the master SVGs at exact sizes (Playwright element screenshot, deviceScaleFactor 1) — 16 uses the M-only variant.
 - **Favicon**: wired at `src/app/icon.svg` (Next.js App Router auto-serves it).
 - **Crit trail**: `logo-plate.html` (3 plate directions — top-down / side-dish / knockout) → direction A (top-down) chosen → single-pixel rim → Ben finalised in Figma (`107:1447`) → `logo-mark.html` (the adopted mark, in-context: hero, ladder, lockup, toolbar states). Decision history in MemPalace (code/recipe_archiver, 2026-06-08).
 - **Reduction note**: at ≤16px the 1px rim breaks up — ship the **M-only** variant (`mise-plate-icon-16.svg`, rim dropped). 128/48/32 carry the full plate.
-- **Toolbar states**: idle = all-paper mark; recipe-detected = paper rim + **flame M** (only the M catches fire — a runtime UI state, not in the glyph).
+- **Toolbar states**: idle = all-ink mark on paper; recipe-detected = ink rim + **flame M** (only the M catches fire — a runtime UI state, not in the glyph). Built 2026-08-20; the polarity is inverted from the original note because the icon flipped to black-on-white the same day, but the rule is unchanged — *the plate is the container and stays put, the M is the content and heats.* The split lives in the SVG itself: `mise-plate-icon.svg` has a `data-part="letter"` group, and `gen-icons.mjs` carries it through to `MARK_PLATE.rim` / `.letter`. At 16px there is no rim, so the whole mark heats.
 
 **Pivot history:**
 - **v1** (through 2026-04-22): warm-cream split-complementary. Rejected for hitting the AI-default "warm cream + rust + serif+sans" aesthetic.
@@ -132,9 +146,275 @@ See the global `design-anti-ai-defaults.md` rule and `design-studio-principles.m
 2. ~~Logo mark + extension icon set~~ — done; "The Spike" (2026-06-07) → repivoted to **plate + mono-M** (2026-06-08, see "Logo mark" section above)
 3. Motion (`/flow` → `impeccable:animate`)
 4. Microcopy pass (`ux-copywriter`)
-5. Adversarial critique (`impeccable:critique` + `web-design-guidelines`)
-6. Final polish
-7. Build track — Chrome MV3 scaffold + Next.js landing (`superpowers:writing-plans`)
+5. ~~Adversarial critique (`impeccable:critique` + `web-design-guidelines`)~~ — run
+   2026-08-20, report at `docs/crit-2026-08-20-step5.md`. 33/40 on Nielsen; zero
+   AI-slop antipatterns.
+6. ~~Final polish~~ — applied 2026-08-20 from the step 5 findings: the API-key link
+   (P0), the specimen/product drift (P1), and `color-scheme` (P3).
+
+   **Three findings are deliberately still open, because they are design-authority
+   calls rather than polish** — the 10.5px secondary navigation, the flame focus
+   ring colliding with Principle 6 on error screens, and unvirtualized 500-row
+   Archive rendering. All three are argued in the crit doc. **Owed a desk crit.**
+
+   The error-row crit (2026-08-18) is done and folded in — see "One window,
+   three panes".
+7. ~~Build track — Chrome MV3 extension~~ — done 2026-08-17, see `extension/` and the plan at `docs/superpowers/plans/2026-08-17-mise-extension.md`
+8. ~~Post-fire navigation, Copy-to-clipboard, and the `author` field~~ — done 2026-08-18, see "Navigation" below
+
+Steps 5 and 6 were originally skipped, not completed: the build ran ahead of them
+because crits need Ben in the room. They were run on 2026-08-20 against the built
+extension rather than the specimens, which is the better artifact — and the crit
+immediately found that the specimen had drifted from what actually ships. Findings
+that are genuinely Ben's call were left open rather than decided in his absence.
+
+## The extension (`extension/`)
+
+Chrome MV3, TypeScript, esbuild, no framework. Zero backend — the popup calls
+the Anthropic API directly with the user's key from `chrome.storage.local`.
+
+```
+npm run build:ext      # bundle to extension/dist (load unpacked from there)
+npm run watch:ext      # rebuild on change
+npm run test:ext       # vitest, 145 tests
+npm run port:design    # re-port CSS + glyphs from type-specimens/
+npm run smoke:ext      # load in real Chromium, assert all surfaces boot
+npm run audit:ext      # diff popup.css classes against what the renderer emits
+npm run test:live      # REAL billed calls to api.anthropic.com — opt-in, needs a key
+```
+
+**`test:live` is the only thing that proves the API contract.** Every test in
+`tests/*.test.ts` mocks `client.messages.parse`, so they prove this code
+handles a well-formed response and nothing about whether Anthropic produces
+one. The live tests cover request shape, `parsed_output`, unit switching, the
+`found: false` decline, and the vision blocks. They live in `tests/live/` under
+a separate filename pattern (`*.live.ts`) and a separate config, so
+`test:ext` can never run them by accident and bill you.
+
+The key is read from `ANTHROPIC_API_KEY` in the environment, or a gitignored
+`.env.local`. **Nothing in this repo ever writes the key** — creating that
+file is the user's job:
+
+```
+ANTHROPIC_API_KEY=sk-ant-... npm run test:live
+```
+
+**`audit:ext` exists because unit tests cannot see an unstyled card.** It
+reports classes styled in `popup.css` but never emitted (a designed state that
+was not built, or a name that drifted) and the inverse. Two real bugs were
+found this way: the skeleton shimmer never ran because the animation is scoped
+to `.skel .bar` and nothing added `skel`, and the whole error callout +
+fallback list was missing. Remaining `MISSING` entries are the unbuilt picker
+/ filmstrip states plus dead specimen scaffolding (`.popup-frame`,
+`.chrome-caption`) — treat a *new* entry as a regression.
+
+**The design system is generated, not hand-written.** `src/popup/popup.css`
+and `src/popup/glyphs.ts` come out of `type-specimens/popup-states.html` via
+`extension/scripts/port-design.mjs`. Never hand-edit them: change the specimen,
+run a desk crit, then `npm run port:design`. Extension-only chrome (the popup
+window box, the Prep form, the Archive list) has no specimen equivalent and is
+authored inside that script.
+
+### Recipe pulse — the toolbar icon as a detector
+
+**Added 2026-08-20.** When a page declares itself a recipe, the toolbar icon
+pulses red three times and then holds at flame for as long as that tab is on the
+recipe. The title changes to `Recipe found — fire it to Mise`, so the signal is
+not carried by colour alone.
+
+- **Detection is deliberately narrow** (`src/lib/detect-recipe.ts`): schema.org
+  `Recipe` in JSON-LD, or the same type in microdata. Both are things a publisher
+  set on purpose. The caption/video heuristics `pickSource` uses for Reels and
+  TikTok are *excluded* — they are the right call once the user has decided to
+  fire, and far too loose to decide on their behalf. A false pulse costs more
+  than a missed one: an icon that cries recipe everywhere is one you stop seeing.
+- **`<all_urls>` stays optional.** Seeing every page needs it, so the pulse is a
+  progressive enhancement: `syncDetector()` registers the content script when the
+  user grants the permission in Prep and unregisters it if they revoke. A plain
+  install still asks for nothing and extraction still runs on `activeTab`.
+- **The pulse is finite, and that is load-bearing.** An MV3 worker is only
+  reliably alive for a short window after the event that woke it, so an endless
+  animation would die at whatever frame Chrome chose. Settling into a steady
+  state means the useful information survives suspension. It is also better
+  manners — a permanent pulse is a nag, not a signal.
+- **It ramps in discrete steps, not a smooth fade** — the motion spec's "smooth
+  container, mechanical contents", and flame is derived from digital-clock red.
+  It should read as a seven-segment display coming up to heat.
+- **Only the M heats — the plate stays ink.** Per the toolbar-states rule above,
+  and it is the same "smooth container, mechanical contents" split the motion spec
+  uses everywhere else: the plate is the container, the M is the content.
+- **Two louder alternatives were rendered side by side and rejected.** Flooding the
+  tile red (mark knocked out to paper) has a more arresting endpoint but its
+  mid-ramp washes to pink with the M dissolved into it. Heating the whole mark,
+  rim included, costs the plate its role as a container and reads less controlled.
+  Both were checked at true 16px, not reasoned about.
+
+### Navigation — the Archive is the nearest thing to a home
+
+**Decided 2026-08-18.** Mise still has no home screen, and shouldn't: the product
+is a tool you pass through. But firing used to dead-end — the receipt's
+countdown resolved to `Saved · Esc to close` with no route anywhere. Prep and
+Archive now persist through the whole lifecycle, and **Prep hangs off the
+Archive** (`Back · Prep`), which is what a home screen would otherwise have
+existed to provide.
+
+Rows by state:
+
+| State | Row |
+|---|---|
+| Idle / skeleton / Off Menu | `FIRE`(disabled) · Prep · Archive |
+| Extracted | `FIRE` · Copy · Prep · Archive |
+| Fired, closing | `Closing in Ns` · Prep · Archive |
+| Fired, stayed | `Saved` · Prep · Archive |
+| Error | `RETRY` · Prep · Archive |
+| Archive | Back · Prep |
+| Prep | `SAVE` · Back |
+
+- **Reaching for Prep or Archive cancels the auto-close.** Navigating *is* the
+  decision to stay, so the old `Keep open` button is gone. Without this the
+  window would shut while the user was mid-Prep.
+- **`Copy` copies the finished `.md`** — the same bytes Fire writes — for Notes,
+  Obsidian, anywhere. Not to be confused with the raw-page-text Copy cut from
+  the error row on the same day: that offered unstructured scrapings, this
+  offers the artifact. It uses the *peeked* ticket, so copying never burns a
+  number.
+- **The primary button is bare `FIRE`, not `FIRE · save .md`.** At four buttons
+  the fire button is flex-sized to 152px and the longer label wraps to two
+  lines (measured). Bare FIRE matches RETRY's idiom, and the format stopped
+  being a variable once PDF was parked. The cost is a real loss of
+  plain-language affordance for a first-time user — **owed a desk crit.**
+
+### Deferred — PDF export and the format dropdown
+
+**Parked 2026-08-18.** Prep was to get a file-type dropdown (`.md` / `.pdf`).
+Dropped for now: there is no PDF engine in the extension and no
+`/api/export/pdf` route, so shipping it means either a client-side generator
+with Departure/Commit Mono embedded, or a backend round-trip that breaks the
+zero-backend BYOK model. Every fire writes `.md` until that is scheduled.
+
+**Download location is also parked**, and note *why*, so it isn't re-litigated:
+Chrome gives extensions no way to set the download directory. Per the
+`chrome.downloads` docs, "absolute paths, empty paths, and paths containing
+back-references '..' will cause an error" — `filename` is always relative to the
+user's Downloads folder. The only routes to an arbitrary folder are a
+subdirectory under Downloads, or `saveAs: true`, which opens the OS file chooser
+on every fire and breaks the fire-and-leave gesture.
+
+### One window, three panes
+
+Prep and Archive were separate pages that opened tabs. Ben's note (2026-08-17):
+leaving the popup to change a setting or check a past recipe breaks the
+fire-and-leave gesture the product is built around. They are panes now —
+`src/popup/views/prep.ts` and `views/archive.ts`, mounted into `#prep-view` /
+`#archive-view`, routed by `showView()`. There is one stylesheet, one document,
+and no `options_page`.
+
+Consequences worth knowing:
+
+- **Returning from a pane must never re-run `run()`.** The extract view's
+  action row is remembered in `extractActions` and restored on the way back,
+  so a filled card, an error row or the fired receipt all survive the detour.
+  Re-running would cost another billed call.
+- **Prep and Archive are the only navigation this window has**, so both buttons
+  persist in the error row too — `RETRY · Prep · Archive`, in every failure
+  scenario. Dropping Archive there would strand the user in a failed extraction
+  with no route to their recipes. **Settled at the 2026-08-18 desk crit**, which
+  also **cut Copy text entirely** — the button, the `⌘C` binding, and its
+  fallback line. Two reasons: raw page text is not the clean `.md` the product
+  promises, so offering it dressed as a fallback oversells it; and on the
+  failures that most look like "nothing came back" (`NO API KEY`,
+  `PAGE UNREADABLE`) the throw happens before any text is harvested, so there
+  is nothing to copy. The specimen was updated to match, so the two agree again.
+  Note the one asymmetry: an unretryable failure renders no RETRY, so
+  `NO API KEY` and `KEY REJECTED` show `Prep · Archive`.
+- **`Esc` backs out of a pane before it closes the window.**
+- The Archive list is authored for 400px — two-line rows, not the old
+  7ch/1fr/12ch/22ch full-tab grid.
+
+**Markup must match the specimen's tags**, because the ported CSS keys off
+them: `h2.title`, `h3.section`, `.facts .fact > strong`, `ul.ingredients li >
+.qty`, `ol.method` (numbering via `::before` — never hand-number), `.tags .tag`,
+`.stamp` + `.glyph-mark` + `h2.stamp-title`.
+
+**Model:** `claude-haiku-4-5` by default, switchable to `claude-opus-5` in Prep.
+Haiku 4.5 supports structured outputs and vision but **not** `output_config.effort`
+or adaptive thinking — sending either is a 400.
+
+### Popup lifecycle — the popup is destroyed on every tab switch
+
+An MV3 popup is a document Chrome tears down the moment it loses focus. Without
+a cache, re-opening it re-runs the entire pipeline including a **billed** API
+call. `src/lib/cache.ts` keys extractions by tab id in `chrome.storage.session`
+(in-memory, never on disk — extraction results are derived data; the artifact is
+the `.md`), guarded by both the tab's URL and a 1h TTL.
+
+Consequence for ticket numbers: the card shows its number *before* the user
+fires, so display calls `peekTicket()` and only `fire()` calls `nextTicket()`.
+Allocating at extract time burned a number on every popup re-open.
+
+### Video capture and social pages
+
+**Never call `chrome.permissions.request()` from the extraction flow.** It
+requires a live user gesture, and by the time the video branch is reached the
+popup has awaited settings, the tab query, the cache and the content script —
+the gesture is long gone, so it throws and takes the whole extraction with it.
+It is also unnecessary: `activeTab` already grants `tabs.captureVisibleTab` on
+the tab the user invoked Mise from. (Proof it is granted: `executeScript`
+works on the same tab, via the same permission.) `optional_host_permissions`
+stays in the manifest per spec but nothing requests it.
+
+Frame capture failures are caught and swallowed — a caption with no frames
+still beats no recipe, because on a Reel the caption usually *is* the recipe.
+
+**Social video hosts are matched by hostname, not by heuristic**
+(`SOCIAL_VIDEO_HOSTS` in `page-source.ts`). Readability frequently *succeeds*
+on Instagram/TikTok/YouTube — it latches onto a sidebar or comment column and
+returns a confident block of navigation — so neither "did parsing work" nor
+"is the text long" can detect an app shell; both are satisfied by chrome. On
+those hosts the caption comes from `og:description` (then `twitter:description`,
+then `description`), which is where these platforms actually publish the post
+text. Caveat: on long-form YouTube `og:description` can be a truncated video
+description, so the frames carry most of the signal there by design.
+
+### Failure states
+
+`src/popup/errors.ts` classifies a thrown error into a shouted label, an HTTP
+code, one actionable sentence, and `canRetry`. The card then renders
+`.callout.error` + `ul.fallback-list`, and the action row swaps Fire for
+**RETRY** — there is no artifact to save, and the swap is what keeps colour
+v2.2's rule that red is contextually exclusive (failure owns the red, so the
+primary button goes bone). A raw SDK message like "400 Bad Request" tells a
+home cook nothing, which is why the taxonomy exists.
+
+### Not built yet
+
+- **PDF export** — see "Deferred — PDF export and the format dropdown" above
+  for why it is parked and what building it would actually cost.
+- **Servings scaler, unit re-toggle, and the ambiguous/low-confidence picker
+  states** — designed in `popup-states.html`, not wired. Their orphaned CSS is
+  the `.picker` / `.arrow` / `.active` / `.meta` / `.ptitle` / `.psub` /
+  `.recipe` / `.warn` / `.warn-glyph` block that `audit:ext` reports.
+- **Capture filmstrip** (`.filmstrip` / `.frame` / `.thumb`) — frame thumbnails
+  during video capture. Styled, never emitted; the capture phase currently
+  shows only the chyron and progress meter.
+- **Safari** — `safari-web-extension-converter` wraps a finished Chrome build.
+- **Landing page.**
+
+### Deferred to launch — multi-provider keys
+
+**Decided 2026-08-17, explicitly not to be built yet.** At launch Prep should
+accept a token from any AI provider — OpenAI, Grok, Anthropic, and whatever
+else — not Anthropic alone. Until then Ben is the only user and BYOK-Anthropic
+is sufficient.
+
+Why it is worth noting now rather than discovering later: BYOK already means
+the user brings their own credential, so provider choice is the same shape of
+decision, not a new one. But it does touch three places that are currently
+Anthropic-shaped — `createClient`, the structured-output call in
+`extractRecipe` (`output_config.format`, `parsed_output`), and the vision
+content blocks. Those are the seams to keep clean; a provider adapter is the
+obvious form. Do not generalise them speculatively before the feature is
+actually scheduled.
 
 ### Process — desk crits, not handoffs
 
