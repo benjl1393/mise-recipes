@@ -1,5 +1,6 @@
 import * as esbuild from "esbuild";
 import { cp, mkdir, rm } from "node:fs/promises";
+import { readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -9,6 +10,29 @@ const from = (...parts) => resolve(here, ...parts);
 
 const watch = process.argv.includes("--watch");
 const outdir = from("dist");
+
+/**
+ * Dev-only convenience: seed the API key so reinstalling the unpacked extension
+ * doesn't mean retyping it. Removing an extension clears its storage, so every
+ * test build otherwise starts with an empty Prep.
+ *
+ * The key is read at BUILD time from api_key.txt, which is gitignored, and is
+ * never written into source. It is also opt-in — without --dev the constant is
+ * an empty string, so a release build cannot carry it even by accident.
+ *
+ * It does land in dist/popup/popup.js, which is why dist/ is gitignored too.
+ * Do not hand a --dev build to anyone else.
+ */
+const dev = process.argv.includes("--dev");
+let devKey = "";
+if (dev) {
+  try {
+    devKey = readFileSync(from("../api_key.txt"), "utf8").trim();
+    console.log(`[mise] dev build — seeding API key from api_key.txt (${devKey.length} chars)`);
+  } catch {
+    console.log("[mise] dev build — no api_key.txt found, Prep will start empty");
+  }
+}
 
 await rm(outdir, { recursive: true, force: true });
 await mkdir(outdir, { recursive: true });
@@ -49,6 +73,7 @@ const ctx = await esbuild.context({
   outdir,
   sourcemap: watch ? "inline" : false,
   minify: !watch,
+  define: { __MISE_DEV_KEY__: JSON.stringify(devKey) },
   logLevel: "info",
 });
 

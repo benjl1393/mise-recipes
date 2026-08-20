@@ -31,9 +31,22 @@ const DEFAULTS: Settings = {
   captureFrames: true,
 };
 
+/**
+ * Injected by build.mjs. Empty string in any build without --dev, so this is
+ * dead weight in a release bundle rather than a leaked credential.
+ */
+declare const __MISE_DEV_KEY__: string;
+
 export async function getSettings(): Promise<Settings> {
   const stored = await chrome.storage.local.get(KEY_SETTINGS);
-  return { ...DEFAULTS, ...(stored[KEY_SETTINGS] as Partial<Settings> | undefined) };
+  const settings = { ...DEFAULTS, ...(stored[KEY_SETTINGS] as Partial<Settings> | undefined) };
+  // Seed a dev key only when nothing is stored — never override a real one the
+  // user typed, so a --dev build behaves normally once Prep has been saved.
+  // The typeof guard matters: this is a build-time define, so the identifier
+  // simply does not exist under vitest, and a bare reference would throw.
+  const seed = typeof __MISE_DEV_KEY__ === "string" ? __MISE_DEV_KEY__ : "";
+  if (!settings.apiKey && seed) settings.apiKey = seed;
+  return settings;
 }
 
 export async function setSettings(patch: Partial<Settings>): Promise<void> {
