@@ -110,7 +110,7 @@ Three systems defined; see canonical docs:
 The brand mark is a **top-down plate** — a single-pixel rounded rim — with the **Departure Mono "M" plated in the centre**. The M is the *actual* Departure Mono glyph, so the mark and the wordmark are one face: the type IS the identity. Drawn on the same coarse pixel grid (8px cells) as the Fire / In-the-Weeds / Off-Menu icons. **Monochrome** — the flame pixel was deliberately removed (Ben: "it makes it harder to read it as an 'M'"), so the single flame accent lives only in the UI (Fire button, FIRED stamp), never baked into the glyph. Source vector: Figma `Mise` node `107:1447`.
 
 - **Geometry**: 13 cols × 14 rows pixel grid @ 8px/cell. The M letter occupies rows 3–10, cols 4–8; everything else is the plate rim.
-- **Masters**: `type-specimens/mark/` — `mise-plate-on-dark.svg` (paper mark, for dark surfaces), `mise-plate-on-light.svg` (ink mark `#1e1e1e`, for light surfaces), `mise-plate-icon.svg` (paper tile `#fafafa` + ink mark `#232323`, for app/extension/favicon), `mise-plate-icon-16.svg` (M-only 16px variant).
+- **Masters**: `type-specimens/mark/` — `mise-plate-on-dark.svg` (paper mark, for dark surfaces), `mise-plate-on-light.svg` (ink mark `#1e1e1e`, for light surfaces), `mise-plate-icon.svg` (**filled ink disc `#232323` + paper mono-M `#fafafa` knocked out, transparent frame** — app/extension/favicon), `mise-plate-icon-16.svg` (M-only 16px variant, **no longer read by the build**; kept as a master).
 
   **Polarity flipped 2026-08-20** on Ben's direct call: the icon was a dark tile
   with a paper mark, chosen because it read on any theme. It is now black-on-white.
@@ -128,8 +128,12 @@ The brand mark is a **top-down plate** — a single-pixel rounded rim — with t
 - **PNG ladder**: `type-specimens/mark/png/mise-icon-{16,32,48,128}.png` (ready for the MV3 manifest at build time). Re-export by rasterizing the master SVGs at exact sizes (Playwright element screenshot, deviceScaleFactor 1) — 16 uses the M-only variant.
 - **Favicon**: wired at `src/app/icon.svg` (Next.js App Router auto-serves it).
 - **Crit trail**: `logo-plate.html` (3 plate directions — top-down / side-dish / knockout) → direction A (top-down) chosen → single-pixel rim → Ben finalised in Figma (`107:1447`) → `logo-mark.html` (the adopted mark, in-context: hero, ladder, lockup, toolbar states). Decision history in MemPalace (code/recipe_archiver, 2026-06-08).
-- **Reduction note**: at ≤16px the 1px rim breaks up — ship the **M-only** variant (`mise-plate-icon-16.svg`, rim dropped). 128/48/32 carry the full plate.
-- **Toolbar states**: idle = all-ink mark on paper; recipe-detected = ink rim + **flame M** (only the M catches fire — a runtime UI state, not in the glyph). Built 2026-08-20; the polarity is inverted from the original note because the icon flipped to black-on-white the same day, but the rule is unchanged — *the plate is the container and stays put, the M is the content and heats.* The split lives in the SVG itself: `mise-plate-icon.svg` has a `data-part="letter"` group, and `gen-icons.mjs` carries it through to `MARK_PLATE.rim` / `.letter`. At 16px there is no rim, so the whole mark heats.
+- **Reduction note** (superseded 2026-08-20): the M-only variant existed because a 1px *rim* breaks up when downscaled. The plate is **filled** now, and a solid disc survives downscaling, so **one geometry carries the whole ladder**. On a retina display Chrome renders the 32px asset into the 16px slot, which is where the mark actually reads — the softer true-16px rendering only applies to non-retina.
+- **Toolbar states**: idle = ink disc + paper M; recipe-detected = **flame disc + paper M** — *the whole plate catches fire*, the M stays paper throughout.
+
+  **Reversed 2026-08-20, same day it was built.** The first version heated only the M, on the "smooth container, mechanical contents" reading. Ben overruled it, correctly: heating a few thin strokes is a weak signal at 16px, and a whole disc changing from ink to flame is a strong one. The parts live in the SVG — `data-part="plate"` and `data-part="letter"` — and `gen-icons.mjs` carries them through to `MARK_PLATE.plate` / `.letter`.
+
+  **Transparent frame**, so the mark sits on any browser chrome instead of carrying its own tile. **Known and accepted:** on a *dark* toolbar the idle ink disc has very little contrast against the chrome. Decided 2026-08-20 to leave it — the paper M stays fully legible, so the mark still reads even when the disc doesn't separate, and the disc is a container rather than the thing you read. Rejected: a paper hairline around the disc (costs the brutalist solidity), and shipping per-theme icon sets (Chrome gives extensions no reliable way to detect toolbar theme, so it would need a hand-set preference).
 
 **Pivot history:**
 - **v1** (through 2026-04-22): warm-cream split-complementary. Rejected for hitting the AI-default "warm cream + rust + serif+sans" aesthetic.
@@ -228,10 +232,25 @@ not carried by colour alone.
   TikTok are *excluded* — they are the right call once the user has decided to
   fire, and far too loose to decide on their behalf. A false pulse costs more
   than a missed one: an icon that cries recipe everywhere is one you stop seeing.
-- **`<all_urls>` stays optional.** Seeing every page needs it, so the pulse is a
-  progressive enhancement: `syncDetector()` registers the content script when the
-  user grants the permission in Prep and unregisters it if they revoke. A plain
-  install still asks for nothing and extraction still runs on `activeTab`.
+- **The detector is DECLARED in the manifest**, matching `https://*/*` and
+  `http://*/*`, so host access is granted at install.
+
+  **This reverses the original design, and the reversal was earned.** The pulse
+  was built as a progressive enhancement: `optional_host_permissions`, a
+  `chrome.permissions.request()` from a Prep toggle, and
+  `chrome.scripting.registerContentScripts` at runtime, so a plain install asked
+  for nothing. It works in Chrome. It does **not** work in Dia, which never shows
+  the permission prompt and never fires `permissions.onAdded` — so the feature was
+  simply dead there, with no error anywhere to explain it. Confirmed by running
+  the same build in both browsers. Ben chose install-time access over losing the
+  feature in his daily browser; revisit before shipping if the install prompt
+  matters more than fork support.
+
+  **The Prep toggle survived, with different plumbing.** It flips a stored
+  `pulseOnDetect` setting instead of a permission, so the user still decides
+  whether the icon pulses. The content script reads it at `document_idle` and
+  bails before doing any work. Default on — detection only fires on a declared
+  `schema.org/Recipe`, so it is quiet everywhere else and needs no opting into.
 - **The pulse is finite, and that is load-bearing.** An MV3 worker is only
   reliably alive for a short window after the event that woke it, so an endless
   animation would die at whatever frame Chrome chose. Settling into a steady
@@ -240,14 +259,15 @@ not carried by colour alone.
 - **It ramps in discrete steps, not a smooth fade** — the motion spec's "smooth
   container, mechanical contents", and flame is derived from digital-clock red.
   It should read as a seven-segment display coming up to heat.
-- **Only the M heats — the plate stays ink.** Per the toolbar-states rule above,
-  and it is the same "smooth container, mechanical contents" split the motion spec
-  uses everywhere else: the plate is the container, the M is the content.
-- **Two louder alternatives were rendered side by side and rejected.** Flooding the
-  tile red (mark knocked out to paper) has a more arresting endpoint but its
-  mid-ramp washes to pink with the M dissolved into it. Heating the whole mark,
-  rim included, costs the plate its role as a container and reads less controlled.
-  Both were checked at true 16px, not reasoned about.
+- **The whole plate heats; the M stays paper.** Reversed the same day it was
+  built — see the toolbar-states note above. Heating only the M was the tidier
+  reading of the motion spec, and the weaker signal.
+- **Everything above was checked at true 16px, rendered, not reasoned about.**
+  Worth keeping that habit: the rejected "flood the square tile" variant washed
+  to pink mid-ramp with the M dissolved into it, which is invisible in a
+  description and obvious in a contact sheet. The version that shipped — flood
+  the *disc*, keep the M paper — is the same idea shaped to the mark rather than
+  to the frame, and it holds all the way down the ramp.
 
 ### Navigation — the Archive is the nearest thing to a home
 
