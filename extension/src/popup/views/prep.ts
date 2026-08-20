@@ -1,4 +1,5 @@
 import { getSettings, setSettings } from "../../lib/storage";
+import { HOST_ACCESS } from "../../lib/host-access";
 import type { Units } from "../../lib/types";
 
 /**
@@ -70,8 +71,7 @@ export function mountPrep(root: HTMLElement): void {
 
   // Not a setting — a live browser permission, so it reads from and writes to
   // chrome.permissions rather than storage, and never goes through save().
-  const ALL_URLS = { origins: ["<all_urls>"] };
-  void chrome.permissions.contains(ALL_URLS).then((granted) => {
+  void chrome.permissions.contains(HOST_ACCESS).then((granted) => {
     watchPages.checked = granted;
   });
 
@@ -85,8 +85,8 @@ export function mountPrep(root: HTMLElement): void {
     // request() only counts inside the click's user gesture, which an await
     // before it would spend. Call it first, resolve the UI afterwards.
     const settled = wanted
-      ? chrome.permissions.request(ALL_URLS)
-      : chrome.permissions.remove(ALL_URLS).then((removed) => !removed);
+      ? chrome.permissions.request(HOST_ACCESS)
+      : chrome.permissions.remove(HOST_ACCESS).then((removed) => !removed);
 
     void settled
       .then((granted) => {

@@ -11,7 +11,9 @@ describe("manifest", () => {
     expect([...manifest.permissions].sort()).toEqual(
       ["activeTab", "contextMenus", "downloads", "scripting", "storage"].sort(),
     );
-    expect(manifest.optional_host_permissions).toEqual(["<all_urls>"]);
+    // Not `<all_urls>`: it also spans file:// and ftp://, which Mise does not
+    // want and Chrome will not hand over from a runtime prompt.
+    expect(manifest.optional_host_permissions).toEqual(["https://*/*", "http://*/*"]);
     expect(manifest.host_permissions).toEqual(["https://api.anthropic.com/*"]);
   });
 
