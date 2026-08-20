@@ -75,18 +75,35 @@ export function mountPrep(root: HTMLElement): void {
     watchPages.checked = granted;
   });
 
+  const say = (text: string, hold = 4000) => {
+    status.textContent = text;
+    setTimeout(() => (status.textContent = ""), hold);
+  };
+
   watchPages.addEventListener("change", () => {
+    const wanted = watchPages.checked;
     // request() only counts inside the click's user gesture, which an await
     // before it would spend. Call it first, resolve the UI afterwards.
-    const settled = watchPages.checked
+    const settled = wanted
       ? chrome.permissions.request(ALL_URLS)
       : chrome.permissions.remove(ALL_URLS).then((removed) => !removed);
 
-    void settled.then((granted) => {
-      watchPages.checked = granted;
-      status.textContent = granted ? "Watching for recipes." : "No longer watching.";
-      setTimeout(() => (status.textContent = ""), 2000);
-    });
+    void settled
+      .then((granted) => {
+        watchPages.checked = granted;
+        if (!granted) return say(wanted ? "Chrome declined that." : "No longer watching.");
+        // Registered content scripts only attach on the next navigation, so
+        // whatever is already open stays dark until it is reloaded. Saying so
+        // here is cheaper than the user concluding the feature is broken.
+        say("Watching. Reload any open tabs to arm them.", 6000);
+      })
+      .catch((error: unknown) => {
+        // A rejected request() used to disappear entirely — no prompt, no
+        // error, and a checkbox still sitting there looking switched on.
+        // Whatever Chrome objects to, the user should be able to see it.
+        watchPages.checked = !wanted;
+        say(`Couldn't: ${(error as Error)?.message ?? String(error)}`, 8000);
+      });
   });
 
   void (async () => {
