@@ -148,11 +148,22 @@ export async function syncDetector(): Promise<void> {
           allFrames: false,
         },
       ]);
+      console.info("[mise] recipe detector registered");
     } else if (!granted && registered.length > 0) {
       await chrome.scripting.unregisterContentScripts({ ids: [DETECTOR_ID] });
+      console.info("[mise] recipe detector unregistered");
+    } else {
+      console.info(
+        `[mise] detector unchanged — host access ${granted ? "granted" : "NOT granted"}, ` +
+          `${registered.length} script(s) registered`,
+      );
     }
-  } catch {
+  } catch (error) {
     // Registration is best-effort: a failure costs the pulse, never extraction.
+    // But it must not be silent — a detector that never registers looks
+    // identical to a feature that does not work, and the service-worker
+    // console is the only place that difference is visible.
+    console.warn("[mise] detector registration failed:", error);
   }
 }
 
@@ -160,3 +171,19 @@ chrome.runtime.onInstalled.addListener(() => void syncDetector());
 chrome.runtime.onStartup.addListener(() => void syncDetector());
 chrome.permissions.onAdded.addListener(() => void syncDetector());
 chrome.permissions.onRemoved.addListener(() => void syncDetector());
+
+/**
+ * And once on every wake, not only on those four events.
+ *
+ * Host access can also be granted outside this extension entirely — Chrome's
+ * "Site access" menu, and whatever equivalent a Chromium fork ships. Those do
+ * not reliably fire `permissions.onAdded`, and when they don't, the detector
+ * is never registered: the permission reads as granted, the toggle looks on,
+ * and nothing pulses, with no error anywhere to explain it. That was a real
+ * report, on Dia.
+ *
+ * An MV3 worker re-runs its top level every time it wakes, and this worker is
+ * woken by tab updates already, so this makes registration self-healing rather
+ * than dependent on a single event firing.
+ */
+void syncDetector();
