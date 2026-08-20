@@ -112,6 +112,17 @@ describe("serializeRecipe", () => {
     expect(lines[lines.indexOf("units: imperial") + 1]).toBe("scaled: 1.5");
   });
 
+  it("emits author after via and before serves, when the source names one", () => {
+    const withAuthor = serializeRecipe({ ...recipe, author: "J. Kenji López-Alt" }, fm);
+    const lines = withAuthor.split("\n");
+    expect(lines.indexOf("author: J. Kenji López-Alt")).toBe(lines.indexOf("via: 8 video frames") + 1);
+    expect(lines.indexOf("serves: 4")).toBe(lines.indexOf("author: J. Kenji López-Alt") + 1);
+  });
+
+  it("omits the author line entirely when the recipe is unattributed", () => {
+    expect(serializeRecipe(recipe, fm)).not.toContain("author:");
+  });
+
   it("omits the subtitle block entirely when absent", () => {
     const md2 = serializeRecipe({ ...recipe, subtitle: undefined }, fm);
     expect(md2).toContain("# Gochujang-Glazed Pork Belly\n\n## Ingredients");

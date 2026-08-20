@@ -37,6 +37,7 @@ export function serializeRecipe(recipe: Recipe, fm: Frontmatter): string {
   lines.push(`captured: ${formatCaptured(fm.captured)}`);
   lines.push(`source: ${fm.source}`);
   lines.push(`via: ${fm.via}`);
+  if (recipe.author) lines.push(`author: ${recipe.author}`);
   lines.push(`serves: ${recipe.serves}`);
   if (recipe.hands_on) lines.push(`hands_on: ${recipe.hands_on}`);
   if (recipe.total) lines.push(`total: ${recipe.total}`);

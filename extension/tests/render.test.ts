@@ -86,6 +86,23 @@ describe("stampTime", () => {
 describe("renderCard", () => {
   const doc = parse(renderCard(recipe, fm));
 
+  it("renders a byline only when the recipe names an author", () => {
+    expect(doc.querySelector(".byline")).toBeNull();
+    const credited = parse(renderCard({ ...recipe, author: "J. Kenji López-Alt" }, fm));
+    const byline = credited.querySelector(".byline")!;
+    expect(byline.textContent).toBe("by J. Kenji López-Alt");
+    // The name carries the emphasis; "by" stays quiet.
+    expect(byline.querySelector("strong")!.textContent).toBe("J. Kenji López-Alt");
+  });
+
+  it("places the byline between the subtitle and the facts row", () => {
+    const credited = parse(renderCard({ ...recipe, author: "Nigel Slater" }, fm));
+    const order = [...credited.querySelectorAll(".subtitle, .byline, .facts")].map(
+      (el) => el.className,
+    );
+    expect(order).toEqual(["subtitle", "byline", "facts"]);
+  });
+
   it("renders the ticket-top with the NO. display convention", () => {
     expect(doc.querySelector(".ticket-top .brand")!.textContent).toBe("MISE · NO. 00427");
   });

@@ -2,6 +2,7 @@ import { createClient, extractRecipe, OffMenuError } from "../lib/anthropic";
 import { clearCache, readCache, writeCache } from "../lib/cache";
 import { captureFrames } from "../lib/frames";
 import { fire, filenameFor } from "../lib/fire";
+import { serializeRecipe } from "../lib/markdown";
 import { getSettings, nextTicket, peekTicket } from "../lib/storage";
 import type { ExtractionPayload } from "../lib/page-source";
 import type { Frontmatter, Recipe, ViaMethod } from "../lib/types";
@@ -32,18 +33,46 @@ const fireBtn = () => byId<HTMLButtonElement>("fire");
  * the row has to change with the view — there is no window chrome to carry
  * navigation.
  */
+const NAV =
+  `<button id="prep" class="secondary-btn" type="button">Prep</button>` +
+  `<button id="archive" class="secondary-btn" type="button">Archive</button>`;
+
+// The label is bare FIRE rather than "FIRE · save .md" because the success row
+// carries four buttons and the longer label wraps to two lines at that width
+// (measured: the fire button is flex:1, so it gets 152px once Copy joins Prep
+// and Archive). Bare FIRE also matches RETRY's idiom in the error row, and the
+// format is no longer a variable — every fire writes .md, and the receipt names
+// the file.
+const FIRE_BTN = (disabled: boolean) =>
+  `<button id="fire" class="fire-btn" type="button"${disabled ? " disabled" : ""}>` +
+  `<span>FIRE</span><span class="kbd">↵</span></button>`;
+
 const ACTIONS = {
-  extract:
-    `<button id="fire" class="fire-btn" type="button" disabled>` +
-    `<span>FIRE · save .md</span><span class="kbd">↵</span></button>` +
-    `<button id="prep" class="secondary-btn" type="button">Prep</button>` +
-    `<button id="archive" class="secondary-btn" type="button">Archive</button>`,
+  // Idle, skeleton and Off Menu: nothing to fire or copy yet.
+  extract: FIRE_BTN(true) + NAV,
   prep:
     `<button id="save" class="fire-btn" type="button">` +
     `<span>SAVE</span><span class="kbd">↵</span></button>` +
     `<button id="back" class="secondary-btn" type="button">Back</button>`,
-  archive: `<button id="back" class="secondary-btn" type="button">Back</button>`,
+  // The Archive is the closest thing this window has to a home, so Prep hangs
+  // off it — that is the route to settings once a recipe has been fired.
+  archive:
+    `<button id="back" class="secondary-btn" type="button">Back</button>` +
+    `<button id="prep" class="secondary-btn" type="button">Prep</button>`,
 } as const;
+
+/** A landed recipe: fire it, or copy the same .md to the clipboard. */
+const SUCCESS_ACTIONS =
+  FIRE_BTN(false) +
+  `<button id="copy" class="secondary-btn" type="button">Copy</button>` +
+  NAV;
+
+/**
+ * After firing there is nothing left to do to this recipe, so the row becomes
+ * pure navigation. This is what stops the fired state dead-ending: it used to
+ * resolve to "Saved · Esc to close" with no route anywhere.
+ */
+const FIRED_ACTIONS = `<span class="countdown">Saved</span>` + NAV;
 
 type View = keyof typeof ACTIONS;
 
@@ -65,7 +94,6 @@ let extractActions: string = ACTIONS.extract;
 let current: { recipe: Recipe; fm: Frontmatter } | null = null;
 let activeTabId: number | null = null;
 let activeTabUrl = "";
-let lastPageText = "";
 
 let elapsedTimer: number | null = null;
 let phaseStartedAt = 0;
@@ -106,6 +134,11 @@ function setExtractActions(html: string) {
 }
 
 function showView(next: View) {
+  // Reaching for Prep or the Archive is itself the decision to stay, so it
+  // cancels the auto-close. Without this the window would shut mid-Prep, and
+  // the row restored on the way back would still be the countdown.
+  if (countdownTimer !== null && next !== "extract") cancelCountdown();
+
   view = next;
   card.hidden = next !== "extract";
   prepView.hidden = next !== "prep";
@@ -128,8 +161,7 @@ function bindActions() {
   byId("back")?.addEventListener("click", () => showView("extract"));
   byId("save")?.addEventListener("click", () => submitPrep(prepView));
   byId("retry")?.addEventListener("click", () => void run());
-  byId("copy")?.addEventListener("click", () => void copyPageText());
-  byId("keep")?.addEventListener("click", () => cancelCountdown());
+  byId("copy")?.addEventListener("click", () => void copyMarkdown());
 }
 
 function showStamp(kind: "error" | "offmenu", detail?: string) {
@@ -154,9 +186,6 @@ function showError(error: unknown) {
   if (failure.canRetry) {
     fallbacks.push({ glyph: "↻", text: "Retry with the same model", key: "↵" });
   }
-  if (lastPageText) {
-    fallbacks.push({ glyph: "⎘", text: "Copy raw page text (fire to .md manually)", key: "⌘C" });
-  }
   fallbacks.push({ glyph: "→", text: "Open Prep to change key or model", key: "P" });
 
   card.innerHTML = renderError(failure, { url: activeTabUrl, fallbacks });
@@ -165,11 +194,13 @@ function showError(error: unknown) {
     ? `<button id="retry" class="retry-btn" type="button">` +
       `<span>RETRY</span><span class="kbd">↵</span></button>`
     : "";
-  // Deviation from the specimen's error row, which read RETRY · Copy text ·
-  // Prep. Prep and Archive are panes now rather than tabs, so they are the
-  // only navigation this window has — dropping Archive here would strand the
-  // user in a failed extraction with no route to their saved recipes. Copy
-  // keeps its ⌘C binding and its line in the fallback list above.
+  // One row for every failure scenario, settled at the 2026-08-18 desk crit.
+  // Prep and Archive are the only navigation this window has, so both persist
+  // here — dropping Archive would strand the user in a failed extraction with
+  // no route to their recipes. The specimen's third slot was Copy text; it was
+  // cut rather than reinstated, because raw page text is not the clean .md the
+  // product promises, and on the failures that most look like "nothing came
+  // back" (NO API KEY, PAGE UNREADABLE) there is no text to copy at all.
   setExtractActions(
     retry +
       `<button id="prep" class="secondary-btn" type="button">Prep</button>` +
@@ -179,15 +210,26 @@ function showError(error: unknown) {
   (byId("retry") ?? byId("prep"))?.focus();
 }
 
-async function copyPageText() {
-  if (!lastPageText) return;
+/**
+ * Copy the finished .md — the same bytes Fire would write — so the artifact can
+ * go straight into Notes, Obsidian or anywhere else. Distinct from the raw page
+ * text the error row used to offer: this is the product's actual output.
+ *
+ * The ticket is the peeked one, not a claimed one. Copying must not burn a
+ * number, so a copy-then-fire writes the same ticket the copy showed, and a
+ * copy-then-abandon leaves the counter untouched.
+ */
+async function copyMarkdown() {
+  if (!current) return;
+  const btn = byId("copy");
   try {
-    await navigator.clipboard.writeText(lastPageText);
-    const btn = byId("copy");
+    await navigator.clipboard.writeText(serializeRecipe(current.recipe, current.fm));
     if (btn) btn.textContent = "Copied";
   } catch {
-    // Clipboard can be refused; the fallback list still names the option.
+    // Clipboard can be refused; say so rather than silently doing nothing.
+    if (btn) btn.textContent = "Can't copy";
   }
+  if (btn) window.setTimeout(() => { btn.textContent = "Copy"; }, 1600);
 }
 
 interface SkeletonOpts {
@@ -258,7 +300,7 @@ function present(recipe: Recipe, fm: Frontmatter) {
   current = { recipe, fm };
   settle();
   card.innerHTML = renderCard(recipe, fm);
-  setExtractActions(ACTIONS.extract);
+  setExtractActions(SUCCESS_ACTIONS);
   const btn = fireBtn();
   if (btn) {
     btn.disabled = false;
@@ -294,8 +336,6 @@ async function run() {
     const selection = await takeSelection(tab.id);
     const reply = selection ? null : await askContentScript(tab.id);
     const payload = selection ?? reply!.payload;
-    // Stashed before extraction so a failure can still offer "Copy text".
-    lastPageText = payload.text;
 
     let frames: string[] = [];
     if (reply && payload.hasVideo && settings.captureFrames) {
@@ -354,19 +394,19 @@ let countdownTimer: number | null = null;
 function cancelCountdown() {
   if (countdownTimer !== null) clearInterval(countdownTimer);
   countdownTimer = null;
-  setExtractActions(`<span class="countdown">Saved · Esc to close</span>`);
+  setExtractActions(FIRED_ACTIONS);
 }
 
 /**
- * Swap the action row for the receipt's countdown. "Keep open" exists because
- * the auto-close is a convenience, not a decision the user has to accept —
- * they may want to read the path, or open the Archive.
+ * Swap the action row for the receipt's countdown. The auto-close preserves the
+ * fire-and-leave gesture, but Prep and Archive ride alongside it — reaching for
+ * either is itself the decision to stay, so it cancels the close rather than
+ * needing a separate "Keep open".
  */
 function startCountdown() {
   let remaining = Math.round(SPIKE_MS / 1000);
   setExtractActions(
-    `<span class="countdown">Closing in <strong>${remaining}s</strong></span>` +
-      `<button id="keep" class="secondary-btn" type="button">Keep open</button>`,
+    `<span class="countdown">Closing in <strong>${remaining}s</strong></span>` + NAV,
   );
 
   countdownTimer = setInterval(() => {
@@ -442,20 +482,13 @@ document.addEventListener("keydown", (event) => {
 
   if (view !== "extract") return;
 
-  // The error card's fallback list advertises P and ⌘C; honour them. Keyed
-  // off the card itself, not off the Retry button — an unretryable failure
-  // (a rejected key) has no Retry but still lists both shortcuts.
+  // The error card's fallback list advertises P; honour it. Keyed off the card
+  // itself, not off the Retry button — an unretryable failure (a rejected key)
+  // has no Retry but still lists the shortcut.
   if (card.querySelector(".callout.error")) {
     if (event.key === "p" && !event.metaKey && !event.ctrlKey) {
       event.preventDefault();
       showView("prep");
-      return;
-    }
-    const copying = event.key === "c" && (event.metaKey || event.ctrlKey);
-    // Never steal a real text selection from the user.
-    if (copying && !window.getSelection()?.toString()) {
-      event.preventDefault();
-      void copyPageText();
     }
   }
 });

@@ -20,6 +20,9 @@ export interface RecipeIngredient {
 export interface Recipe {
   title: string;
   subtitle?: string;
+  /** Who wrote the recipe, when the source names one. Model-extracted, so it
+   *  lives here rather than in Frontmatter, which is extension-generated. */
+  author?: string;
   serves: string;
   hands_on?: string;
   total?: string;

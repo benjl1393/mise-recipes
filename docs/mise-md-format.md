@@ -25,6 +25,7 @@ ticket: 00427
 captured: 2026-04-22T16:28
 source: https://instagram.com/p/C9xK2
 via: 8 video frames
+author: J. Kenji López-Alt   # optional — only when the source credits someone
 serves: 4
 hands_on: 25m
 total: 2h 10m
@@ -41,6 +42,7 @@ scaled: 1.0              # optional — only if user changed servings
 | `captured` | ISO 8601 datetime | yes | extension generates at save time |
 | `source` | URL | yes | tab URL at capture time |
 | `via` | string (vocabulary below) | yes | inferred from successful extraction path |
+| `author` | string | no | Mise-extracted — the recipe's credited writer, as the source names them, without titles or affiliations. Omitted when the source attributes nobody; never inferred from the site or channel name. Rendered on the card as a byline beneath the subtitle. |
 | `serves` | string | yes | Mise-extracted, Claude-normalized (`"4"`, `"makes 12"`, `"serves 6-8"`). Rendered as `SERVES X`. |
 | `hands_on` | string | no | hands-on cooking time — time at counter/stove, excluding passive waits (marinating, oven-braising, rising). Rendered as `HANDS-ON 25m`. Underscore key for JS-identifier compatibility. |
 | `total` | string | no | total elapsed time including passive. Rendered as `TOTAL 2h 10m`. |

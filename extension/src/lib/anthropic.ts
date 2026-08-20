@@ -29,6 +29,11 @@ export const RECIPE_SCHEMA = {
       type: "string",
       description: "One-line description. Omit if the source gives none.",
     },
+    author: {
+      type: "string",
+      description:
+        "Who wrote the recipe, as the source credits them. Omit if unattributed.",
+    },
     serves: { type: "string", description: 'e.g. "4", "makes 12", "serves 6-8".' },
     hands_on: {
       type: "string",
@@ -87,6 +92,7 @@ Rules:
 - Use the em-dash "—" as the quantity for finishing garnishes with no measurable amount.
 - Ingredient items are lowercase prose; brief modifiers like "crushed" or "skin-on" are welcome.
 - Method steps are flat prose. If the source nests sub-steps, flatten them into one paragraph with em-dashes or semicolons.
+- Author is the recipe's credited writer — a byline, "Recipe by X", a chef or blog author. Use the name as written, without titles or affiliations. Omit the field if the source names nobody; never infer it from the site or channel name.
 - Notes are only for genuine extra context — substitutions, source tips, provenance. Omit the field rather than padding it.
 - Give 3–5 tags from this taxonomy: cuisine ${TAXONOMY.cuisine}; main ingredient ${TAXONOMY.ingredient}; technique ${TAXONOMY.technique}; dietary ${TAXONOMY.dietary}. Do not add time-bucket tags — those are computed.
 - If this page carries no recipe, set found to false and leave the other fields empty. Never invent a recipe.
@@ -143,6 +149,7 @@ export async function extractRecipe(
   return {
     title: parsed.title,
     subtitle: parsed.subtitle,
+    author: parsed.author,
     serves: parsed.serves,
     hands_on: parsed.hands_on,
     total: parsed.total,

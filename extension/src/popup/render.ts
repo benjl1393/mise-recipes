@@ -87,6 +87,7 @@ export function renderCard(recipe: Recipe, fm: Frontmatter): string {
     </div>
     <h2 class="title">${esc(recipe.title)}</h2>
     ${recipe.subtitle ? `<p class="subtitle">${esc(recipe.subtitle)}</p>` : ""}
+    ${recipe.author ? `<p class="byline">by <strong>${esc(recipe.author)}</strong></p>` : ""}
     ${factsRow(recipe)}
     <h3 class="section">Ingredients</h3>
     <ul class="ingredients">

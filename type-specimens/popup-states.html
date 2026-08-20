@@ -402,6 +402,32 @@
         color: var(--ink-dim);
       }
 
+      /* byline — who wrote the recipe. Roman, not italic: the subtitle is the
+         recipe's own voice, this is attribution. Sentence case, because a
+         person's name is not a label to be shouted like the facts row. */
+      .popup .byline {
+        margin: 0 18px 14px;
+        font-family: var(--font-mono);
+        font-size: 10px;
+        line-height: 1.4;
+        letter-spacing: 0.06em;
+        /* --ink-dim, not --ink-muted-v2: muted lands at 3.28:1 on paper and
+           fails AA at 10px. This matches the facts label and the subtitle. */
+        color: var(--ink-dim);
+      }
+
+      /* Tighten only when it trails a subtitle, which already carries 14px
+         beneath it. Under a bare title (6px) that pull would close the gap. */
+      .popup .subtitle + .byline {
+        margin-top: -6px;
+      }
+
+      .popup .byline strong {
+        color: var(--ink);
+        font-weight: 400;
+        letter-spacing: 0.02em;
+      }
+
       /* facts */
       .popup .facts {
         display: flex;
@@ -1641,11 +1667,6 @@
                   <span class="kbd">↵</span>
                 </li>
                 <li>
-                  <span class="gl">⎘</span>
-                  <span>Copy raw page text (fire to .md manually)</span>
-                  <span class="kbd">⌘C</span>
-                </li>
-                <li>
                   <span class="gl">↓</span>
                   <span>Switch to Haiku (cheaper, less nuance)</span>
                   <span class="kbd">H</span>
@@ -1659,10 +1680,10 @@
             </div>
             <div class="popup-actions">
               <button class="retry-btn"><span>RETRY</span><span class="kbd" style="border:1px solid var(--ink-primary); color: var(--ink-primary); opacity: .5">↵</span></button>
-              <button class="secondary-btn">Copy text</button>
               <button class="secondary-btn">Prep</button>
+              <button class="secondary-btn">Archive</button>
             </div>
-            <p class="chrome-caption">↑ Fire replaced by Retry when there is no artifact to save</p>
+            <p class="chrome-caption">↑ Fire replaced by Retry when there is no artifact to save. Prep and Archive are the window's only navigation, so both persist here — Copy text was cut at the 2026-08-18 crit.</p>
           </div>
         </article>
 
