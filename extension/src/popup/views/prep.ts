@@ -21,6 +21,10 @@ export function mountPrep(root: HTMLElement): void {
                placeholder="sk-ant-…" />
         <span class="hint">
           Stored on this device only. Sent to api.anthropic.com and nowhere else.
+          No key yet?
+          <a href="https://console.anthropic.com/settings/keys"
+             target="_blank" rel="noreferrer noopener">Make one here</a>
+          — you pay Anthropic directly, usually well under a cent per recipe.
         </span>
       </label>
 

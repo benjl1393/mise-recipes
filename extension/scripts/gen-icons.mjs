@@ -53,21 +53,34 @@ export function parseMarkSvg(path) {
   const ground = svg.match(/<rect width="\d+" height="\d+" fill="(#[0-9a-fA-F]{6})"\/>/);
   if (!ground) throw new Error(`${path}: no ground rect`);
 
-  const group = svg.match(/<g fill="(#[0-9a-fA-F]{6})" transform="translate\((-?\d+) (-?\d+)\)">([\s\S]*?)<\/g>/);
-  if (!group) throw new Error(`${path}: no translated mark group`);
-  const [, ink, dxRaw, dyRaw, body] = group;
-  const dx = Number(dxRaw);
-  const dy = Number(dyRaw);
+  // The plate SVG carries two groups; the 16px variant carries one. A group
+  // tagged data-part="letter" is the mono-M — the part the pulse heats. An
+  // untagged group in a single-group file is all letter, because at 16px the
+  // rim is dropped and the M *is* the mark.
+  const groups = [
+    ...svg.matchAll(
+      /<g fill="(#[0-9a-fA-F]{6})" transform="translate\((-?\d+) (-?\d+)\)"([^>]*)>([\s\S]*?)<\/g>/g,
+    ),
+  ];
+  if (groups.length === 0) throw new Error(`${path}: no translated mark group`);
 
-  const cells = [];
-  const rect = /<rect x="(-?\d+)" y="(-?\d+)" width="(\d+)" height="(\d+)"\/>/g;
-  for (let m = rect.exec(body); m; m = rect.exec(body)) {
-    // Bake the group transform in so consumers never have to know about it.
-    cells.push({ x: Number(m[1]) + dx, y: Number(m[2]) + dy, w: Number(m[3]), h: Number(m[4]) });
+  const rim = [];
+  const letter = [];
+  let ink = null;
+  for (const [, fill, dxRaw, dyRaw, attrs, body] of groups) {
+    ink ??= fill;
+    const dx = Number(dxRaw);
+    const dy = Number(dyRaw);
+    const into = attrs.includes('data-part="letter"') || groups.length === 1 ? letter : rim;
+    const rect = /<rect x="(-?\d+)" y="(-?\d+)" width="(\d+)" height="(\d+)"\/>/g;
+    for (let m = rect.exec(body); m; m = rect.exec(body)) {
+      // Bake the group transform in so consumers never have to know about it.
+      into.push({ x: Number(m[1]) + dx, y: Number(m[2]) + dy, w: Number(m[3]), h: Number(m[4]) });
+    }
   }
-  if (cells.length === 0) throw new Error(`${path}: mark group has no rects`);
+  if (rim.length + letter.length === 0) throw new Error(`${path}: mark groups have no rects`);
 
-  return { size, paper: ground[1], ink, cells };
+  return { size, paper: ground[1], ink, rim, letter };
 }
 
 // ---------------------------------------------------------------------------
@@ -91,43 +104,59 @@ const SS = 4;
  * thresholding would shift the whole mark a pixel left or right and break the
  * plate's symmetry. Averaging keeps it centred.
  */
-export function render(geometry, out) {
-  const { size, cells } = geometry;
-  const [pr, pg, pb] = hexToRgb(geometry.paper);
-  const [ir, ig, ib] = hexToRgb(geometry.ink);
+export function render(geometry, out, colors = {}) {
+  const { size } = geometry;
+  const paper = colors.paper ?? geometry.paper;
+  const rimInk = colors.rim ?? geometry.ink;
+  const letterInk = colors.letter ?? geometry.ink;
 
-  // Mark a supersampled coverage grid, then box-filter it down.
+  // Coverage is tracked per part so rim and letter can take different colours —
+  // the pulse heats only the M, per the toolbar-states spec.
   const hi = out * SS;
-  const covered = new Uint8Array(hi * hi);
   const scale = hi / size;
-  for (const cell of cells) {
-    const x0 = Math.round(cell.x * scale);
-    const y0 = Math.round(cell.y * scale);
-    const x1 = Math.round((cell.x + cell.w) * scale);
-    const y1 = Math.round((cell.y + cell.h) * scale);
-    for (let y = y0; y < y1; y++) {
-      if (y < 0 || y >= hi) continue;
-      for (let x = x0; x < x1; x++) {
-        if (x < 0 || x >= hi) continue;
-        covered[y * hi + x] = 1;
+  const coverageOf = (cells) => {
+    const covered = new Uint8Array(hi * hi);
+    for (const cell of cells) {
+      const x0 = Math.round(cell.x * scale);
+      const y0 = Math.round(cell.y * scale);
+      const x1 = Math.round((cell.x + cell.w) * scale);
+      const y1 = Math.round((cell.y + cell.h) * scale);
+      for (let y = Math.max(0, y0); y < Math.min(hi, y1); y++) {
+        for (let x = Math.max(0, x0); x < Math.min(hi, x1); x++) covered[y * hi + x] = 1;
       }
     }
-  }
+    return covered;
+  };
+
+  const parts = [
+    { covered: coverageOf(geometry.rim), rgb: hexToRgb(rimInk) },
+    { covered: coverageOf(geometry.letter), rgb: hexToRgb(letterInk) },
+  ];
+  const [pr, pg, pb] = hexToRgb(paper);
 
   const rgba = Buffer.alloc(out * out * 4);
   const samples = SS * SS;
   for (let y = 0; y < out; y++) {
     for (let x = 0; x < out; x++) {
-      let hits = 0;
-      for (let sy = 0; sy < SS; sy++) {
-        const row = (y * SS + sy) * hi + x * SS;
-        for (let sx = 0; sx < SS; sx++) hits += covered[row + sx];
+      let r = pr;
+      let g = pg;
+      let b = pb;
+      for (const { covered, rgb } of parts) {
+        let hits = 0;
+        for (let sy = 0; sy < SS; sy++) {
+          const row = (y * SS + sy) * hi + x * SS;
+          for (let sx = 0; sx < SS; sx++) hits += covered[row + sx];
+        }
+        if (hits === 0) continue;
+        const a = hits / samples;
+        r = Math.round(r + (rgb[0] - r) * a);
+        g = Math.round(g + (rgb[1] - g) * a);
+        b = Math.round(b + (rgb[2] - b) * a);
       }
-      const a = hits / samples;
       const i = (y * out + x) * 4;
-      rgba[i] = Math.round(pr + (ir - pr) * a);
-      rgba[i + 1] = Math.round(pg + (ig - pg) * a);
-      rgba[i + 2] = Math.round(pb + (ib - pb) * a);
+      rgba[i] = r;
+      rgba[i + 1] = g;
+      rgba[i + 2] = b;
       rgba[i + 3] = 255; // the tile is a solid ground, per the black-on-white brief
     }
   }
@@ -211,10 +240,12 @@ for (const size of SIZES) {
   console.log(`[mise] icons/mise-icon-${size}.png  (${geometry === small ? "rim-less" : "plate"})`);
 }
 
+const list = (cells) =>
+  cells.map((c) => `    { x: ${c.x}, y: ${c.y}, w: ${c.w}, h: ${c.h} },`).join("\n");
+
 const serialise = (geometry) =>
-  `{\n  size: ${geometry.size},\n  cells: [\n${geometry.cells
-    .map((c) => `    { x: ${c.x}, y: ${c.y}, w: ${c.w}, h: ${c.h} },`)
-    .join("\n")}\n  ],\n}`;
+  `{\n  size: ${geometry.size},\n  rim: [\n${list(geometry.rim)}\n  ],\n` +
+  `  letter: [\n${list(geometry.letter)}\n  ],\n}`;
 
 writeFileSync(
   GEOMETRY_OUT,
@@ -232,7 +263,10 @@ export interface MarkCell {
 export interface MarkGeometry {
   /** Edge length of the coordinate space the cells are expressed in. */
   size: number;
-  cells: MarkCell[];
+  /** The plate. Stays ink — it is the container, not the content. */
+  rim: MarkCell[];
+  /** The mono-M. This is the part the toolbar pulse heats. */
+  letter: MarkCell[];
 }
 
 /** Plate rim + mono-M. The mark proper. */
@@ -242,7 +276,7 @@ export const MARK_PLATE: MarkGeometry = ${serialise(full)};
 export const MARK_SMALL: MarkGeometry = ${serialise(small)};
 `,
 );
-console.log(`[mise] src/lib/mark-geometry.ts  (${full.cells.length} + ${small.cells.length} cells)`);
+console.log(`[mise] src/lib/mark-geometry.ts  (rim ${full.rim.length} + letter ${full.letter.length}, small ${small.letter.length})`);
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) main();

@@ -129,7 +129,7 @@ The brand mark is a **top-down plate** — a single-pixel rounded rim — with t
 - **Favicon**: wired at `src/app/icon.svg` (Next.js App Router auto-serves it).
 - **Crit trail**: `logo-plate.html` (3 plate directions — top-down / side-dish / knockout) → direction A (top-down) chosen → single-pixel rim → Ben finalised in Figma (`107:1447`) → `logo-mark.html` (the adopted mark, in-context: hero, ladder, lockup, toolbar states). Decision history in MemPalace (code/recipe_archiver, 2026-06-08).
 - **Reduction note**: at ≤16px the 1px rim breaks up — ship the **M-only** variant (`mise-plate-icon-16.svg`, rim dropped). 128/48/32 carry the full plate.
-- **Toolbar states**: idle = all-paper mark; recipe-detected = paper rim + **flame M** (only the M catches fire — a runtime UI state, not in the glyph).
+- **Toolbar states**: idle = all-ink mark on paper; recipe-detected = ink rim + **flame M** (only the M catches fire — a runtime UI state, not in the glyph). Built 2026-08-20; the polarity is inverted from the original note because the icon flipped to black-on-white the same day, but the rule is unchanged — *the plate is the container and stays put, the M is the content and heats.* The split lives in the SVG itself: `mise-plate-icon.svg` has a `data-part="letter"` group, and `gen-icons.mjs` carries it through to `MARK_PLATE.rim` / `.letter`. At 16px there is no rim, so the whole mark heats.
 
 **Pivot history:**
 - **v1** (through 2026-04-22): warm-cream split-complementary. Rejected for hitting the AI-default "warm cream + rust + serif+sans" aesthetic.
@@ -146,17 +146,27 @@ See the global `design-anti-ai-defaults.md` rule and `design-studio-principles.m
 2. ~~Logo mark + extension icon set~~ — done; "The Spike" (2026-06-07) → repivoted to **plate + mono-M** (2026-06-08, see "Logo mark" section above)
 3. Motion (`/flow` → `impeccable:animate`)
 4. Microcopy pass (`ux-copywriter`)
-5. Adversarial critique (`impeccable:critique` + `web-design-guidelines`) — **still owed a desk crit**
-6. Final polish — **still owed a desk crit**
+5. ~~Adversarial critique (`impeccable:critique` + `web-design-guidelines`)~~ — run
+   2026-08-20, report at `docs/crit-2026-08-20-step5.md`. 33/40 on Nielsen; zero
+   AI-slop antipatterns.
+6. ~~Final polish~~ — applied 2026-08-20 from the step 5 findings: the API-key link
+   (P0), the specimen/product drift (P1), and `color-scheme` (P3).
+
+   **Three findings are deliberately still open, because they are design-authority
+   calls rather than polish** — the 10.5px secondary navigation, the flame focus
+   ring colliding with Principle 6 on error screens, and unvirtualized 500-row
+   Archive rendering. All three are argued in the crit doc. **Owed a desk crit.**
 
    The error-row crit (2026-08-18) is done and folded in — see "One window,
-   three panes". Steps 5 and 6 are the remaining ones.
+   three panes".
 7. ~~Build track — Chrome MV3 extension~~ — done 2026-08-17, see `extension/` and the plan at `docs/superpowers/plans/2026-08-17-mise-extension.md`
 8. ~~Post-fire navigation, Copy-to-clipboard, and the `author` field~~ — done 2026-08-18, see "Navigation" below
 
-Steps 5 and 6 were skipped, not completed: the build ran ahead of them because
-crits need Ben in the room. The extension is a working target to crit against
-now — which is a better artifact to critique than the specimens were.
+Steps 5 and 6 were originally skipped, not completed: the build ran ahead of them
+because crits need Ben in the room. They were run on 2026-08-20 against the built
+extension rather than the specimens, which is the better artifact — and the crit
+immediately found that the specimen had drifted from what actually ships. Findings
+that are genuinely Ben's call were left open rather than decided in his absence.
 
 ## The extension (`extension/`)
 
@@ -230,12 +240,14 @@ not carried by colour alone.
 - **It ramps in discrete steps, not a smooth fade** — the motion spec's "smooth
   container, mechanical contents", and flame is derived from digital-clock red.
   It should read as a seven-segment display coming up to heat.
-- **Why the mark heats and not the tile:** the louder alternative (flood the tile
-  red, knock the mark out to paper) was rendered side by side at true 16px. Its
-  endpoint is more arresting, but its mid-ramp washes to pink with the M
-  dissolved into it. Heating the mark keeps a crisp letterform at every step.
-  A hybrid — pulse the mark, settle on the inverted red tile — is **owed a desk
-  crit**.
+- **Only the M heats — the plate stays ink.** Per the toolbar-states rule above,
+  and it is the same "smooth container, mechanical contents" split the motion spec
+  uses everywhere else: the plate is the container, the M is the content.
+- **Two louder alternatives were rendered side by side and rejected.** Flooding the
+  tile red (mark knocked out to paper) has a more arresting endpoint but its
+  mid-ramp washes to pink with the M dissolved into it. Heating the whole mark,
+  rim included, costs the plate its role as a container and reads less controlled.
+  Both were checked at true 16px, not reasoned about.
 
 ### Navigation — the Archive is the nearest thing to a home
 

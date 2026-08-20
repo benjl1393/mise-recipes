@@ -38,38 +38,55 @@ export function mix(from: string, to: string, amount: number): string {
   return `#${parts.join("")}`;
 }
 
+export interface MarkColors {
+  rim: string;
+  letter: string;
+  paper: string;
+}
+
 export function drawMark(
   ctx: OffscreenCanvasRenderingContext2D,
   size: number,
-  ink: string,
-  paper: string,
+  colors: MarkColors,
 ): void {
   const geometry = geometryFor(size);
   const scale = size / geometry.size;
-  ctx.fillStyle = paper;
+  ctx.fillStyle = colors.paper;
   ctx.fillRect(0, 0, size, size);
-  ctx.fillStyle = ink;
-  for (const cell of geometry.cells) {
-    ctx.fillRect(cell.x * scale, cell.y * scale, cell.w * scale, cell.h * scale);
+  for (const [cells, fill] of [
+    [geometry.rim, colors.rim],
+    [geometry.letter, colors.letter],
+  ] as const) {
+    ctx.fillStyle = fill;
+    for (const cell of cells) {
+      ctx.fillRect(cell.x * scale, cell.y * scale, cell.w * scale, cell.h * scale);
+    }
   }
 }
 
 /** One frame of the toolbar icon, ready for `chrome.action.setIcon`. */
-export function markImageData(size: number, ink: string, paper: string): ImageData {
+export function markImageData(size: number, colors: MarkColors): ImageData {
   const canvas = new OffscreenCanvas(size, size);
   const ctx = canvas.getContext("2d");
   if (!ctx) throw new Error("OffscreenCanvas 2d context unavailable");
-  drawMark(ctx, size, ink, paper);
+  drawMark(ctx, size, colors);
   return ctx.getImageData(0, 0, size, size);
 }
 
 /** Chrome picks the closest size; supplying both avoids it rescaling one. */
 export const ICON_SIZES = [16, 32] as const;
 
-/** The icon at one point on the ink→flame ramp, as a setIcon `imageData` map. */
+/**
+ * The icon at one point on the heat ramp.
+ *
+ * Only the M catches fire. The plate is the container and stays ink — per the
+ * toolbar-states line in CLAUDE.md, and because it is the same "smooth
+ * container, mechanical contents" split the motion spec uses everywhere else.
+ * At 16px there is no rim to hold steady, so the whole mark heats.
+ */
 export function iconFrame(heat: number): Record<number, ImageData> {
-  const ink = mix(INK, FLAME, heat);
+  const colors: MarkColors = { rim: INK, letter: mix(INK, FLAME, heat), paper: PAPER };
   const frame: Record<number, ImageData> = {};
-  for (const size of ICON_SIZES) frame[size] = markImageData(size, ink, PAPER);
+  for (const size of ICON_SIZES) frame[size] = markImageData(size, colors);
   return frame;
 }

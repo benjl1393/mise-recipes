@@ -12,13 +12,16 @@ export interface MarkCell {
 export interface MarkGeometry {
   /** Edge length of the coordinate space the cells are expressed in. */
   size: number;
-  cells: MarkCell[];
+  /** The plate. Stays ink — it is the container, not the content. */
+  rim: MarkCell[];
+  /** The mono-M. This is the part the toolbar pulse heats. */
+  letter: MarkCell[];
 }
 
 /** Plate rim + mono-M. The mark proper. */
 export const MARK_PLATE: MarkGeometry = {
   size: 128,
-  cells: [
+  rim: [
     { x: 44, y: 8, w: 8, h: 8 },
     { x: 52, y: 8, w: 8, h: 8 },
     { x: 60, y: 8, w: 8, h: 8 },
@@ -33,40 +36,20 @@ export const MARK_PLATE: MarkGeometry = {
     { x: 92, y: 24, w: 8, h: 8 },
     { x: 100, y: 24, w: 8, h: 8 },
     { x: 20, y: 32, w: 8, h: 8 },
-    { x: 44, y: 32, w: 8, h: 8 },
-    { x: 76, y: 32, w: 8, h: 8 },
     { x: 100, y: 32, w: 8, h: 8 },
     { x: 12, y: 40, w: 8, h: 8 },
-    { x: 44, y: 40, w: 8, h: 8 },
-    { x: 76, y: 40, w: 8, h: 8 },
     { x: 108, y: 40, w: 8, h: 8 },
     { x: 12, y: 48, w: 8, h: 8 },
-    { x: 44, y: 48, w: 8, h: 8 },
-    { x: 52, y: 48, w: 8, h: 8 },
-    { x: 68, y: 48, w: 8, h: 8 },
-    { x: 76, y: 48, w: 8, h: 8 },
     { x: 108, y: 48, w: 8, h: 8 },
     { x: 12, y: 56, w: 8, h: 8 },
-    { x: 44, y: 56, w: 8, h: 8 },
-    { x: 60, y: 56, w: 8, h: 8 },
-    { x: 76, y: 56, w: 8, h: 8 },
     { x: 108, y: 56, w: 8, h: 8 },
     { x: 12, y: 64, w: 8, h: 8 },
-    { x: 44, y: 64, w: 8, h: 8 },
-    { x: 60, y: 64, w: 8, h: 8 },
-    { x: 76, y: 64, w: 8, h: 8 },
     { x: 108, y: 64, w: 8, h: 8 },
     { x: 12, y: 72, w: 8, h: 8 },
-    { x: 44, y: 72, w: 8, h: 8 },
-    { x: 76, y: 72, w: 8, h: 8 },
     { x: 108, y: 72, w: 8, h: 8 },
     { x: 12, y: 80, w: 8, h: 8 },
-    { x: 44, y: 80, w: 8, h: 8 },
-    { x: 76, y: 80, w: 8, h: 8 },
     { x: 108, y: 80, w: 8, h: 8 },
     { x: 20, y: 88, w: 8, h: 8 },
-    { x: 44, y: 88, w: 8, h: 8 },
-    { x: 76, y: 88, w: 8, h: 8 },
     { x: 100, y: 88, w: 8, h: 8 },
     { x: 20, y: 96, w: 8, h: 8 },
     { x: 28, y: 96, w: 8, h: 8 },
@@ -82,12 +65,37 @@ export const MARK_PLATE: MarkGeometry = {
     { x: 68, y: 112, w: 8, h: 8 },
     { x: 76, y: 112, w: 8, h: 8 },
   ],
+  letter: [
+    { x: 44, y: 32, w: 8, h: 8 },
+    { x: 76, y: 32, w: 8, h: 8 },
+    { x: 44, y: 40, w: 8, h: 8 },
+    { x: 76, y: 40, w: 8, h: 8 },
+    { x: 44, y: 48, w: 8, h: 8 },
+    { x: 52, y: 48, w: 8, h: 8 },
+    { x: 68, y: 48, w: 8, h: 8 },
+    { x: 76, y: 48, w: 8, h: 8 },
+    { x: 44, y: 56, w: 8, h: 8 },
+    { x: 60, y: 56, w: 8, h: 8 },
+    { x: 76, y: 56, w: 8, h: 8 },
+    { x: 44, y: 64, w: 8, h: 8 },
+    { x: 60, y: 64, w: 8, h: 8 },
+    { x: 76, y: 64, w: 8, h: 8 },
+    { x: 44, y: 72, w: 8, h: 8 },
+    { x: 76, y: 72, w: 8, h: 8 },
+    { x: 44, y: 80, w: 8, h: 8 },
+    { x: 76, y: 80, w: 8, h: 8 },
+    { x: 44, y: 88, w: 8, h: 8 },
+    { x: 76, y: 88, w: 8, h: 8 },
+  ],
 };
 
 /** M only. Below ~20px the 1px plate rim turns to mush, so it is dropped. */
 export const MARK_SMALL: MarkGeometry = {
   size: 16,
-  cells: [
+  rim: [
+
+  ],
+  letter: [
     { x: 3, y: 0, w: 2, h: 2 },
     { x: 11, y: 0, w: 2, h: 2 },
     { x: 3, y: 2, w: 2, h: 2 },

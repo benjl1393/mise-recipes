@@ -905,8 +905,17 @@ body {
   background: var(--bg-page);
   color: var(--paper-primary);
   font-family: var(--font-body);
+  /* The window surround is ink, so the scrollbar should be too. */
+  color-scheme: dark;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* …but the card and the panes are paper, and they hold native controls — the
+   Model <select> in Prep renders itself dark on a white field otherwise. */
+.popup,
+.surface {
+  color-scheme: light;
 }
 
 body {
@@ -1029,6 +1038,13 @@ body {
   font-size: 11px;
   line-height: 1.45;
   color: var(--ink-dim);
+}
+
+/* The only link in the extension. Flame because it is the one action inside a
+   hint, and 5.22:1 on paper carries it. */
+#prep-view .field .hint a {
+  color: var(--flame);
+  text-underline-offset: 2px;
 }
 
 #prep-view .radios {
