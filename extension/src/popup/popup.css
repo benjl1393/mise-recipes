@@ -246,6 +246,32 @@
   color: var(--ink-dim);
 }
 
+/* byline — who wrote the recipe. Roman, not italic: the subtitle is the
+   recipe's own voice, this is attribution. Sentence case, because a
+   person's name is not a label to be shouted like the facts row. */
+.popup .byline {
+  margin: 0 18px 14px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  line-height: 1.4;
+  letter-spacing: 0.06em;
+  /* --ink-dim, not --ink-muted-v2: muted lands at 3.28:1 on paper and
+     fails AA at 10px. This matches the facts label and the subtitle. */
+  color: var(--ink-dim);
+}
+
+/* Tighten only when it trails a subtitle, which already carries 14px
+   beneath it. Under a bare title (6px) that pull would close the gap. */
+.popup .subtitle + .byline {
+  margin-top: -6px;
+}
+
+.popup .byline strong {
+  color: var(--ink);
+  font-weight: 400;
+  letter-spacing: 0.02em;
+}
+
 /* facts */
 .popup .facts {
   display: flex;
@@ -1028,6 +1054,28 @@ body {
   font-family: var(--font-mono);
   font-size: 12px;
   line-height: 1.4;
+}
+
+/* A checkbox field that carries a hint needs the hint under both columns
+   rather than tucked beside the box. */
+#prep-view .field.checkbox.explained {
+  grid-auto-flow: row;
+  grid-template-columns: auto 1fr;
+  align-items: start;
+  row-gap: 6px;
+}
+
+#prep-view .field.checkbox.explained > input {
+  grid-row: 1;
+  margin-top: 2px;
+}
+
+#prep-view .field.checkbox.explained > span:not(.hint) {
+  grid-row: 1;
+}
+
+#prep-view .field.checkbox.explained > .hint {
+  grid-column: 1 / -1;
 }
 
 #prep-view .status {

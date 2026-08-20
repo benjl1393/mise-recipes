@@ -45,6 +45,15 @@ export function mountPrep(root: HTMLElement): void {
         <input id="captureFrames" type="checkbox" />
         <span>Scan video frames on Reels, TikTok, and Shorts</span>
       </label>
+
+      <label class="field checkbox explained">
+        <input id="watchPages" type="checkbox" />
+        <span>Pulse the icon when a page has a recipe</span>
+        <span class="hint">
+          Needs permission to read the pages you visit. Detection runs on this
+          device and no page leaves it.
+        </span>
+      </label>
     </form>
     <p id="prep-status" class="status" role="status"></p>`;
 
@@ -52,7 +61,29 @@ export function mountPrep(root: HTMLElement): void {
   const apiKey = root.querySelector("#apiKey") as HTMLInputElement;
   const model = root.querySelector("#model") as HTMLSelectElement;
   const captureFrames = root.querySelector("#captureFrames") as HTMLInputElement;
+  const watchPages = root.querySelector("#watchPages") as HTMLInputElement;
   const status = root.querySelector("#prep-status") as HTMLElement;
+
+  // Not a setting — a live browser permission, so it reads from and writes to
+  // chrome.permissions rather than storage, and never goes through save().
+  const ALL_URLS = { origins: ["<all_urls>"] };
+  void chrome.permissions.contains(ALL_URLS).then((granted) => {
+    watchPages.checked = granted;
+  });
+
+  watchPages.addEventListener("change", () => {
+    // request() only counts inside the click's user gesture, which an await
+    // before it would spend. Call it first, resolve the UI afterwards.
+    const settled = watchPages.checked
+      ? chrome.permissions.request(ALL_URLS)
+      : chrome.permissions.remove(ALL_URLS).then((removed) => !removed);
+
+    void settled.then((granted) => {
+      watchPages.checked = granted;
+      status.textContent = granted ? "Watching for recipes." : "No longer watching.";
+      setTimeout(() => (status.textContent = ""), 2000);
+    });
+  });
 
   void (async () => {
     const settings = await getSettings();

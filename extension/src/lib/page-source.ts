@@ -24,7 +24,7 @@ function isRecipeNode(node: unknown): boolean {
 }
 
 /** Walk a JSON-LD document (bare object, array, or @graph) for a Recipe node. */
-function findRecipeNode(parsed: unknown): unknown | null {
+export function findRecipeNode(parsed: unknown): unknown | null {
   if (Array.isArray(parsed)) {
     for (const entry of parsed) {
       const hit = findRecipeNode(entry);

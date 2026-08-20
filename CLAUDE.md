@@ -110,7 +110,21 @@ Three systems defined; see canonical docs:
 The brand mark is a **top-down plate** — a single-pixel rounded rim — with the **Departure Mono "M" plated in the centre**. The M is the *actual* Departure Mono glyph, so the mark and the wordmark are one face: the type IS the identity. Drawn on the same coarse pixel grid (8px cells) as the Fire / In-the-Weeds / Off-Menu icons. **Monochrome** — the flame pixel was deliberately removed (Ben: "it makes it harder to read it as an 'M'"), so the single flame accent lives only in the UI (Fire button, FIRED stamp), never baked into the glyph. Source vector: Figma `Mise` node `107:1447`.
 
 - **Geometry**: 13 cols × 14 rows pixel grid @ 8px/cell. The M letter occupies rows 3–10, cols 4–8; everything else is the plate rim.
-- **Masters**: `type-specimens/mark/` — `mise-plate-on-dark.svg` (paper mark, for dark surfaces), `mise-plate-on-light.svg` (ink mark `#1e1e1e`, for light surfaces), `mise-plate-icon.svg` (ink tile `#232323` + paper mark, for app/extension/favicon — reads on any theme), `mise-plate-icon-16.svg` (M-only 16px variant).
+- **Masters**: `type-specimens/mark/` — `mise-plate-on-dark.svg` (paper mark, for dark surfaces), `mise-plate-on-light.svg` (ink mark `#1e1e1e`, for light surfaces), `mise-plate-icon.svg` (paper tile `#fafafa` + ink mark `#232323`, for app/extension/favicon), `mise-plate-icon-16.svg` (M-only 16px variant).
+
+  **Polarity flipped 2026-08-20** on Ben's direct call: the icon was a dark tile
+  with a paper mark, chosen because it read on any theme. It is now black-on-white.
+  The tradeoff that buys back: a paper tile is a bright chip on a dark browser
+  toolbar rather than disappearing into it — **owed a desk crit**. Note this is
+  the *icon* only; `mise-plate-on-dark.svg` and `-on-light.svg` are unchanged and
+  still carry the surface-appropriate variants.
+
+  **The PNG ladder is generated, not exported.** `npm run gen:icons` rasterises
+  both SVGs into `type-specimens/mark/png/` and emits
+  `extension/src/lib/mark-geometry.ts`. The toolbar icon animates (see "Recipe
+  pulse"), so the mark must be drawable at runtime in colours no exported asset
+  contains — one geometry source keeps the pulse and the shipped PNGs in step.
+  Change the SVG, then run `gen:icons`; never hand-edit the PNGs or the geometry.
 - **PNG ladder**: `type-specimens/mark/png/mise-icon-{16,32,48,128}.png` (ready for the MV3 manifest at build time). Re-export by rasterizing the master SVGs at exact sizes (Playwright element screenshot, deviceScaleFactor 1) — 16 uses the M-only variant.
 - **Favicon**: wired at `src/app/icon.svg` (Next.js App Router auto-serves it).
 - **Crit trail**: `logo-plate.html` (3 plate directions — top-down / side-dish / knockout) → direction A (top-down) chosen → single-pixel rim → Ben finalised in Figma (`107:1447`) → `logo-mark.html` (the adopted mark, in-context: hero, ladder, lockup, toolbar states). Decision history in MemPalace (code/recipe_archiver, 2026-06-08).
@@ -134,7 +148,11 @@ See the global `design-anti-ai-defaults.md` rule and `design-studio-principles.m
 4. Microcopy pass (`ux-copywriter`)
 5. Adversarial critique (`impeccable:critique` + `web-design-guidelines`) — **still owed a desk crit**
 6. Final polish — **still owed a desk crit**
+
+   The error-row crit (2026-08-18) is done and folded in — see "One window,
+   three panes". Steps 5 and 6 are the remaining ones.
 7. ~~Build track — Chrome MV3 extension~~ — done 2026-08-17, see `extension/` and the plan at `docs/superpowers/plans/2026-08-17-mise-extension.md`
+8. ~~Post-fire navigation, Copy-to-clipboard, and the `author` field~~ — done 2026-08-18, see "Navigation" below
 
 Steps 5 and 6 were skipped, not completed: the build ran ahead of them because
 crits need Ben in the room. The extension is a working target to crit against
@@ -187,6 +205,89 @@ run a desk crit, then `npm run port:design`. Extension-only chrome (the popup
 window box, the Prep form, the Archive list) has no specimen equivalent and is
 authored inside that script.
 
+### Recipe pulse — the toolbar icon as a detector
+
+**Added 2026-08-20.** When a page declares itself a recipe, the toolbar icon
+pulses red three times and then holds at flame for as long as that tab is on the
+recipe. The title changes to `Recipe found — fire it to Mise`, so the signal is
+not carried by colour alone.
+
+- **Detection is deliberately narrow** (`src/lib/detect-recipe.ts`): schema.org
+  `Recipe` in JSON-LD, or the same type in microdata. Both are things a publisher
+  set on purpose. The caption/video heuristics `pickSource` uses for Reels and
+  TikTok are *excluded* — they are the right call once the user has decided to
+  fire, and far too loose to decide on their behalf. A false pulse costs more
+  than a missed one: an icon that cries recipe everywhere is one you stop seeing.
+- **`<all_urls>` stays optional.** Seeing every page needs it, so the pulse is a
+  progressive enhancement: `syncDetector()` registers the content script when the
+  user grants the permission in Prep and unregisters it if they revoke. A plain
+  install still asks for nothing and extraction still runs on `activeTab`.
+- **The pulse is finite, and that is load-bearing.** An MV3 worker is only
+  reliably alive for a short window after the event that woke it, so an endless
+  animation would die at whatever frame Chrome chose. Settling into a steady
+  state means the useful information survives suspension. It is also better
+  manners — a permanent pulse is a nag, not a signal.
+- **It ramps in discrete steps, not a smooth fade** — the motion spec's "smooth
+  container, mechanical contents", and flame is derived from digital-clock red.
+  It should read as a seven-segment display coming up to heat.
+- **Why the mark heats and not the tile:** the louder alternative (flood the tile
+  red, knock the mark out to paper) was rendered side by side at true 16px. Its
+  endpoint is more arresting, but its mid-ramp washes to pink with the M
+  dissolved into it. Heating the mark keeps a crisp letterform at every step.
+  A hybrid — pulse the mark, settle on the inverted red tile — is **owed a desk
+  crit**.
+
+### Navigation — the Archive is the nearest thing to a home
+
+**Decided 2026-08-18.** Mise still has no home screen, and shouldn't: the product
+is a tool you pass through. But firing used to dead-end — the receipt's
+countdown resolved to `Saved · Esc to close` with no route anywhere. Prep and
+Archive now persist through the whole lifecycle, and **Prep hangs off the
+Archive** (`Back · Prep`), which is what a home screen would otherwise have
+existed to provide.
+
+Rows by state:
+
+| State | Row |
+|---|---|
+| Idle / skeleton / Off Menu | `FIRE`(disabled) · Prep · Archive |
+| Extracted | `FIRE` · Copy · Prep · Archive |
+| Fired, closing | `Closing in Ns` · Prep · Archive |
+| Fired, stayed | `Saved` · Prep · Archive |
+| Error | `RETRY` · Prep · Archive |
+| Archive | Back · Prep |
+| Prep | `SAVE` · Back |
+
+- **Reaching for Prep or Archive cancels the auto-close.** Navigating *is* the
+  decision to stay, so the old `Keep open` button is gone. Without this the
+  window would shut while the user was mid-Prep.
+- **`Copy` copies the finished `.md`** — the same bytes Fire writes — for Notes,
+  Obsidian, anywhere. Not to be confused with the raw-page-text Copy cut from
+  the error row on the same day: that offered unstructured scrapings, this
+  offers the artifact. It uses the *peeked* ticket, so copying never burns a
+  number.
+- **The primary button is bare `FIRE`, not `FIRE · save .md`.** At four buttons
+  the fire button is flex-sized to 152px and the longer label wraps to two
+  lines (measured). Bare FIRE matches RETRY's idiom, and the format stopped
+  being a variable once PDF was parked. The cost is a real loss of
+  plain-language affordance for a first-time user — **owed a desk crit.**
+
+### Deferred — PDF export and the format dropdown
+
+**Parked 2026-08-18.** Prep was to get a file-type dropdown (`.md` / `.pdf`).
+Dropped for now: there is no PDF engine in the extension and no
+`/api/export/pdf` route, so shipping it means either a client-side generator
+with Departure/Commit Mono embedded, or a backend round-trip that breaks the
+zero-backend BYOK model. Every fire writes `.md` until that is scheduled.
+
+**Download location is also parked**, and note *why*, so it isn't re-litigated:
+Chrome gives extensions no way to set the download directory. Per the
+`chrome.downloads` docs, "absolute paths, empty paths, and paths containing
+back-references '..' will cause an error" — `filename` is always relative to the
+user's Downloads folder. The only routes to an arbitrary folder are a
+subdirectory under Downloads, or `saveAs: true`, which opens the OS file chooser
+on every fire and breaks the fire-and-leave gesture.
+
 ### One window, three panes
 
 Prep and Archive were separate pages that opened tabs. Ben's note (2026-08-17):
@@ -203,10 +304,17 @@ Consequences worth knowing:
   so a filled card, an error row or the fired receipt all survive the detour.
   Re-running would cost another billed call.
 - **Prep and Archive are the only navigation this window has**, so both buttons
-  persist in the error row too. That deviates from the specimen's error row
-  (RETRY · Copy text · Prep); dropping Archive there would strand the user in a
-  failed extraction with no route to their recipes. Copy keeps ⌘C and its line
-  in the fallback list. **Owed a desk crit.**
+  persist in the error row too — `RETRY · Prep · Archive`, in every failure
+  scenario. Dropping Archive there would strand the user in a failed extraction
+  with no route to their recipes. **Settled at the 2026-08-18 desk crit**, which
+  also **cut Copy text entirely** — the button, the `⌘C` binding, and its
+  fallback line. Two reasons: raw page text is not the clean `.md` the product
+  promises, so offering it dressed as a fallback oversells it; and on the
+  failures that most look like "nothing came back" (`NO API KEY`,
+  `PAGE UNREADABLE`) the throw happens before any text is harvested, so there
+  is nothing to copy. The specimen was updated to match, so the two agree again.
+  Note the one asymmetry: an unretryable failure renders no RETRY, so
+  `NO API KEY` and `KEY REJECTED` show `Prep · Archive`.
 - **`Esc` backs out of a pane before it closes the window.**
 - The Archive list is authored for 400px — two-line rows, not the old
   7ch/1fr/12ch/22ch full-tab grid.
@@ -268,8 +376,8 @@ home cook nothing, which is why the taxonomy exists.
 
 ### Not built yet
 
-- **PDF export** — the `.pdf` action in the specimen needs the Next.js
-  `/api/export/pdf` route; the button is not in the extension's action row.
+- **PDF export** — see "Deferred — PDF export and the format dropdown" above
+  for why it is parked and what building it would actually cost.
 - **Servings scaler, unit re-toggle, and the ambiguous/low-confidence picker
   states** — designed in `popup-states.html`, not wired. Their orphaned CSS is
   the `.picker` / `.arrow` / `.active` / `.meta` / `.ptitle` / `.psub` /

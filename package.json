@@ -13,6 +13,7 @@
     "watch:ext": "node extension/build.mjs --watch",
     "test:ext": "vitest run --root extension",
     "port:design": "node extension/scripts/port-design.mjs",
+    "gen:icons": "node extension/scripts/gen-icons.mjs",
     "smoke:ext": "node extension/scripts/smoke.mjs",
     "audit:ext": "node extension/scripts/audit-port.mjs",
     "test:live": "vitest run --root extension --config vitest.live.config.ts"

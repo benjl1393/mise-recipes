@@ -229,6 +229,28 @@ const prepView = `
   line-height: 1.4;
 }
 
+/* A checkbox field that carries a hint needs the hint under both columns
+   rather than tucked beside the box. */
+#prep-view .field.checkbox.explained {
+  grid-auto-flow: row;
+  grid-template-columns: auto 1fr;
+  align-items: start;
+  row-gap: 6px;
+}
+
+#prep-view .field.checkbox.explained > input {
+  grid-row: 1;
+  margin-top: 2px;
+}
+
+#prep-view .field.checkbox.explained > span:not(.hint) {
+  grid-row: 1;
+}
+
+#prep-view .field.checkbox.explained > .hint {
+  grid-column: 1 / -1;
+}
+
 #prep-view .status {
   font-family: var(--font-mono);
   font-size: 11px;

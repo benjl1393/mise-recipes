@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128" role="img" aria-label="Mise">
-  <!-- Mise app / extension / favicon icon — ink tile, paper mark. Plate + mono-M. Source: Figma node 107:1447. -->
-  <rect width="128" height="128" fill="#232323"/>
-  <g fill="#f3f3f3" transform="translate(12 8)">
+  <!-- Mise app / extension / favicon icon — paper tile, ink mark. Plate + mono-M. Source: Figma node 107:1447. -->
+  <rect width="128" height="128" fill="#fafafa"/>
+  <g fill="#232323" transform="translate(12 8)">
     <rect x="32" y="0" width="8" height="8"/>
     <rect x="40" y="0" width="8" height="8"/>
     <rect x="48" y="0" width="8" height="8"/>

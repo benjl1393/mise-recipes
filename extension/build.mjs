@@ -41,6 +41,7 @@ const ctx = await esbuild.context({
     "popup/popup": from("src/popup/popup.ts"),
     "background/service-worker": from("src/background/service-worker.ts"),
     "content/extract": from("src/content/extract.ts"),
+    "content/detect": from("src/content/detect.ts"),
   },
   bundle: true,
   format: "esm",

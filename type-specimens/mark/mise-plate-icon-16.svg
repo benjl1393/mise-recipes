@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" role="img" aria-label="Mise">
-  <!-- Mise 16px favicon variant — M-only (rim dropped; a 1px plate rim can't survive 16px). Ink tile, paper M @ 2px cells. -->
-  <rect width="16" height="16" fill="#232323"/>
-  <g fill="#f3f3f3" transform="translate(3 0)">
+  <!-- Mise 16px favicon variant — M-only (rim dropped; a 1px plate rim can't survive 16px). Paper tile, ink M @ 2px cells. -->
+  <rect width="16" height="16" fill="#fafafa"/>
+  <g fill="#232323" transform="translate(3 0)">
     <rect x="0" y="0" width="2" height="2"/>
     <rect x="8" y="0" width="2" height="2"/>
     <rect x="0" y="2" width="2" height="2"/>
