@@ -105,6 +105,23 @@ Three systems defined; see canonical docs:
 - **Color**: Brutalist monochrome + flame. Neutral grays + a single accent family (flame at hue 30.4°, sanguine red — like digital-clock LED digits). See `docs/mise-color-system.md`.
 - **Icons** (2026-06-09): two tiers. **Stamp glyphs = custom pixel art only** (broken plate, off-menu sheet, flame) — pixellation reads at large stamp size, NOT at small sizes. **All other functional chrome = [Tabler outline](https://tabler.io/icons) vector icons** (warning/alert, retry, copy, clipboard, photo, highlight, arrows, status, etc.) — clean technical strokes, referencing stove/oven control-panel iconography. (Switched from Phosphor → Tabler 2026-06-09.) Emojis are reserved for *content* (source-type badges like `🎬` video, `📝` article) — never functional chrome.
 
+  **The action row wears them since 2026-08-30**, seven in total, pinned to
+  Tabler v3.46.0: `flame` (Fire), `settings` (Prep), `history` (Archive),
+  `refresh` (Retry), `copy` (Copy), `arrow-left` (Back), `device-floppy`
+  (Save). Fire, Prep and Archive were Ben's call; the other four followed
+  because a row with icons on some buttons and not others reads as
+  unfinished — `tests/actions.test.ts` asserts every button in every row has
+  one, and that none of them is icon-only (the svgs are `aria-hidden`, so a
+  label-less button would be nameless to a screen reader).
+
+  **Geometry is verbatim from the package, never hand-drawn** — only the inert
+  `<path stroke="none" fill="none">` bounding box is dropped. The icons live
+  in the specimen like everything else and are lifted into `glyphs.ts` by
+  `port:design`, keyed on `data-icon`; the two that have no specimen variant
+  (Back and Save belong to the Prep and Archive panes) are declared in a
+  hidden `#icon-inventory` block so the set still has exactly one source.
+  `@tabler/icons` is *not* a dependency — it was installed once to copy from.
+
 ## Logo mark (locked — 2026-06-08, plate + mono-M)
 
 The brand mark is a **top-down plate** — a single-pixel rounded rim — with the **Departure Mono "M" plated in the centre**. The M is the *actual* Departure Mono glyph, so the mark and the wordmark are one face: the type IS the identity. Drawn on the same coarse pixel grid (8px cells) as the Fire / In-the-Weeds / Off-Menu icons. **Monochrome** — the flame pixel was deliberately removed (Ben: "it makes it harder to read it as an 'M'"), so the single flame accent lives only in the UI (Fire button, FIRED stamp), never baked into the glyph. Source vector: Figma `Mise` node `107:1447`.
@@ -290,6 +307,15 @@ Rows by state:
 | Archive | Back · Prep |
 | Prep | `SAVE` · Back |
 
+Every one of those rows lives in `src/popup/actions.ts`, split out of
+`popup.ts` on 2026-08-30. `popup.ts` resolves its DOM handles at module scope,
+so importing it outside a browser throws and the rows could not be rendered on
+their own to be looked at — which is the whole process here. Seeing them in
+one file immediately turned up the error row rebuilding Prep and Archive from
+its own string literals instead of reusing `NAV`; it now calls
+`errorActions(canRetry)`. If you add a row, add it to `ROWS` in
+`tests/actions.test.ts` and to `audit-port.mjs`'s source list.
+
 - **Reaching for Prep or Archive cancels the auto-close.** Navigating *is* the
   decision to stay, so the old `Keep open` button is gone. Without this the
   window would shut while the user was mid-Prep.
@@ -354,7 +380,33 @@ Consequences worth knowing:
 **Markup must match the specimen's tags**, because the ported CSS keys off
 them: `h2.title`, `h3.section`, `.facts .fact > strong`, `ul.ingredients li >
 .qty`, `ol.method` (numbering via `::before` — never hand-number), `.tags .tag`,
-`.stamp` + `.glyph-mark` + `h2.stamp-title`.
+`.stamp` + `.glyph-mark` + `h2.stamp-title`, and on the Off Menu screen
+`p.off-note` + `p.off-hint`.
+
+### Off Menu — the stamp stopped being the message (2026-08-30)
+
+Ben's note: the screen was low-contrast italic text under a heavy boxed stamp,
+and "OFF MENU" on its own is cryptic. Three changes, all from that one crit.
+
+- **The stamp is inverted, and quieter.** It was a 2px box around near-black
+  text, which made it the loudest object on an otherwise empty screen. It is
+  now a filled `--ink-dim` block with the glyph and title knocked out in
+  paper — what a rubber stamp actually looks like — and no border at all.
+  Measured in-browser at **5.93:1**, so it clears AA for normal text, never
+  mind the 3:1 its 28px title needs. `.stamp.err` gets the same treatment on
+  `--flame-deep`, which *strengthens* colour v2.2's Principle 6: failure now
+  owns the red as a fill, so the action row stays bone.
+- **The message leads.** `.off-note` is 15px, full ink, no italic (18.26:1)
+  and says "Nothing to cook here." `.off-hint` underneath stays quiet at
+  `--ink-dim` (5.93:1) and carries the recovery. `text-wrap: balance` rather
+  than a `max-width` — at 40ch the line broke after "Open" with a third of
+  the card empty beside it.
+- **The card no longer butts into the button panel.** `.off-hint` carries a
+  20px bottom margin, which is the gap Ben asked for.
+
+The stamp is deliberately still large. Ben asked for *reduced contrast*, not a
+smaller stamp, and the hierarchy now reads stamp → headline → hint. **Owed a
+desk crit** if it still feels heavy on the real 400px window.
 
 **Model:** `claude-haiku-4-5` by default, switchable to `claude-opus-5` in Prep.
 Haiku 4.5 supports structured outputs and vision but **not** `output_config.effort`

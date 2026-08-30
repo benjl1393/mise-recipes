@@ -416,6 +416,19 @@ if (svgs.length !== 2) throw new Error(`expected 2 glyph SVGs, found ${svgs.leng
 const [OFF_MENU, BROKEN_PLATE] = svgs;
 const esc = (s) => s.replace(/\\/g, "\\\\").replace(/`/g, "\\`").replace(/\$\{/g, "\\${");
 
+// Tier two: the Tabler outline icons the action row wears. Lifted from the
+// specimen the same way the stamp glyphs are, so the buttons in the design
+// document and the buttons that ship cannot drift apart. Keyed by data-icon
+// rather than by position — the row's button order changes per view.
+const icons = new Map();
+for (const m of html.matchAll(/<svg class="btn-icon" data-icon="([a-z0-9-]+)"[\s\S]*?<\/svg>/g)) {
+  icons.set(m[1], m[0]);
+}
+const WANTED = ["flame", "settings", "history", "refresh", "copy", "arrow-left", "device-floppy"];
+for (const want of WANTED) {
+  if (!icons.has(want)) throw new Error(`specimen is missing the ${want} button icon`);
+}
+
 mkdirSync(`${ext}/src/popup`, { recursive: true });
 writeFileSync(
   `${ext}/src/popup/glyphs.ts`,
@@ -436,6 +449,33 @@ export const GLYPH_OFF_MENU = \`${esc(OFF_MENU)}\`;
 
 /** The broken plate — extraction failed. Figma node 122:1728. */
 export const GLYPH_BROKEN_PLATE = \`${esc(BROKEN_PLATE)}\`;
+
+/**
+ * Action-row icons — Tabler Icons v3.46.0, outline set, verbatim geometry.
+ * Stroke is currentColor, so each one inherits its button's ink: paper on
+ * the flame fill, paper-muted when Fire is disabled.
+ */
+
+/** Fire — the flame the product is named for. */
+export const ICON_FIRE = \`${esc(icons.get("flame"))}\`;
+
+/** Prep — settings. */
+export const ICON_PREP = \`${esc(icons.get("settings"))}\`;
+
+/** Archive — everything fired from this device, newest first. */
+export const ICON_ARCHIVE = \`${esc(icons.get("history"))}\`;
+
+/** Retry — run the failed extraction again. */
+export const ICON_RETRY = \`${esc(icons.get("refresh"))}\`;
+
+/** Copy — the finished .md to the clipboard. */
+export const ICON_COPY = \`${esc(icons.get("copy"))}\`;
+
+/** Back — out of a pane, to the extraction card. */
+export const ICON_BACK = \`${esc(icons.get("arrow-left"))}\`;
+
+/** Save — commit the Prep form. */
+export const ICON_SAVE = \`${esc(icons.get("device-floppy"))}\`;
 `,
 );
 

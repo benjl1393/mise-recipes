@@ -220,7 +220,17 @@ const STAMPS = {
   error: { title: "Kitchen Error", glyph: GLYPH_BROKEN_PLATE, modifier: " err" },
 } as const;
 
-export function renderStamp(kind: keyof typeof STAMPS, detail?: string): string {
+/**
+ * @param detail The message under the stamp. `note` is the headline and does
+ *   the work the stamp cannot: "OFF MENU" names the state in brand voice
+ *   without explaining it, so the plain sentence is what the user actually
+ *   reads. `hint` is the quieter recovery line beneath it.
+ */
+export function renderStamp(
+  kind: keyof typeof STAMPS,
+  detail?: string,
+  hint?: string,
+): string {
   const { title, glyph, modifier } = STAMPS[kind];
   return (
     `<div class="popup-body">` +
@@ -229,6 +239,7 @@ export function renderStamp(kind: keyof typeof STAMPS, detail?: string): string 
     `<h2 class="stamp-title">${title}</h2>` +
     `</div>` +
     (detail ? `<p class="off-note">${esc(detail)}</p>` : "") +
+    (hint ? `<p class="off-hint">${esc(hint)}</p>` : "") +
     `</div>`
   );
 }

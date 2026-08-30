@@ -276,6 +276,22 @@ describe("renderStamp", () => {
   it("escapes the detail line", () => {
     expect(renderStamp("error", "<b>boom</b>")).toContain("&lt;b&gt;boom&lt;/b&gt;");
   });
+
+  it("puts the headline in .off-note and the recovery line in .off-hint", () => {
+    // The two carry different weight: .off-note is the message that replaces
+    // the cryptic stamp, .off-hint is the quieter line under it.
+    const doc = parse(renderStamp("offmenu", "Nothing to cook here.", "Try a recipe blog."));
+    expect(doc.querySelector(".off-note")!.textContent).toBe("Nothing to cook here.");
+    expect(doc.querySelector(".off-hint")!.textContent).toBe("Try a recipe blog.");
+  });
+
+  it("omits the hint paragraph entirely when there is none", () => {
+    expect(parse(renderStamp("offmenu", "Nothing to cook here.")).querySelector(".off-hint")).toBeNull();
+  });
+
+  it("escapes the hint line too", () => {
+    expect(renderStamp("offmenu", "x", "<i>hi</i>")).toContain("&lt;i&gt;hi&lt;/i&gt;");
+  });
 });
 
 describe("renderFired", () => {

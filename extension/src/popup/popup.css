@@ -526,21 +526,30 @@
 
 /* ─── Stamp — FIRED / KITCHEN ERROR / OFF MENU ───────── */
 
-/* Horizontal [icon] LABEL stamp — border = icon = text (currentColor), matches popup-motion-states */
+/* Inverted stamp — the impression, not the outline (2026-08-30).
+   A 2px box around near-black text made the stamp the loudest object on
+   an otherwise empty screen, so it out-shouted the sentence that
+   actually says what happened. Filling the block and knocking the mark
+   out of it is what a rubber stamp does; dropping the fill to --ink-dim
+   pulls its contrast back so the message below can lead.
+   Measured in-browser: paper-100 on ink-dim = 5.93:1, which clears AA
+   for normal text, never mind the 3:1 the 28px title needs. The err
+   fill is flame-deep, and keeps colour v2.2's rule that failure owns
+   the red. */
 .stamp {
   margin: 14px 18px;
-  border: 2px solid currentColor;
-  background: var(--paper-100);
+  border: none;
+  background: var(--ink-dim);
   padding: 14px 20px;
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: center;
   gap: 12px;
-  color: var(--ink-primary);
+  color: var(--paper-100);
 }
 
-.stamp.err { color: var(--flame-deep); }
+.stamp.err { background: var(--flame-deep); color: var(--paper-50); }
 
 .stamp .glyph-mark { height: 30px; flex-shrink: 0; display: flex; }
 .stamp .glyph-mark svg { display: block; height: 100%; width: auto; }
@@ -556,15 +565,37 @@
   white-space: nowrap;
 }
 
-/* off-menu explanatory note — sits below the stamp box, not inside it */
+/* Off-menu message — sits below the stamp box, not inside it.
+   This is the user feedback, so it carries the weight (2026-08-30).
+   "OFF MENU" is brand voice: it names the state without explaining it,
+   and on its own it reads as cryptic. The headline states the outcome
+   in plain words at full ink and no italic — italics on a 12px mono
+   face at --ink-dim was the quietest text on a screen whose only job
+   is to tell you something. The hint below stays quiet and carries the
+   recovery, so the two lines read in the right order. */
 .off-note {
-  margin: 6px 18px 0;
+  margin: 14px 18px 0;
   font-family: var(--font-body);
-  font-style: italic;
+  font-size: 15px;
+  line-height: 1.35;
+  color: var(--ink-primary);
+  max-width: 34ch;
+}
+
+/* The recovery line, and the breathing room before the action row —
+   the ticket used to butt straight into the button panel. */
+/* No max-width: at 40ch the line broke after "Open" with a third of the
+   card empty beside it. The block is two lines, so `balance` is the
+   right tool — it evens them and keeps a word off its own line.
+   --ink-dim on the card measures 5.93:1, so the quiet line is still AA
+   at 12px. */
+.off-hint {
+  margin: 7px 18px 20px;
+  font-family: var(--font-body);
   font-size: 12px;
-  line-height: 1.5;
+  line-height: 1.55;
   color: var(--ink-dim);
-  max-width: 42ch;
+  text-wrap: balance;
 }
 
 /* Empty / Error — full 1px bordered callout instead of banned side-stripe */
@@ -846,14 +877,33 @@
   background: transparent;
   border: 1px solid var(--rule-dark);
   color: var(--ink-paper);
-  padding: 10px 12px;
+  padding: 10px 11px;
   font-family: var(--font-body);
   font-weight: 400;
   font-size: 10.5px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
+
+/* Button icons — Tabler outline, per CLAUDE.md's two-tier icon rule:
+   pixel art for stamp glyphs, Tabler vectors for functional chrome.
+   Sized down from the 24px grid, so the 2px stroke lands near 1.2px —
+   the control-panel hairline the rest of the chrome is drawn with. */
+.popup-actions .btn-icon {
+  flex-shrink: 0;
+  display: block;
+}
+
+.popup-actions .secondary-btn .btn-icon { width: 14px; height: 14px; }
+.popup-actions .fire-btn .btn-icon,
+.popup-actions .retry-btn .btn-icon { width: 15px; height: 15px; }
+
+/* Fire disabled: the icon rides the label's ink, not full strength. */
+.popup-actions .fire-btn[disabled] .btn-icon { opacity: 0.85; }
 
 .popup-actions .retry-btn {
   flex: 1;
