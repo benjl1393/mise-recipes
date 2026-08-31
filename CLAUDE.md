@@ -106,7 +106,7 @@ Three systems defined; see canonical docs:
 - **Icons** (2026-06-09): two tiers. **Stamp glyphs = custom pixel art only** (broken plate, off-menu sheet, flame) — pixellation reads at large stamp size, NOT at small sizes. **All other functional chrome = [Tabler outline](https://tabler.io/icons) vector icons** (warning/alert, retry, copy, clipboard, photo, highlight, arrows, status, etc.) — clean technical strokes, referencing stove/oven control-panel iconography. (Switched from Phosphor → Tabler 2026-06-09.) Emojis are reserved for *content* (source-type badges like `🎬` video, `📝` article) — never functional chrome.
 
   **The action row wears them since 2026-08-30**, seven in total, pinned to
-  Tabler v3.46.0: `flame` (Fire), `settings` (Prep), `history` (Archive),
+  Tabler v3.46.0: `cake` (Fire), `settings` (Prep), `history` (Archive),
   `refresh` (Retry), `copy` (Copy), `arrow-left` (Back), `device-floppy`
   (Save). Fire, Prep and Archive were Ben's call; the other four followed
   because a row with icons on some buttons and not others reads as
@@ -121,6 +121,17 @@ Three systems defined; see canonical docs:
   (Back and Save belong to the Prep and Archive panes) are declared in a
   hidden `#icon-inventory` block so the set still has exactly one source.
   `@tabler/icons` is *not* a dependency — it was installed once to copy from.
+
+  **Fire wears `cake`, not `flame`, since 2026-08-31** — Ben's call. Worth
+  knowing the tradeoff, because it is not visible in the markup: at the 15px
+  the button actually renders, the cake's candle collapses to a single dot and
+  its frosting wave flattens, so it reads closer to a generic rounded container
+  than an unmistakable cake. `flame` was the more legible glyph at that size.
+  **Owed a desk crit.** The pixel flame now marks the FIRED stamp instead, so
+  the two are no longer the same glyph.
+
+  **Stroke weight is 1.5, not Tabler's default 2** (2026-08-31, Ben's call),
+  applied to all 26 icon instances in the specimen.
 
 ## Logo mark (locked — 2026-06-08, plate + mono-M)
 

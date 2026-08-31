@@ -430,7 +430,7 @@ const icons = new Map();
 for (const m of html.matchAll(/<svg class="btn-icon" data-icon="([a-z0-9-]+)"[\s\S]*?<\/svg>/g)) {
   icons.set(m[1], m[0]);
 }
-const WANTED = ["flame", "settings", "history", "refresh", "copy", "arrow-left", "device-floppy"];
+const WANTED = ["cake", "settings", "history", "refresh", "copy", "arrow-left", "device-floppy"];
 for (const want of WANTED) {
   if (!icons.has(want)) throw new Error(`specimen is missing the ${want} button icon`);
 }
@@ -470,8 +470,12 @@ export const GLYPH_FIRED = \`${esc(FIRED_FLAME)}\`;
  * the flame fill, paper-muted when Fire is disabled.
  */
 
-/** Fire — the flame the product is named for. */
-export const ICON_FIRE = \`${esc(icons.get("flame"))}\`;
+/**
+ * Fire — the primary action. Tabler \`cake\`, Ben's call 2026-08-31, chosen
+ * over the \`flame\` this button used to wear. The pixel flame still marks
+ * the FIRED stamp, so the two are no longer the same glyph.
+ */
+export const ICON_FIRE = \`${esc(icons.get("cake"))}\`;
 
 /** Prep — settings. */
 export const ICON_PREP = \`${esc(icons.get("settings"))}\`;
