@@ -424,6 +424,22 @@ document.addEventListener("keydown", (event) => {
     return;
   }
 
+  // Copy advertises ⌘C on the button, so the binding has to exist — a chip
+  // promising a shortcut that does nothing is worse than no chip. Guarded on
+  // an empty selection: if the user has actually selected recipe text, ⌘C
+  // means copy that, and the browser's own handling should win.
+  if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "c") {
+    const selection = window.getSelection();
+    if (!selection || selection.isCollapsed) {
+      const copyBtn = byId<HTMLButtonElement>("copy");
+      if (copyBtn) {
+        event.preventDefault();
+        copyBtn.click();
+        return;
+      }
+    }
+  }
+
   if (view !== "extract") return;
 
   // The error card's fallback list advertises P; honour it. Keyed off the card

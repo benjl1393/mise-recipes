@@ -66,6 +66,27 @@ describe("action rows", () => {
     expect(parse(ACTIONS.extract).querySelector("#copy")).toBeNull();
   });
 
+  it("styles every keystroke chip by class alone, never inline", () => {
+    // The RETRY chip had no box in the product while the specimen faked one
+    // with an inline style, so the design document looked right and the
+    // shipped button did not. One class, one rule, no local overrides.
+    for (const [, row] of ROWS) {
+      for (const chip of [...parse(row).querySelectorAll(".kbd")]) {
+        expect(chip.getAttribute("style"), `${chip.textContent} chip is styled inline`).toBeNull();
+        expect(chip.closest("button"), "a chip must live inside its button").not.toBeNull();
+      }
+    }
+  });
+
+  it("advertises Enter on every row whose primary action Enter triggers", () => {
+    // Fire, Retry and Save are all bound to Enter in the keydown handler.
+    for (const row of [ACTIONS.extract, ACTIONS.prep, SUCCESS_ACTIONS, errorActions(true)]) {
+      const doc = parse(row);
+      const primary = doc.querySelector("#fire, #retry, #save")!;
+      expect(primary.querySelector(".kbd")!.textContent).toBe("↵");
+    }
+  });
+
   it("gives the fired row navigation instead of a dead end", () => {
     const doc = parse(FIRED_ACTIONS);
     expect(doc.querySelector(".countdown")!.textContent).toBe("Saved");

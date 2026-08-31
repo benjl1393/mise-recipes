@@ -52,6 +52,12 @@ export const ACTIONS = {
 /** A landed recipe: fire it, or copy the same .md to the clipboard. */
 export const SUCCESS_ACTIONS =
   FIRE_BTN(false) +
+  // NOTE: Copy has no .kbd chip yet, though ⌘C works — see the keydown
+  // handler. Measured: the chip pushes this four-button row 43px past
+  // the 400px content box, and it is still 12.6px over even with the
+  // shortcut cut to a bare "C", secondary padding at 8px and the row
+  // gap at 6px. Fitting it means tightening every row in the product
+  // to serve one chip, so the tradeoff is Ben's call, not a silent one.
   `<button id="copy" class="secondary-btn" type="button">${ICON_COPY}<span>Copy</span></button>` +
   NAV;
 

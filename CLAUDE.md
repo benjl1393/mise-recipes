@@ -446,6 +446,53 @@ an array asserted to be length 2, which a third glyph breaks — and would have
 broken silently by reordering rather than loudly. Adding a fourth is now an
 entry in `WANTED_GLYPHS`.
 
+### The action row fits again, and the chips are one rule (2026-08-31)
+
+Ben: *"keystroke icons need to be in a rectangular box. it's missing on the
+retry button. also please slightly round the corners"* / *"reduce strokeweight
+of tabler icons."*
+
+- **The chip rule left `.fire-btn`.** It is `.popup-actions .kbd` now, with
+  `border: 1px solid currentColor` and `border-radius: 2px`, so one rule reads
+  on the flame fill and the bone fill alike. It was scoped to `.fire-btn`,
+  which is why the shipped RETRY chip had no box at all — **the specimen had
+  been faking one with an inline style**, so the design document looked right
+  while the product did not. `tests/actions.test.ts` now asserts no `.kbd`
+  carries a `style` attribute, and that every Enter-bound primary advertises `↵`.
+- **Tabler strokes went 2 → 1.5**, all 26 icon instances in the specimen.
+
+**The success row had been overflowing the popup by 15.8px, and nothing
+caught it.** Once every button grew an icon (2026-08-30), `FIRE + Copy + Prep +
+Archive` needed ~412px in a 400px window; `FIRE` is `flex: 1` so it collapsed to
+min-content and `Archive` quietly spilled off the edge. Fixed by taking
+`.secondary-btn` horizontal padding from 11px to 8px — every row now fits.
+
+**Why no existing check caught it, which is the part worth keeping:** the row is
+`overflow: visible`, so **`scrollWidth` does not report the overflow** — it reads
+equal to `clientWidth` and looks clean. `audit:ext` compares class names, not
+geometry, and the unit tests run in happy-dom, which has no layout at all. The
+only test that finds it is measuring **the last button's right edge against the
+row's content box** in a real browser:
+
+```js
+last.right - (row.getBoundingClientRect().right - parseFloat(cs.paddingRight))
+```
+
+Run that against every row after any change to a button's label, icon, padding
+or chip.
+
+### Deferred — the Copy chip does not fit
+
+**⌘C is wired** (`popup.ts` keydown, guarded on an empty selection so a real
+text selection still copies normally), but **Copy carries no `.kbd` chip yet**,
+which is half of what Ben asked for. Measured: the chip pushes the four-button
+success row 43px past the content box. Cutting the shortcut to a bare `C`
+(consistent with the `P` the error card already advertises), taking secondary
+padding to 8px and the row gap to 6px still leaves it **28.6px over**. Fitting
+it means tightening every row in the product to serve one chip, or widening the
+popup past 400px — both are Ben's call, so the chip waits rather than being
+forced in. **Owed a desk crit.**
+
 **Model:** `claude-haiku-4-5` by default, switchable to `claude-opus-5` in Prep.
 Haiku 4.5 supports structured outputs and vision but **not** `output_config.effort`
 or adaptive thinking — sending either is a 400.
