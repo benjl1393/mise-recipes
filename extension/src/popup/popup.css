@@ -776,14 +776,22 @@
   pointer-events: none;
 }
 
+/* Inverted like .stamp — a filled block with the mark knocked out,
+   which is what a rubber stamp actually looks like. Fill is
+   --ink-primary, not flame: the colour system gives success no
+   dedicated hue ("the glyph carries the meaning"), and red is
+   contextually exclusive, so it stays with failure. The three
+   stamps read as a value ladder — dim grey nothing-here, near-black
+   delivered, red broken. */
 .fired-stamp .mark {
-  border: 2px solid var(--ink-primary);
-  padding: 18px 22px 16px;
+  border: none;
+  padding: 16px 20px 14px;
   display: flex;
   flex-direction: column;
   gap: 8px;
   align-items: center;
-  background: var(--paper-100);
+  background: var(--ink-primary);
+  color: var(--paper-100);
 }
 
 .fired-stamp .mark .line1 {
@@ -791,22 +799,32 @@
   font-size: 28px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--ink-primary);
+  color: var(--paper-100);
   line-height: 1.0;
   display: flex;
-  gap: 10px;
-  align-items: baseline;
+  gap: 12px;
+  align-items: center;
 }
 
-.fired-stamp .mark .line1 .check {
-  font-size: 22px;
-  color: var(--ink-primary);
+/* 34px is not arbitrary: the flame's viewBox is 28x34, so this puts
+   exactly one grid unit on one CSS pixel and crispEdges can then
+   switch anti-aliasing off without tearing anything. It is the only
+   stamp glyph drawn with 1-unit features — at 30px they landed on
+   0.88px and blurred into a smudge beside Departure Mono's chunky
+   letterforms. Deliberately NOT applied to the other two glyphs:
+   checked side by side, and the broken plate's circular rim goes
+   visibly uneven without AA, because its curves render at a
+   fractional scale where the anti-aliasing is doing real work. */
+.fired-stamp .glyph-mark { height: 34px; flex-shrink: 0; display: flex; }
+.fired-stamp .glyph-mark svg {
+  display: block; height: 100%; width: auto;
+  shape-rendering: crispEdges;
 }
 
 .fired-stamp .mark .line2 {
   font-family: var(--font-mono);
   font-size: 11px;
-  color: var(--ink-dim);
+  color: var(--paper-dim);
   letter-spacing: 0.02em;
   max-width: 32ch;
   text-align: center;

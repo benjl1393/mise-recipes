@@ -932,14 +932,22 @@
         pointer-events: none;
       }
 
+      /* Inverted like .stamp — a filled block with the mark knocked out,
+         which is what a rubber stamp actually looks like. Fill is
+         --ink-primary, not flame: the colour system gives success no
+         dedicated hue ("the glyph carries the meaning"), and red is
+         contextually exclusive, so it stays with failure. The three
+         stamps read as a value ladder — dim grey nothing-here, near-black
+         delivered, red broken. */
       .fired-stamp .mark {
-        border: 2px solid var(--ink-primary);
-        padding: 18px 22px 16px;
+        border: none;
+        padding: 16px 20px 14px;
         display: flex;
         flex-direction: column;
         gap: 8px;
         align-items: center;
-        background: var(--paper-100);
+        background: var(--ink-primary);
+        color: var(--paper-100);
       }
 
       .fired-stamp .mark .line1 {
@@ -947,22 +955,32 @@
         font-size: 28px;
         letter-spacing: 0.14em;
         text-transform: uppercase;
-        color: var(--ink-primary);
+        color: var(--paper-100);
         line-height: 1.0;
         display: flex;
-        gap: 10px;
-        align-items: baseline;
+        gap: 12px;
+        align-items: center;
       }
 
-      .fired-stamp .mark .line1 .check {
-        font-size: 22px;
-        color: var(--ink-primary);
+      /* 34px is not arbitrary: the flame's viewBox is 28x34, so this puts
+         exactly one grid unit on one CSS pixel and crispEdges can then
+         switch anti-aliasing off without tearing anything. It is the only
+         stamp glyph drawn with 1-unit features — at 30px they landed on
+         0.88px and blurred into a smudge beside Departure Mono's chunky
+         letterforms. Deliberately NOT applied to the other two glyphs:
+         checked side by side, and the broken plate's circular rim goes
+         visibly uneven without AA, because its curves render at a
+         fractional scale where the anti-aliasing is doing real work. */
+      .fired-stamp .glyph-mark { height: 34px; flex-shrink: 0; display: flex; }
+      .fired-stamp .glyph-mark svg {
+        display: block; height: 100%; width: auto;
+        shape-rendering: crispEdges;
       }
 
       .fired-stamp .mark .line2 {
         font-family: var(--font-mono);
         font-size: 11px;
-        color: var(--ink-dim);
+        color: var(--paper-dim);
         letter-spacing: 0.02em;
         max-width: 32ch;
         text-align: center;
@@ -1362,7 +1380,7 @@
               </div>
 
               <div class="stamp">
-                <span class="glyph-mark"><svg viewBox="0 0 27 34" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M9 26H7V24H9V26Z"/><path d="M21 26H19V24H21V26Z"/><path d="M11 24H9V22H11V24Z"/><path d="M19 24H17V22H19V24Z"/><path d="M13 22H11V20H13V22Z"/><path d="M17 22H15V20H17V22Z"/><path d="M15 20H13V18H15V20Z"/><path d="M13 18H11V16H13V18Z"/><path d="M17 18H15V16H17V18Z"/><path d="M11 16H9V14H11V16Z"/><path d="M19 16H17V14H19V16Z"/><path d="M9 14H7V12H9V14Z"/><path d="M21 14H19V12H21V14Z"/><path fill-rule="evenodd" clip-rule="evenodd" d="M27 34H0V7H1V5H3V7H7V3H5V1H7V0H27V34ZM9 9H2V32H25V2H9V9Z"/><path d="M5 5H3V3H5V5Z"/></svg></span>
+                <span class="glyph-mark"><svg data-glyph="off-menu" viewBox="0 0 27 34" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M9 26H7V24H9V26Z"/><path d="M21 26H19V24H21V26Z"/><path d="M11 24H9V22H11V24Z"/><path d="M19 24H17V22H19V24Z"/><path d="M13 22H11V20H13V22Z"/><path d="M17 22H15V20H17V22Z"/><path d="M15 20H13V18H15V20Z"/><path d="M13 18H11V16H13V18Z"/><path d="M17 18H15V16H17V18Z"/><path d="M11 16H9V14H11V16Z"/><path d="M19 16H17V14H19V16Z"/><path d="M9 14H7V12H9V14Z"/><path d="M21 14H19V12H21V14Z"/><path fill-rule="evenodd" clip-rule="evenodd" d="M27 34H0V7H1V5H3V7H7V3H5V1H7V0H27V34ZM9 9H2V32H25V2H9V9Z"/><path d="M5 5H3V3H5V5Z"/></svg></span>
                 <h2 class="stamp-title">Off Menu</h2>
               </div>
               <p class="off-note">Nothing to cook here.</p>
@@ -1704,7 +1722,7 @@
               </div>
 
               <div class="stamp err">
-                <span class="glyph-mark"><svg viewBox="0 0 104 112" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><rect x="32" y="0" width="8" height="8"/><rect x="40" y="0" width="8" height="8"/><rect x="48" y="0" width="8" height="8"/><rect x="40" y="8" width="8" height="8"/><rect x="48" y="16" width="8" height="8"/><rect x="56" y="32" width="8" height="8"/><rect x="48" y="32" width="8" height="8"/><rect x="56" y="24" width="8" height="8"/><rect x="64" y="16" width="8" height="8"/><rect x="40" y="40" width="8" height="8"/><rect x="32" y="48" width="8" height="8"/><rect x="24" y="40" width="8" height="8"/><rect x="16" y="32" width="8" height="8"/><rect x="48" y="56" width="8" height="8"/><rect x="56" y="64" width="8" height="8"/><rect x="64" y="72" width="8" height="8"/><rect x="72" y="64" width="8" height="8"/><rect x="80" y="56" width="8" height="8"/><rect x="88" y="48" width="8" height="8"/><rect x="72" y="80" width="8" height="8"/><rect x="40" y="56" width="8" height="8"/><rect x="40" y="64" width="8" height="8"/><rect x="40" y="80" width="8" height="8"/><rect x="48" y="88" width="8" height="8"/><rect x="56" y="96" width="8" height="8"/><rect x="32" y="72" width="8" height="8"/><rect x="24" y="80" width="8" height="8"/><rect x="56" y="0" width="8" height="8"/><rect x="64" y="0" width="8" height="8"/><rect x="16" y="8" width="8" height="8"/><rect x="24" y="8" width="8" height="8"/><rect x="72" y="8" width="8" height="8"/><rect x="80" y="8" width="8" height="8"/><rect x="8" y="16" width="8" height="8"/><rect x="16" y="16" width="8" height="8"/><rect x="80" y="16" width="8" height="8"/><rect x="88" y="16" width="8" height="8"/><rect x="8" y="24" width="8" height="8"/><rect x="88" y="24" width="8" height="8"/><rect x="0" y="32" width="8" height="8"/><rect x="96" y="32" width="8" height="8"/><rect x="0" y="40" width="8" height="8"/><rect x="96" y="40" width="8" height="8"/><rect x="0" y="48" width="8" height="8"/><rect x="96" y="48" width="8" height="8"/><rect x="0" y="56" width="8" height="8"/><rect x="96" y="56" width="8" height="8"/><rect x="0" y="64" width="8" height="8"/><rect x="0" y="72" width="8" height="8"/><rect x="96" y="64" width="8" height="8"/><rect x="96" y="72" width="8" height="8"/><rect x="8" y="80" width="8" height="8"/><rect x="88" y="80" width="8" height="8"/><rect x="8" y="88" width="8" height="8"/><rect x="16" y="88" width="8" height="8"/><rect x="80" y="88" width="8" height="8"/><rect x="88" y="88" width="8" height="8"/><rect x="16" y="96" width="8" height="8"/><rect x="24" y="96" width="8" height="8"/><rect x="72" y="96" width="8" height="8"/><rect x="80" y="96" width="8" height="8"/><rect x="32" y="104" width="8" height="8"/><rect x="40" y="104" width="8" height="8"/><rect x="48" y="104" width="8" height="8"/><rect x="56" y="104" width="8" height="8"/><rect x="64" y="104" width="8" height="8"/></svg></span>
+                <span class="glyph-mark"><svg data-glyph="broken-plate" viewBox="0 0 104 112" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><rect x="32" y="0" width="8" height="8"/><rect x="40" y="0" width="8" height="8"/><rect x="48" y="0" width="8" height="8"/><rect x="40" y="8" width="8" height="8"/><rect x="48" y="16" width="8" height="8"/><rect x="56" y="32" width="8" height="8"/><rect x="48" y="32" width="8" height="8"/><rect x="56" y="24" width="8" height="8"/><rect x="64" y="16" width="8" height="8"/><rect x="40" y="40" width="8" height="8"/><rect x="32" y="48" width="8" height="8"/><rect x="24" y="40" width="8" height="8"/><rect x="16" y="32" width="8" height="8"/><rect x="48" y="56" width="8" height="8"/><rect x="56" y="64" width="8" height="8"/><rect x="64" y="72" width="8" height="8"/><rect x="72" y="64" width="8" height="8"/><rect x="80" y="56" width="8" height="8"/><rect x="88" y="48" width="8" height="8"/><rect x="72" y="80" width="8" height="8"/><rect x="40" y="56" width="8" height="8"/><rect x="40" y="64" width="8" height="8"/><rect x="40" y="80" width="8" height="8"/><rect x="48" y="88" width="8" height="8"/><rect x="56" y="96" width="8" height="8"/><rect x="32" y="72" width="8" height="8"/><rect x="24" y="80" width="8" height="8"/><rect x="56" y="0" width="8" height="8"/><rect x="64" y="0" width="8" height="8"/><rect x="16" y="8" width="8" height="8"/><rect x="24" y="8" width="8" height="8"/><rect x="72" y="8" width="8" height="8"/><rect x="80" y="8" width="8" height="8"/><rect x="8" y="16" width="8" height="8"/><rect x="16" y="16" width="8" height="8"/><rect x="80" y="16" width="8" height="8"/><rect x="88" y="16" width="8" height="8"/><rect x="8" y="24" width="8" height="8"/><rect x="88" y="24" width="8" height="8"/><rect x="0" y="32" width="8" height="8"/><rect x="96" y="32" width="8" height="8"/><rect x="0" y="40" width="8" height="8"/><rect x="96" y="40" width="8" height="8"/><rect x="0" y="48" width="8" height="8"/><rect x="96" y="48" width="8" height="8"/><rect x="0" y="56" width="8" height="8"/><rect x="96" y="56" width="8" height="8"/><rect x="0" y="64" width="8" height="8"/><rect x="0" y="72" width="8" height="8"/><rect x="96" y="64" width="8" height="8"/><rect x="96" y="72" width="8" height="8"/><rect x="8" y="80" width="8" height="8"/><rect x="88" y="80" width="8" height="8"/><rect x="8" y="88" width="8" height="8"/><rect x="16" y="88" width="8" height="8"/><rect x="80" y="88" width="8" height="8"/><rect x="88" y="88" width="8" height="8"/><rect x="16" y="96" width="8" height="8"/><rect x="24" y="96" width="8" height="8"/><rect x="72" y="96" width="8" height="8"/><rect x="80" y="96" width="8" height="8"/><rect x="32" y="104" width="8" height="8"/><rect x="40" y="104" width="8" height="8"/><rect x="48" y="104" width="8" height="8"/><rect x="56" y="104" width="8" height="8"/><rect x="64" y="104" width="8" height="8"/></svg></span>
                 <h2 class="stamp-title">Kitchen Error</h2>
               </div>
 
@@ -1787,7 +1805,7 @@
               </div>
               <div class="fired-stamp" aria-live="polite">
                 <div class="mark">
-                  <div class="line1"><span class="check">✓</span><span>FIRED</span></div>
+                  <div class="line1"><span class="glyph-mark"><svg data-glyph="fired-flame" viewBox="0 0 28 34" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M15 29H17V27H19V29H18V32H20V34H8V32H7V30H9V32H10V27H12V29H13V25H15V29ZM22 32H20V30H22V32ZM11 24H7V22H6V28H7V30H5V28H4V22H3V20H5V18H4V17H3V15H5V16H6V18H8V16H7V13H5V10H3V11H4V13H2V11H1V9H3V8H2V6H4V8H5V9H7V12H9V8H11V12H10V13H12V11H14V8H12V3H13V2H15V4H14V5H16V8H18V10H20V18H22V14H24V18H26V27H24V30H22V22H21V24H19V22H18V21H14V17H16V14H14V17H12V22H11V24ZM2 17H0V15H2V17ZM27 8H28V10H26V11H24V10H22V6H24V9H26V8H25V4H27V8ZM9 6H7V3H9V6ZM24 4H22V2H24V4ZM17 2H15V0H17V2Z"/></svg></span><span>FIRED</span></div>
                   <div class="line2">saved to ~/Recipes/2026-04-24-gochujang-pork-belly.md</div>
                 </div>
               </div>

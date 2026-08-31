@@ -408,6 +408,44 @@ The stamp is deliberately still large. Ben asked for *reduced contrast*, not a
 smaller stamp, and the hierarchy now reads stamp → headline → hint. **Owed a
 desk crit** if it still feels heavy on the real 400px window.
 
+### FIRED — the same inversion, and a flame instead of a tick (2026-08-31)
+
+Ben asked for the Off Menu treatment to carry over to the fired stamp, and for
+the pixel flame he drew to replace the `✓`. Both landed; the three stamps are
+now one family.
+
+- **The mark is inverted** like `.stamp` — was a 2px box around near-black text
+  on paper, now a filled block with the glyph and wordmark knocked out. Measured
+  in-browser: FIRED and the glyph **18.26:1**, the `saved to …` line **10.1:1**
+  at 11px. Both clear AA comfortably.
+- **The fill is `--ink-primary`, deliberately not flame.** The colour system is
+  explicit that *"success has no dedicated color … the glyph carries the
+  meaning"*, and Principle 6 keeps red contextually exclusive — failure owns it.
+  So the set reads as a **value ladder**: `--ink-dim` grey nothing-here,
+  `--ink-primary` near-black delivered, `--flame-deep` red broken.
+- **The glyph is the pixel flame**, master at
+  `type-specimens/mark/mise-fired-flame.svg`. A tick is app-generic; Fire is the
+  verb this product is built on. Geometry verbatim — only the hard-coded
+  `#010101` is dropped so it inherits `currentColor` and knocks out of the fill.
+- **It renders at 34px with `shape-rendering: crispEdges`, and both halves of
+  that matter.** Its viewBox is 28×34, so 34px puts exactly one grid unit on one
+  CSS pixel, which is what makes it safe to switch anti-aliasing off. It is the
+  only stamp glyph with **1-unit features** — at the 30px the other two use they
+  landed on 0.88px and blurred into a smudge beside Departure Mono's chunky
+  letterforms.
+
+  **`crispEdges` is NOT applied to the other two glyphs**, and that was checked
+  side by side rather than assumed: without AA the broken plate's circular rim
+  goes visibly uneven, because its curves render at a fractional scale where the
+  anti-aliasing is doing real work. The rule is *crisp when the glyph lands on
+  an integer multiple of its own grid*, not "pixel art wants crisp edges."
+
+**The stamp glyphs are keyed by `data-glyph` now**, the way the Tabler icons are
+keyed by `data-icon`. `port:design` used to destructure them positionally out of
+an array asserted to be length 2, which a third glyph breaks — and would have
+broken silently by reordering rather than loudly. Adding a fourth is now an
+entry in `WANTED_GLYPHS`.
+
 **Model:** `claude-haiku-4-5` by default, switchable to `claude-opus-5` in Prep.
 Haiku 4.5 supports structured outputs and vision but **not** `output_config.effort`
 or adaptive thinking — sending either is a 400.

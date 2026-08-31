@@ -295,11 +295,25 @@ describe("renderStamp", () => {
 });
 
 describe("renderFired", () => {
-  it("shows the check, the FIRED word, and the saved filename", () => {
+  it("shows the flame, the FIRED word, and the saved filename", () => {
     const doc = parse(renderFired("00427-gochujang.md"));
-    expect(doc.querySelector(".fired-stamp .check")!.textContent).toBe("✓");
+    // The pixel flame replaced a ✓ character (2026-08-31). It is the same
+    // .glyph-mark slot the Off Menu and Kitchen Error stamps use, so all
+    // three inherit one sizing rule.
+    const glyph = doc.querySelector(".fired-stamp .glyph-mark svg");
+    expect(glyph).not.toBeNull();
+    expect(glyph!.getAttribute("data-glyph")).toBe("fired-flame");
     expect(doc.querySelector(".line1")!.textContent).toContain("FIRED");
     expect(doc.querySelector(".line2")!.textContent).toBe("saved to 00427-gochujang.md");
+  });
+
+  it("knocks the glyph out of the fill rather than colouring it", () => {
+    // fill=currentColor is what lets one glyph serve a dark stamp: it takes
+    // the .mark's paper colour. A hard-coded fill would vanish on the block.
+    const doc = parse(renderFired("x.md"));
+    expect(doc.querySelector(".fired-stamp .glyph-mark svg")!.getAttribute("fill")).toBe(
+      "currentColor",
+    );
   });
 
   it("announces itself to screen readers", () => {
