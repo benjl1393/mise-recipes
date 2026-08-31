@@ -520,6 +520,39 @@ Consequence for ticket numbers: the card shows its number *before* the user
 fires, so display calls `peekTicket()` and only `fire()` calls `nextTicket()`.
 Allocating at extract time burned a number on every popup re-open.
 
+**Firing must not drop the cache entry (fixed 2026-08-31).** `onFire()` used to
+call `clearCache(tabId)`, with a reason that was true as far as it went: the
+cached card holds the *peeked* ticket, so re-offering it would show a number
+that had since been consumed. But the cure was worse than the disease — every
+re-open of the popup on a page the user had just saved re-ran the entire
+pipeline (content script, frame capture, and another **billed** Anthropic call)
+for a recipe already on disk. That is precisely when a user is most likely to
+re-open: to check it saved, or to get to the Archive.
+
+The fix rewrites the entry instead of deleting it, with the **committed**
+frontmatter — which settles the stale-ticket problem properly — plus a
+`firedAs` field holding the filename. `run()` sees `firedAs` on a cache hit and
+restores the receipt (dimmed card, FIRED stamp, `Saved · Prep · Archive`)
+rather than offering Fire a second time. **No countdown on restore**: re-opening
+is a deliberate act, so closing the window out from under the user would be
+hostile.
+
+Two things worth knowing about the shape of this fix:
+
+- **`run()` clears `.fired` at the top.** The class lives on `#card`, which is
+  the `.popup` element, and it survives an `innerHTML` swap — so without this a
+  later extraction renders greyed out under nothing.
+- **There is no in-product route to re-extract a fired page** while the entry is
+  live (same tab, same URL, inside the 1h TTL). That is a small capability loss
+  versus the old behaviour, which re-extracted automatically *because* it was
+  the bug. `clearCache()` is kept as the primitive for a deliberate "extract
+  this page again" gesture, but nothing calls it yet — **owed a desk crit**. The
+  workaround meanwhile is that the cache is keyed on the exact URL, so adding a
+  `#` fragment forces a fresh extraction.
+
+**Note for testing:** this is why re-firing the same page repeatedly no longer
+costs a call — which is also why a test loop needs the fragment trick above.
+
 ### Video capture and social pages
 
 **Never call `chrome.permissions.request()` from the extraction flow.** It

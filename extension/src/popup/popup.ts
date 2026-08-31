@@ -1,5 +1,5 @@
 import { createClient, extractRecipe, OffMenuError } from "../lib/anthropic";
-import { clearCache, readCache, writeCache } from "../lib/cache";
+import { readCache, writeCache } from "../lib/cache";
 import { captureFrames } from "../lib/frames";
 import { fire, filenameFor } from "../lib/fire";
 import { serializeRecipe } from "../lib/markdown";
@@ -252,6 +252,9 @@ async function run() {
   showView("extract");
   setExtractActions(ACTIONS.extract);
   current = null;
+  // .fired dims the card and survives an innerHTML swap, so a re-run would
+  // otherwise render the new extraction greyed out under nothing.
+  card.classList.remove("fired");
   showSkeleton("reading");
 
   try {
@@ -268,6 +271,15 @@ async function run() {
     const cached = await readCache(tab.id, activeTabUrl);
     if (cached) {
       present(cached.recipe, cached.fm);
+      // Already fired on this tab: show what was written where, rather than
+      // offering Fire a second time. No countdown — re-opening is a deliberate
+      // act, so closing the window out from under the user would be hostile.
+      if (cached.firedAs) {
+        card.scrollTop = 0;
+        card.classList.add("fired");
+        card.insertAdjacentHTML("beforeend", renderFired(cached.firedAs));
+        setExtractActions(FIRED_ACTIONS);
+      }
       return;
     }
 
@@ -375,16 +387,22 @@ async function onFire() {
     const fm = { ...current.fm, ticket: await nextTicket() };
     await fire(current.recipe, fm);
 
-    // The recipe is on disk; the cached card would otherwise re-offer it
-    // with a ticket number that has since been consumed.
-    if (activeTabId !== null) await clearCache(activeTabId);
+    // Re-open on this tab must not re-extract: that is another billed call
+    // for a recipe already on disk. Rewrite the entry rather than dropping it
+    // — with the *committed* frontmatter, which also settles the stale-ticket
+    // problem that deleting it was there to avoid — and record the filename so
+    // the next open restores the receipt instead of offering Fire again.
+    const savedAs = filenameFor(current.recipe, fm);
+    if (activeTabId !== null) {
+      await writeCache(activeTabId, activeTabUrl, current.recipe, fm, savedAs);
+    }
 
     // The card stays, dimmed, under the receipt — the user sees what was
     // written and where. The overlay is absolutely positioned, so pin the
     // card to the top first or a scrolled card hides it.
     card.scrollTop = 0;
     card.classList.add("fired");
-    card.insertAdjacentHTML("beforeend", renderFired(filenameFor(current.recipe, fm)));
+    card.insertAdjacentHTML("beforeend", renderFired(savedAs));
     startCountdown();
   } catch (error) {
     showError(error);
