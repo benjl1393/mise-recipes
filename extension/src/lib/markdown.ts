@@ -28,13 +28,42 @@ export function formatCaptured(d: Date): string {
   );
 }
 
+/**
+ * `captured` as YAML sees it: seconds AND a UTC offset. Both are load-bearing.
+ *
+ * Obsidian parses frontmatter with js-yaml, and the minute-precision form
+ * `2026-04-22T16:28` misses the YAML timestamp pattern entirely — it types as
+ * Text, so the Properties panel will not treat it as a date and it will not
+ * sort or filter in Bases or Dataview.
+ *
+ * Adding seconds alone fixes the type and introduces a worse bug: a bare
+ * `2026-04-22T16:28:00` is read as **UTC**, so a recipe captured at 16:28 in
+ * Zurich renders as 18:28. A wrong time that looks right beats no date only
+ * from the parser's point of view. The offset is what makes it round-trip.
+ *
+ * Verified against js-yaml 4.1.1, the engine behind Obsidian's `parseYaml`.
+ */
+export function formatCapturedYaml(d: Date): string {
+  const p = (n: number) => String(n).padStart(2, "0");
+  const offsetMin = -d.getTimezoneOffset();
+  const sign = offsetMin >= 0 ? "+" : "-";
+  const abs = Math.abs(offsetMin);
+  return (
+    `${formatCaptured(d)}:${p(d.getSeconds())}` +
+    `${sign}${p(Math.floor(abs / 60))}:${p(abs % 60)}`
+  );
+}
+
 export function serializeRecipe(recipe: Recipe, fm: Frontmatter): string {
   const lines: string[] = [];
 
   // 1–3: frontmatter, in the spec's mandatory field order.
   lines.push("---");
-  lines.push(`ticket: ${formatTicket(fm.ticket)}`);
-  lines.push(`captured: ${formatCaptured(fm.captured)}`);
+  // Quoted: unquoted `00427` is a YAML integer, so Obsidian's Properties
+  // panel renders the ticket as `427` and the zero-padding that carries the
+  // whole ticket-printer identity is gone before the user ever sees it.
+  lines.push(`ticket: "${formatTicket(fm.ticket)}"`);
+  lines.push(`captured: ${formatCapturedYaml(fm.captured)}`);
   lines.push(`source: ${fm.source}`);
   lines.push(`via: ${fm.via}`);
   if (recipe.author) lines.push(`author: ${recipe.author}`);

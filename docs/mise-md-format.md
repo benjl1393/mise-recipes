@@ -21,8 +21,8 @@ A Mise `.md` file has three zones:
 
 ```yaml
 ---
-ticket: 00427
-captured: 2026-04-22T16:28
+ticket: "00427"
+captured: 2026-04-22T16:28:31+02:00
 source: https://instagram.com/p/C9xK2
 via: 8 video frames
 author: J. Kenji López-Alt   # optional — only when the source credits someone
@@ -38,9 +38,28 @@ scaled: 1.0              # optional — only if user changed servings
 
 | Field | Type | Required | Source |
 |---|---|---|---|
-| `ticket` | 5-digit zero-padded integer | yes | device-local counter in `chrome.storage.local`, incremented per capture. Displayed in popup/PDF as `NO. XXXXX` (typographic convention for numbered tickets). |
-| `captured` | ISO 8601 datetime | yes | extension generates at save time |
+| `ticket` | 5-digit zero-padded integer, **quoted** | yes | device-local counter in `chrome.storage.local`, incremented per capture. Displayed in popup/PDF as `NO. XXXXX` (typographic convention for numbered tickets). The quotes are load-bearing — see YAML typing below. |
+| `captured` | ISO 8601 datetime, **with seconds and a UTC offset** | yes | extension generates at save time. Both parts are load-bearing — see YAML typing below. |
 | `source` | URL | yes | tab URL at capture time |
+
+### YAML typing — why two fields are punctuated the way they are
+
+Obsidian parses frontmatter with **js-yaml**, and two fields are silently
+mangled without the punctuation above. Verified against js-yaml 4.1.1:
+
+| Emitted | Parsed as | Result in Obsidian |
+|---|---|---|
+| `ticket: 00427` | `427` *(number)* | ✗ zero-padding gone — the Properties panel shows `427` |
+| `ticket: "00427"` | `"00427"` *(string)* | ✓ the ticket reads as printed |
+| `captured: 2026-04-22T16:28` | `"2026-04-22T16:28"` *(string)* | ✗ Text, not a date — will not sort or filter |
+| `captured: 2026-04-22T16:28:31` | `Date` | ✗ **read as UTC** — a 16:28 Zurich capture shows as 18:28 |
+| `captured: 2026-04-22T16:28:31+02:00` | `Date` | ✓ the right instant, in the reader's zone |
+
+The seconds and the offset are separate fixes for separate bugs. Seconds alone
+make the value a date at the **wrong time**, which is worse than a string
+because it looks correct. `formatCapturedYaml()` in `extension/src/lib/markdown.ts`
+emits both; `formatCaptured()` is unchanged and still produces the
+minute-precision, zone-free form the popup's ticket-top stamp wants.
 | `via` | string (vocabulary below) | yes | inferred from successful extraction path |
 | `author` | string | no | Mise-extracted — the recipe's credited writer, as the source names them, without titles or affiliations. Omitted when the source attributes nobody; never inferred from the site or channel name. Rendered on the card as a byline beneath the subtitle. |
 | `serves` | string | yes | Mise-extracted, Claude-normalized (`"4"`, `"makes 12"`, `"serves 6-8"`). Rendered as `SERVES X`. |
@@ -213,8 +232,8 @@ Conversion rules:
 
 ```markdown
 ---
-ticket: 00427
-captured: 2026-04-22T16:28
+ticket: "00427"
+captured: 2026-04-22T16:28:31+02:00
 source: https://instagram.com/p/C9xK2
 via: 8 video frames
 serves: 4
