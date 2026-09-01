@@ -103,7 +103,7 @@ live("live extraction — vision", () => {
 
     console.log(
       `\n[live] vision → ${recipe.title}\n` +
-        recipe.ingredients.map((i) => `  ${i.qty}  ·  ${i.item}`).join("\n") +
+        recipe.ingredients.map((i) => `  ${i.qty}  |  ${i.item}`).join("\n") +
         `\n`,
     );
   });

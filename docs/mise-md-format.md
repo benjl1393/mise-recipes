@@ -111,17 +111,20 @@ Reserved for v2: `"translated from {lang}"` (suffix appended when recipe-transla
 
 ```markdown
 ## Ingredients
-- 800 g  ·  pork belly, skin-on
-- 3 tbsp  ·  gochujang paste
-- 2 tbsp  ·  honey or maltose
-- 1½ tbsp  ·  soy sauce (light)
-- 4 cloves  ·  garlic, crushed
-- 1 thumb  ·  ginger, julienned
-- —  ·  spring onion & sesame to finish
+- 800 g  |  pork belly, skin-on
+- 3 tbsp  |  gochujang paste
+- 2 tbsp  |  honey or maltose
+- 1½ tbsp  |  soy sauce (light)
+- 4 cloves  |  garlic, crushed
+- 1 thumb  |  ginger, julienned
+- —  |  spring onion & sesame to finish
 ```
 
-- Each line: `- <qty>  ·  <item>`
-- Separator: `  ·  ` — two spaces, middle-dot (`U+00B7`), two spaces. Five characters total, gives visual breathing room in mono-rendered plain text.
+- Each line: `- <qty>  |  <item>`
+- Separator: `  |  ` — two spaces, pipe (`U+007C`), two spaces. Five characters total, gives visual breathing room in mono-rendered plain text.
+- **Why a pipe and not a middle dot** (changed 2026-09-01): Obsidian renders Markdown to HTML, and HTML collapses whitespace runs — so the five-character gutter reaches the reader as a *single space*, and a `·` all but disappears between the columns. The gutter survives intact only in source view, `cat`, and on paper. A pipe spans the full line height and so reads as a rule rather than a mark once collapsed. It is ASCII, so it is safe in the proportional fallback fonts Apple Notes uses, and it leaves `✶` as the only star in the file.
+- Rejected en route: an em-dash (already the qty placeholder, so `- — — spring onion` would be unreadable), `::` (Dataview inline-field syntax — every ingredient would spawn a phantom field), an asterisk (rides toward cap-height, so it reads as a footnote marker on the qty rather than a divider, and it dilutes the `✶` signature), and `│` box-drawing (a finer rule in mono, no better once collapsed, less certain in fallback fonts).
+- The pipe is Markdown-safe, verified through a CommonMark parser: a list item carrying pipes cannot become a table (GFM requires a delimiter row), and the pipe has no inline meaning outside a wikilink, which this format never emits.
 - `<qty>` format: space between number and unit (`800 g`, `1½ tbsp`). Vulgar fractions (`½`, `⅓`, `¼`, `¾`) preferred over decimals when culturally natural.
 - `<item>` format: lowercase prose, brief modifiers acceptable (`crushed`, `julienned`, `skin-on`).
 - No measurable quantity: use em-dash `—` as the qty placeholder (`— · spring onion & sesame to finish`). Common for finishing garnishes.
@@ -246,13 +249,13 @@ total: 2h 10m
 *slow-rendered, sharply-sauced, served over rice with a soft egg.*
 
 ## Ingredients
-- 800 g  ·  pork belly, skin-on
-- 3 tbsp  ·  gochujang paste
-- 2 tbsp  ·  honey or maltose
-- 1½ tbsp  ·  soy sauce (light)
-- 4 cloves  ·  garlic, crushed
-- 1 thumb  ·  ginger, julienned
-- —  ·  spring onion & sesame to finish
+- 800 g  |  pork belly, skin-on
+- 3 tbsp  |  gochujang paste
+- 2 tbsp  |  honey or maltose
+- 1½ tbsp  |  soy sauce (light)
+- 4 cloves  |  garlic, crushed
+- 1 thumb  |  ginger, julienned
+- —  |  spring onion & sesame to finish
 
 ## Method
 1. Score the pork belly skin in a crosshatch, just through the fat. Salt heavily, uncovered in the fridge overnight — this is non-negotiable.

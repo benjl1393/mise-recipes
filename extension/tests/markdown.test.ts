@@ -7,7 +7,7 @@ import {
 } from "../src/lib/markdown";
 import type { Recipe, Frontmatter } from "../src/lib/types";
 
-const SEP = "  ·  ";
+const SEP = "  |  ";
 
 const recipe: Recipe = {
   title: "Gochujang-Glazed Pork Belly",

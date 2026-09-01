@@ -1,14 +1,37 @@
 import type { Frontmatter, Recipe } from "./types";
 
 /**
- * Ingredient separator: two spaces, middle-dot (U+00B7), two spaces. Five
+ * Ingredient separator: two spaces, pipe (U+007C), two spaces. Five
  * characters — it doubles as the qty/item column gutter in mono renderings.
+ *
+ * A pipe rather than a middle dot (changed 2026-09-01). Obsidian renders
+ * Markdown to HTML and HTML collapses whitespace runs, so the five-character
+ * gutter arrives as a single space and a U+00B7 all but vanishes between the
+ * two columns — the gutter only survives intact in source view, `cat`, and on
+ * paper. A pipe spans the full line height, so it reads as a rule rather than
+ * a mark once collapsed, which is also the brand's own "real lines, no soft
+ * elements" language.
+ *
+ * Rejected en route: an em-dash (already the qty placeholder for garnishes,
+ * so `- — — spring onion` would be unreadable), `::` (Dataview inline-field
+ * syntax — every ingredient would spawn a phantom field), an asterisk (rides
+ * toward cap-height, so it reads as a footnote marker attached to the qty
+ * rather than a divider, and it puts four star-ish marks in a file whose
+ * signature glyph is ✶), and U+2502 box-drawing (a finer rule in mono, but no
+ * better once collapsed and less certain in the proportional fallback fonts
+ * Apple Notes uses).
+ *
+ * Markdown-safe, verified through a CommonMark parser: a list item carrying
+ * pipes cannot become a table — GFM requires a delimiter row — and the pipe
+ * has no inline meaning outside a wikilink, which this format never emits.
  */
-export const SEPARATOR = "  ·  ";
+export const SEPARATOR = "  |  ";
 
 /**
- * Tag-line separator: single spaces. Narrower than the ingredient separator
- * because the tag line is an inline run, not an aligned column.
+ * Tag-line separator: a middle dot with single spaces. Deliberately still a
+ * dot, and deliberately narrower: the tag line is an inline run with nothing
+ * to align, so it wants a mark between items rather than a column rule, and
+ * the collapse that defeats U+00B7 as a gutter is harmless in a run.
  */
 export const TAG_SEPARATOR = " · ";
 
