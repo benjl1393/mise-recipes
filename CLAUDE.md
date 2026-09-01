@@ -200,6 +200,55 @@ extension rather than the specimens, which is the better artifact — and the cr
 immediately found that the specimen had drifted from what actually ships. Findings
 that are genuinely Ben's call were left open rather than decided in his absence.
 
+9. ~~Off Menu rework, action-row icons, FIRED stamp, cache fix, Obsidian `.md`
+   fixes~~ — done 2026-08-30 → 2026-09-01 on branch `worktree-mise-permission-fix`
+   (PR #2). See the sections above for each; the short list is the Off Menu
+   inversion, seven Tabler icons on the action row, the FIRED stamp inverted with
+   Ben's pixel flame, `cake` on Fire, boxed keystroke chips, a 15.8px action-row
+   overflow fixed, the post-fire cache bug fixed, and two Obsidian YAML defects.
+
+### Where this stands (2026-09-01) — read this first in a new session
+
+**Everything below is committed and pushed. Working tree clean, `tsc` clean,
+212 tests green, `audit:ext` unchanged across every commit.**
+
+**Decided and shipped, do not re-litigate:**
+
+- Ingredient gutter is `  |  ` (pipe). The tag line keeps `  ·  `. Both
+  rationales, and the four rejected candidates, are in `docs/mise-md-format.md`
+  and the `SEPARATOR` doc comment.
+- `ticket` is quoted and `captured` carries seconds **and a UTC offset**. Without
+  the offset the value parses as UTC and shows the wrong time — see the YAML
+  typing table in the format spec.
+- Firing no longer clears the extraction cache.
+
+**Open — needs Ben, not a decision to make in his absence:**
+
+1. **Five Obsidian `.md` improvements, researched but NOT built.** Ingredient
+   `- [ ]` checkboxes; frontmatter reordered so cook-facing fields lead and
+   provenance trails; substitutions as prose (`guanciale (or pancetta)`, a prompt
+   change only); `## Notes` as a `> [!tip]` callout; and `cssclasses: [mise]`
+   plus an optional CSS snippet. That last one is the real answer to the gutter
+   collapsing — it is the only route that restores the intended column rendering
+   inside Obsidian without compromising the plain-text file. Deferred as
+   expensive: ingredient/method grouping via `###`, which changes the `Recipe`
+   type, the prompt, the serializer *and* the 400px card.
+2. **Owed a desk crit**, accumulated and each argued where it sits: the Off Menu
+   stamp size; `cake` legibility at 15px (the candle collapses to a dot — `flame`
+   read better, and this was Ben's call made with alternatives on the table); no
+   in-product route to re-extract a fired page inside the 1h TTL; the Copy
+   keystroke chip, which does not fit the four-button row; plus the three older
+   ones from the 2026-08-20 crit.
+
+**The render harness is in `.scratch/`, which is gitignored and dies with the
+worktree.** It renders the real action rows and card to static HTML so they can be
+screenshotted and looked at — it is what found the row overflow. Rebuild command
+and full source are in the MemPalace handoff drawer. **Re-bundle it before every
+measurement** (`npx esbuild .scratch/harness-entry.ts --bundle --platform=node
+--format=esm --outfile=.scratch/harness.mjs && node .scratch/harness.mjs`) —
+running the stale bundle silently renders new CSS with old markup, which cost a
+wrong measurement once already.
+
 ## The extension (`extension/`)
 
 Chrome MV3, TypeScript, esbuild, no framework. Zero backend — the popup calls
