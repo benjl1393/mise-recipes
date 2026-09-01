@@ -205,7 +205,20 @@ that are genuinely Ben's call were left open rather than decided in his absence.
    (PR #2). See the sections above for each; the short list is the Off Menu
    inversion, seven Tabler icons on the action row, the FIRED stamp inverted with
    Ben's pixel flame, `cake` on Fire, boxed keystroke chips, a 15.8px action-row
-   overflow fixed, the post-fire cache bug fixed, and two Obsidian YAML defects.
+   overflow fixed, the post-fire cache bug fixed, two Obsidian YAML defects, the
+   ingredient gutter changed from a middle dot to a pipe, and the Vercel deploy
+   unbroken.
+
+   **The Vercel fix is worth knowing about, because it will recur.** The root
+   `tsconfig.json` includes `**/*.ts` and excluded only `node_modules`, so
+   `next build` type-checked `extension/src` — code written against
+   `extension/tsconfig.json` at `target: ES2022`, where the BigInt literals in
+   `frames.ts` are legal. The root targets `ES2017`, so the deploy failed on
+   `0n`. **Two configs, one of them reaching into code that is not its own.**
+   It had been failing on `main` too, not just on the branch. The root now
+   excludes `extension` and `.scratch`; the extension keeps full coverage via
+   its own config and `test:ext`. If a new top-level directory ever carries
+   TypeScript with its own tsconfig, add it to that exclude list.
 
 ### Where this stands (2026-09-01) — read this first in a new session
 
