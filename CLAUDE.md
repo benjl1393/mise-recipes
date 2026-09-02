@@ -253,14 +253,10 @@ that are genuinely Ben's call were left open rather than decided in his absence.
    keystroke chip, which does not fit the four-button row; plus the three older
    ones from the 2026-08-20 crit.
 
-**The render harness is in `.scratch/`, which is gitignored and dies with the
-worktree.** It renders the real action rows and card to static HTML so they can be
-screenshotted and looked at — it is what found the row overflow. Rebuild command
-and full source are in the MemPalace handoff drawer. **Re-bundle it before every
-measurement** (`npx esbuild .scratch/harness-entry.ts --bundle --platform=node
---format=esm --outfile=.scratch/harness.mjs && node .scratch/harness.mjs`) —
-running the stale bundle silently renders new CSS with old markup, which cost a
-wrong measurement once already.
+**The render harness is `npm run render:states` now** — promoted out of
+`.scratch/` and committed on 2026-09-02, because it is what found the 15.8px row
+overflow and it should not die with a worktree. See "Looking at the popup
+states" below.
 
 ## The extension (`extension/`)
 
@@ -274,6 +270,7 @@ npm run test:ext       # vitest, 145 tests
 npm run port:design    # re-port CSS + glyphs from type-specimens/
 npm run smoke:ext      # load in real Chromium, assert all surfaces boot
 npm run audit:ext      # diff popup.css classes against what the renderer emits
+npm run render:states  # render every popup state to static HTML, to look at
 npm run test:live      # REAL billed calls to api.anthropic.com — opt-in, needs a key
 ```
 
@@ -301,6 +298,34 @@ to `.skel .bar` and nothing added `skel`, and the whole error callout +
 fallback list was missing. Remaining `MISSING` entries are the unbuilt picker
 / filmstrip states plus dead specimen scaffolding (`.popup-frame`,
 `.chrome-caption`) — treat a *new* entry as a regression.
+
+### Looking at the popup states
+
+`npm run render:states` renders every state — both stamps, the fired receipt over
+a real card, and all the action rows — to `extension/.render/states.html` using
+the **real** renderer, the **real** action rows and the **real** generated
+stylesheet. Serve it over HTTP and look at it; `file://` blocks the web fonts, so
+Departure and Commit Mono silently fall back to system mono and misrepresent the
+typography.
+
+This exists because `popup.ts` resolves DOM handles at module scope, so it cannot
+be imported outside a browser — `actions.ts` was split out precisely so the rows
+could be rendered on their own and reviewed. It has earned its keep: the success
+row was overflowing the 400px window by 15.8px for a day, and no unit test, audit
+or type-check could see it.
+
+**It bundles itself in memory on every run, and that is deliberate.** The
+`.scratch/` version needed a manual `esbuild` step first, and re-running the
+stale bundle renders *fresh CSS with old markup* — a page that looks entirely
+coherent and is wrong only in the half you just changed. That produced one
+confidently wrong measurement before it was caught. Nothing is written to disk to
+go stale now, so the failure mode is structurally impossible rather than merely
+documented.
+
+**Checking whether a row fits:** do not trust `scrollWidth`. `.popup-actions` is
+`overflow: visible`, so it reads equal to `clientWidth` while buttons spill off
+the edge. Measure the last button's right edge against the row's content box, in
+a real browser — the snippet is in the script's header comment.
 
 **The design system is generated, not hand-written.** `src/popup/popup.css`
 and `src/popup/glyphs.ts` come out of `type-specimens/popup-states.html` via

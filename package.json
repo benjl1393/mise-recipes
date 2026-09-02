@@ -17,6 +17,7 @@
     "gen:icons": "node extension/scripts/gen-icons.mjs",
     "smoke:ext": "node extension/scripts/smoke.mjs",
     "audit:ext": "node extension/scripts/audit-port.mjs",
+    "render:states": "node extension/scripts/render-states.mjs",
     "test:live": "vitest run --root extension --config vitest.live.config.ts"
   },
   "dependencies": {

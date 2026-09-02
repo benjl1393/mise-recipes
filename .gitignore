@@ -50,6 +50,9 @@ next-env.d.ts
 # Mise extension build output
 extension/dist/
 
+# render:states output — regenerated on every run, never edited by hand
+extension/.render/
+
 # Secrets. api_key.txt sat untracked and unignored in the repo root until
 # 2026-08-20 — one `git add -A` away from being published.
 api_key.txt
