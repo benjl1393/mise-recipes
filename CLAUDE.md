@@ -105,12 +105,40 @@ Three systems defined; see canonical docs:
 - **Color**: Brutalist monochrome + flame. Neutral grays + a single accent family (flame at hue 30.4°, sanguine red — like digital-clock LED digits). See `docs/mise-color-system.md`.
 - **Icons** (2026-06-09): two tiers. **Stamp glyphs = custom pixel art only** (broken plate, off-menu sheet, flame) — pixellation reads at large stamp size, NOT at small sizes. **All other functional chrome = [Tabler outline](https://tabler.io/icons) vector icons** (warning/alert, retry, copy, clipboard, photo, highlight, arrows, status, etc.) — clean technical strokes, referencing stove/oven control-panel iconography. (Switched from Phosphor → Tabler 2026-06-09.) Emojis are reserved for *content* (source-type badges like `🎬` video, `📝` article) — never functional chrome.
 
+  **The action row wears them since 2026-08-30**, seven in total, pinned to
+  Tabler v3.46.0: `cake` (Fire), `settings` (Prep), `history` (Archive),
+  `refresh` (Retry), `copy` (Copy), `arrow-left` (Back), `device-floppy`
+  (Save). Fire, Prep and Archive were Ben's call; the other four followed
+  because a row with icons on some buttons and not others reads as
+  unfinished — `tests/actions.test.ts` asserts every button in every row has
+  one, and that none of them is icon-only (the svgs are `aria-hidden`, so a
+  label-less button would be nameless to a screen reader).
+
+  **Geometry is verbatim from the package, never hand-drawn** — only the inert
+  `<path stroke="none" fill="none">` bounding box is dropped. The icons live
+  in the specimen like everything else and are lifted into `glyphs.ts` by
+  `port:design`, keyed on `data-icon`; the two that have no specimen variant
+  (Back and Save belong to the Prep and Archive panes) are declared in a
+  hidden `#icon-inventory` block so the set still has exactly one source.
+  `@tabler/icons` is *not* a dependency — it was installed once to copy from.
+
+  **Fire wears `cake`, not `flame`, since 2026-08-31** — Ben's call. Worth
+  knowing the tradeoff, because it is not visible in the markup: at the 15px
+  the button actually renders, the cake's candle collapses to a single dot and
+  its frosting wave flattens, so it reads closer to a generic rounded container
+  than an unmistakable cake. `flame` was the more legible glyph at that size.
+  **Owed a desk crit.** The pixel flame now marks the FIRED stamp instead, so
+  the two are no longer the same glyph.
+
+  **Stroke weight is 1.5, not Tabler's default 2** (2026-08-31, Ben's call),
+  applied to all 26 icon instances in the specimen.
+
 ## Logo mark (locked — 2026-06-08, plate + mono-M)
 
 The brand mark is a **top-down plate** — a single-pixel rounded rim — with the **Departure Mono "M" plated in the centre**. The M is the *actual* Departure Mono glyph, so the mark and the wordmark are one face: the type IS the identity. Drawn on the same coarse pixel grid (8px cells) as the Fire / In-the-Weeds / Off-Menu icons. **Monochrome** — the flame pixel was deliberately removed (Ben: "it makes it harder to read it as an 'M'"), so the single flame accent lives only in the UI (Fire button, FIRED stamp), never baked into the glyph. Source vector: Figma `Mise` node `107:1447`.
 
 - **Geometry**: 13 cols × 14 rows pixel grid @ 8px/cell. The M letter occupies rows 3–10, cols 4–8; everything else is the plate rim.
-- **Masters**: `type-specimens/mark/` — `mise-plate-on-dark.svg` (paper mark, for dark surfaces), `mise-plate-on-light.svg` (ink mark `#1e1e1e`, for light surfaces), `mise-plate-icon.svg` (paper tile `#fafafa` + ink mark `#232323`, for app/extension/favicon), `mise-plate-icon-16.svg` (M-only 16px variant).
+- **Masters**: `type-specimens/mark/` — `mise-plate-on-dark.svg` (paper mark, for dark surfaces), `mise-plate-on-light.svg` (ink mark `#1e1e1e`, for light surfaces), `mise-plate-icon.svg` (**filled ink disc `#232323` + paper mono-M `#fafafa` knocked out, transparent frame** — app/extension/favicon), `mise-plate-icon-16.svg` (M-only 16px variant, **no longer read by the build**; kept as a master).
 
   **Polarity flipped 2026-08-20** on Ben's direct call: the icon was a dark tile
   with a paper mark, chosen because it read on any theme. It is now black-on-white.
@@ -128,8 +156,12 @@ The brand mark is a **top-down plate** — a single-pixel rounded rim — with t
 - **PNG ladder**: `type-specimens/mark/png/mise-icon-{16,32,48,128}.png` (ready for the MV3 manifest at build time). Re-export by rasterizing the master SVGs at exact sizes (Playwright element screenshot, deviceScaleFactor 1) — 16 uses the M-only variant.
 - **Favicon**: wired at `src/app/icon.svg` (Next.js App Router auto-serves it).
 - **Crit trail**: `logo-plate.html` (3 plate directions — top-down / side-dish / knockout) → direction A (top-down) chosen → single-pixel rim → Ben finalised in Figma (`107:1447`) → `logo-mark.html` (the adopted mark, in-context: hero, ladder, lockup, toolbar states). Decision history in MemPalace (code/recipe_archiver, 2026-06-08).
-- **Reduction note**: at ≤16px the 1px rim breaks up — ship the **M-only** variant (`mise-plate-icon-16.svg`, rim dropped). 128/48/32 carry the full plate.
-- **Toolbar states**: idle = all-ink mark on paper; recipe-detected = ink rim + **flame M** (only the M catches fire — a runtime UI state, not in the glyph). Built 2026-08-20; the polarity is inverted from the original note because the icon flipped to black-on-white the same day, but the rule is unchanged — *the plate is the container and stays put, the M is the content and heats.* The split lives in the SVG itself: `mise-plate-icon.svg` has a `data-part="letter"` group, and `gen-icons.mjs` carries it through to `MARK_PLATE.rim` / `.letter`. At 16px there is no rim, so the whole mark heats.
+- **Reduction note** (superseded 2026-08-20): the M-only variant existed because a 1px *rim* breaks up when downscaled. The plate is **filled** now, and a solid disc survives downscaling, so **one geometry carries the whole ladder**. On a retina display Chrome renders the 32px asset into the 16px slot, which is where the mark actually reads — the softer true-16px rendering only applies to non-retina.
+- **Toolbar states**: idle = ink disc + paper M; recipe-detected = **flame disc + paper M** — *the whole plate catches fire*, the M stays paper throughout.
+
+  **Reversed 2026-08-20, same day it was built.** The first version heated only the M, on the "smooth container, mechanical contents" reading. Ben overruled it, correctly: heating a few thin strokes is a weak signal at 16px, and a whole disc changing from ink to flame is a strong one. The parts live in the SVG — `data-part="plate"` and `data-part="letter"` — and `gen-icons.mjs` carries them through to `MARK_PLATE.plate` / `.letter`.
+
+  **Transparent frame**, so the mark sits on any browser chrome instead of carrying its own tile. **Known and accepted:** on a *dark* toolbar the idle ink disc has very little contrast against the chrome. Decided 2026-08-20 to leave it — the paper M stays fully legible, so the mark still reads even when the disc doesn't separate, and the disc is a container rather than the thing you read. Rejected: a paper hairline around the disc (costs the brutalist solidity), and shipping per-theme icon sets (Chrome gives extensions no reliable way to detect toolbar theme, so it would need a hand-set preference).
 
 **Pivot history:**
 - **v1** (through 2026-04-22): warm-cream split-complementary. Rejected for hitting the AI-default "warm cream + rust + serif+sans" aesthetic.
@@ -167,6 +199,68 @@ because crits need Ben in the room. They were run on 2026-08-20 against the buil
 extension rather than the specimens, which is the better artifact — and the crit
 immediately found that the specimen had drifted from what actually ships. Findings
 that are genuinely Ben's call were left open rather than decided in his absence.
+
+9. ~~Off Menu rework, action-row icons, FIRED stamp, cache fix, Obsidian `.md`
+   fixes~~ — done 2026-08-30 → 2026-09-01 on branch `worktree-mise-permission-fix`
+   (PR #2). See the sections above for each; the short list is the Off Menu
+   inversion, seven Tabler icons on the action row, the FIRED stamp inverted with
+   Ben's pixel flame, `cake` on Fire, boxed keystroke chips, a 15.8px action-row
+   overflow fixed, the post-fire cache bug fixed, two Obsidian YAML defects, the
+   ingredient gutter changed from a middle dot to a pipe, and the Vercel deploy
+   unbroken.
+
+   **The Vercel fix is worth knowing about, because it will recur.** The root
+   `tsconfig.json` includes `**/*.ts` and excluded only `node_modules`, so
+   `next build` type-checked `extension/src` — code written against
+   `extension/tsconfig.json` at `target: ES2022`, where the BigInt literals in
+   `frames.ts` are legal. The root targets `ES2017`, so the deploy failed on
+   `0n`. **Two configs, one of them reaching into code that is not its own.**
+   It had been failing on `main` too, not just on the branch. The root now
+   excludes `extension` and `.scratch`; the extension keeps full coverage via
+   its own config and `test:ext`. If a new top-level directory ever carries
+   TypeScript with its own tsconfig, add it to that exclude list.
+
+### Where this stands (2026-09-01) — read this first in a new session
+
+**Everything below is committed and pushed. Working tree clean, `tsc` clean,
+212 tests green, `audit:ext` unchanged across every commit.**
+
+**Decided and shipped, do not re-litigate:**
+
+- Ingredient gutter is `  |  ` (pipe). The tag line keeps `  ·  `. Both
+  rationales, and the four rejected candidates, are in `docs/mise-md-format.md`
+  and the `SEPARATOR` doc comment.
+- `ticket` is quoted and `captured` carries seconds **and a UTC offset**. Without
+  the offset the value parses as UTC and shows the wrong time — see the YAML
+  typing table in the format spec.
+- Firing no longer clears the extraction cache.
+
+**Open — needs Ben, not a decision to make in his absence:**
+
+1. **Five Obsidian `.md` improvements, researched but NOT built.** Ingredient
+   `- [ ]` checkboxes; frontmatter reordered so cook-facing fields lead and
+   provenance trails; substitutions as prose (`guanciale (or pancetta)`, a prompt
+   change only); `## Notes` as a `> [!tip]` callout; and `cssclasses: [mise]`
+   plus an optional CSS snippet. That last one is the real answer to the gutter
+   collapsing — it is the only route that restores the intended column rendering
+   inside Obsidian without compromising the plain-text file. Deferred as
+   expensive: ingredient/method grouping via `###`, which changes the `Recipe`
+   type, the prompt, the serializer *and* the 400px card.
+2. **Owed a desk crit**, accumulated and each argued where it sits: the Off Menu
+   stamp size; `cake` legibility at 15px (the candle collapses to a dot — `flame`
+   read better, and this was Ben's call made with alternatives on the table); no
+   in-product route to re-extract a fired page inside the 1h TTL; the Copy
+   keystroke chip, which does not fit the four-button row; plus the three older
+   ones from the 2026-08-20 crit.
+
+**The render harness is in `.scratch/`, which is gitignored and dies with the
+worktree.** It renders the real action rows and card to static HTML so they can be
+screenshotted and looked at — it is what found the row overflow. Rebuild command
+and full source are in the MemPalace handoff drawer. **Re-bundle it before every
+measurement** (`npx esbuild .scratch/harness-entry.ts --bundle --platform=node
+--format=esm --outfile=.scratch/harness.mjs && node .scratch/harness.mjs`) —
+running the stale bundle silently renders new CSS with old markup, which cost a
+wrong measurement once already.
 
 ## The extension (`extension/`)
 
@@ -228,10 +322,25 @@ not carried by colour alone.
   TikTok are *excluded* — they are the right call once the user has decided to
   fire, and far too loose to decide on their behalf. A false pulse costs more
   than a missed one: an icon that cries recipe everywhere is one you stop seeing.
-- **`<all_urls>` stays optional.** Seeing every page needs it, so the pulse is a
-  progressive enhancement: `syncDetector()` registers the content script when the
-  user grants the permission in Prep and unregisters it if they revoke. A plain
-  install still asks for nothing and extraction still runs on `activeTab`.
+- **The detector is DECLARED in the manifest**, matching `https://*/*` and
+  `http://*/*`, so host access is granted at install.
+
+  **This reverses the original design, and the reversal was earned.** The pulse
+  was built as a progressive enhancement: `optional_host_permissions`, a
+  `chrome.permissions.request()` from a Prep toggle, and
+  `chrome.scripting.registerContentScripts` at runtime, so a plain install asked
+  for nothing. It works in Chrome. It does **not** work in Dia, which never shows
+  the permission prompt and never fires `permissions.onAdded` — so the feature was
+  simply dead there, with no error anywhere to explain it. Confirmed by running
+  the same build in both browsers. Ben chose install-time access over losing the
+  feature in his daily browser; revisit before shipping if the install prompt
+  matters more than fork support.
+
+  **The Prep toggle survived, with different plumbing.** It flips a stored
+  `pulseOnDetect` setting instead of a permission, so the user still decides
+  whether the icon pulses. The content script reads it at `document_idle` and
+  bails before doing any work. Default on — detection only fires on a declared
+  `schema.org/Recipe`, so it is quiet everywhere else and needs no opting into.
 - **The pulse is finite, and that is load-bearing.** An MV3 worker is only
   reliably alive for a short window after the event that woke it, so an endless
   animation would die at whatever frame Chrome chose. Settling into a steady
@@ -240,14 +349,15 @@ not carried by colour alone.
 - **It ramps in discrete steps, not a smooth fade** — the motion spec's "smooth
   container, mechanical contents", and flame is derived from digital-clock red.
   It should read as a seven-segment display coming up to heat.
-- **Only the M heats — the plate stays ink.** Per the toolbar-states rule above,
-  and it is the same "smooth container, mechanical contents" split the motion spec
-  uses everywhere else: the plate is the container, the M is the content.
-- **Two louder alternatives were rendered side by side and rejected.** Flooding the
-  tile red (mark knocked out to paper) has a more arresting endpoint but its
-  mid-ramp washes to pink with the M dissolved into it. Heating the whole mark,
-  rim included, costs the plate its role as a container and reads less controlled.
-  Both were checked at true 16px, not reasoned about.
+- **The whole plate heats; the M stays paper.** Reversed the same day it was
+  built — see the toolbar-states note above. Heating only the M was the tidier
+  reading of the motion spec, and the weaker signal.
+- **Everything above was checked at true 16px, rendered, not reasoned about.**
+  Worth keeping that habit: the rejected "flood the square tile" variant washed
+  to pink mid-ramp with the M dissolved into it, which is invisible in a
+  description and obvious in a contact sheet. The version that shipped — flood
+  the *disc*, keep the M paper — is the same idea shaped to the mark rather than
+  to the frame, and it holds all the way down the ramp.
 
 ### Navigation — the Archive is the nearest thing to a home
 
@@ -269,6 +379,15 @@ Rows by state:
 | Error | `RETRY` · Prep · Archive |
 | Archive | Back · Prep |
 | Prep | `SAVE` · Back |
+
+Every one of those rows lives in `src/popup/actions.ts`, split out of
+`popup.ts` on 2026-08-30. `popup.ts` resolves its DOM handles at module scope,
+so importing it outside a browser throws and the rows could not be rendered on
+their own to be looked at — which is the whole process here. Seeing them in
+one file immediately turned up the error row rebuilding Prep and Archive from
+its own string literals instead of reusing `NAV`; it now calls
+`errorActions(canRetry)`. If you add a row, add it to `ROWS` in
+`tests/actions.test.ts` and to `audit-port.mjs`'s source list.
 
 - **Reaching for Prep or Archive cancels the auto-close.** Navigating *is* the
   decision to stay, so the old `Keep open` button is gone. Without this the
@@ -334,7 +453,118 @@ Consequences worth knowing:
 **Markup must match the specimen's tags**, because the ported CSS keys off
 them: `h2.title`, `h3.section`, `.facts .fact > strong`, `ul.ingredients li >
 .qty`, `ol.method` (numbering via `::before` — never hand-number), `.tags .tag`,
-`.stamp` + `.glyph-mark` + `h2.stamp-title`.
+`.stamp` + `.glyph-mark` + `h2.stamp-title`, and on the Off Menu screen
+`p.off-note` + `p.off-hint`.
+
+### Off Menu — the stamp stopped being the message (2026-08-30)
+
+Ben's note: the screen was low-contrast italic text under a heavy boxed stamp,
+and "OFF MENU" on its own is cryptic. Three changes, all from that one crit.
+
+- **The stamp is inverted, and quieter.** It was a 2px box around near-black
+  text, which made it the loudest object on an otherwise empty screen. It is
+  now a filled `--ink-dim` block with the glyph and title knocked out in
+  paper — what a rubber stamp actually looks like — and no border at all.
+  Measured in-browser at **5.93:1**, so it clears AA for normal text, never
+  mind the 3:1 its 28px title needs. `.stamp.err` gets the same treatment on
+  `--flame-deep`, which *strengthens* colour v2.2's Principle 6: failure now
+  owns the red as a fill, so the action row stays bone.
+- **The message leads.** `.off-note` is 15px, full ink, no italic (18.26:1)
+  and says "Nothing to cook here." `.off-hint` underneath stays quiet at
+  `--ink-dim` (5.93:1) and carries the recovery. `text-wrap: balance` rather
+  than a `max-width` — at 40ch the line broke after "Open" with a third of
+  the card empty beside it.
+- **The card no longer butts into the button panel.** `.off-hint` carries a
+  20px bottom margin, which is the gap Ben asked for.
+
+The stamp is deliberately still large. Ben asked for *reduced contrast*, not a
+smaller stamp, and the hierarchy now reads stamp → headline → hint. **Owed a
+desk crit** if it still feels heavy on the real 400px window.
+
+### FIRED — the same inversion, and a flame instead of a tick (2026-08-31)
+
+Ben asked for the Off Menu treatment to carry over to the fired stamp, and for
+the pixel flame he drew to replace the `✓`. Both landed; the three stamps are
+now one family.
+
+- **The mark is inverted** like `.stamp` — was a 2px box around near-black text
+  on paper, now a filled block with the glyph and wordmark knocked out. Measured
+  in-browser: FIRED and the glyph **18.26:1**, the `saved to …` line **10.1:1**
+  at 11px. Both clear AA comfortably.
+- **The fill is `--ink-primary`, deliberately not flame.** The colour system is
+  explicit that *"success has no dedicated color … the glyph carries the
+  meaning"*, and Principle 6 keeps red contextually exclusive — failure owns it.
+  So the set reads as a **value ladder**: `--ink-dim` grey nothing-here,
+  `--ink-primary` near-black delivered, `--flame-deep` red broken.
+- **The glyph is the pixel flame**, master at
+  `type-specimens/mark/mise-fired-flame.svg`. A tick is app-generic; Fire is the
+  verb this product is built on. Geometry verbatim — only the hard-coded
+  `#010101` is dropped so it inherits `currentColor` and knocks out of the fill.
+- **It renders at 34px with `shape-rendering: crispEdges`, and both halves of
+  that matter.** Its viewBox is 28×34, so 34px puts exactly one grid unit on one
+  CSS pixel, which is what makes it safe to switch anti-aliasing off. It is the
+  only stamp glyph with **1-unit features** — at the 30px the other two use they
+  landed on 0.88px and blurred into a smudge beside Departure Mono's chunky
+  letterforms.
+
+  **`crispEdges` is NOT applied to the other two glyphs**, and that was checked
+  side by side rather than assumed: without AA the broken plate's circular rim
+  goes visibly uneven, because its curves render at a fractional scale where the
+  anti-aliasing is doing real work. The rule is *crisp when the glyph lands on
+  an integer multiple of its own grid*, not "pixel art wants crisp edges."
+
+**The stamp glyphs are keyed by `data-glyph` now**, the way the Tabler icons are
+keyed by `data-icon`. `port:design` used to destructure them positionally out of
+an array asserted to be length 2, which a third glyph breaks — and would have
+broken silently by reordering rather than loudly. Adding a fourth is now an
+entry in `WANTED_GLYPHS`.
+
+### The action row fits again, and the chips are one rule (2026-08-31)
+
+Ben: *"keystroke icons need to be in a rectangular box. it's missing on the
+retry button. also please slightly round the corners"* / *"reduce strokeweight
+of tabler icons."*
+
+- **The chip rule left `.fire-btn`.** It is `.popup-actions .kbd` now, with
+  `border: 1px solid currentColor` and `border-radius: 2px`, so one rule reads
+  on the flame fill and the bone fill alike. It was scoped to `.fire-btn`,
+  which is why the shipped RETRY chip had no box at all — **the specimen had
+  been faking one with an inline style**, so the design document looked right
+  while the product did not. `tests/actions.test.ts` now asserts no `.kbd`
+  carries a `style` attribute, and that every Enter-bound primary advertises `↵`.
+- **Tabler strokes went 2 → 1.5**, all 26 icon instances in the specimen.
+
+**The success row had been overflowing the popup by 15.8px, and nothing
+caught it.** Once every button grew an icon (2026-08-30), `FIRE + Copy + Prep +
+Archive` needed ~412px in a 400px window; `FIRE` is `flex: 1` so it collapsed to
+min-content and `Archive` quietly spilled off the edge. Fixed by taking
+`.secondary-btn` horizontal padding from 11px to 8px — every row now fits.
+
+**Why no existing check caught it, which is the part worth keeping:** the row is
+`overflow: visible`, so **`scrollWidth` does not report the overflow** — it reads
+equal to `clientWidth` and looks clean. `audit:ext` compares class names, not
+geometry, and the unit tests run in happy-dom, which has no layout at all. The
+only test that finds it is measuring **the last button's right edge against the
+row's content box** in a real browser:
+
+```js
+last.right - (row.getBoundingClientRect().right - parseFloat(cs.paddingRight))
+```
+
+Run that against every row after any change to a button's label, icon, padding
+or chip.
+
+### Deferred — the Copy chip does not fit
+
+**⌘C is wired** (`popup.ts` keydown, guarded on an empty selection so a real
+text selection still copies normally), but **Copy carries no `.kbd` chip yet**,
+which is half of what Ben asked for. Measured: the chip pushes the four-button
+success row 43px past the content box. Cutting the shortcut to a bare `C`
+(consistent with the `P` the error card already advertises), taking secondary
+padding to 8px and the row gap to 6px still leaves it **28.6px over**. Fitting
+it means tightening every row in the product to serve one chip, or widening the
+popup past 400px — both are Ben's call, so the chip waits rather than being
+forced in. **Owed a desk crit.**
 
 **Model:** `claude-haiku-4-5` by default, switchable to `claude-opus-5` in Prep.
 Haiku 4.5 supports structured outputs and vision but **not** `output_config.effort`
@@ -351,6 +581,39 @@ the `.md`), guarded by both the tab's URL and a 1h TTL.
 Consequence for ticket numbers: the card shows its number *before* the user
 fires, so display calls `peekTicket()` and only `fire()` calls `nextTicket()`.
 Allocating at extract time burned a number on every popup re-open.
+
+**Firing must not drop the cache entry (fixed 2026-08-31).** `onFire()` used to
+call `clearCache(tabId)`, with a reason that was true as far as it went: the
+cached card holds the *peeked* ticket, so re-offering it would show a number
+that had since been consumed. But the cure was worse than the disease — every
+re-open of the popup on a page the user had just saved re-ran the entire
+pipeline (content script, frame capture, and another **billed** Anthropic call)
+for a recipe already on disk. That is precisely when a user is most likely to
+re-open: to check it saved, or to get to the Archive.
+
+The fix rewrites the entry instead of deleting it, with the **committed**
+frontmatter — which settles the stale-ticket problem properly — plus a
+`firedAs` field holding the filename. `run()` sees `firedAs` on a cache hit and
+restores the receipt (dimmed card, FIRED stamp, `Saved · Prep · Archive`)
+rather than offering Fire a second time. **No countdown on restore**: re-opening
+is a deliberate act, so closing the window out from under the user would be
+hostile.
+
+Two things worth knowing about the shape of this fix:
+
+- **`run()` clears `.fired` at the top.** The class lives on `#card`, which is
+  the `.popup` element, and it survives an `innerHTML` swap — so without this a
+  later extraction renders greyed out under nothing.
+- **There is no in-product route to re-extract a fired page** while the entry is
+  live (same tab, same URL, inside the 1h TTL). That is a small capability loss
+  versus the old behaviour, which re-extracted automatically *because* it was
+  the bug. `clearCache()` is kept as the primitive for a deliberate "extract
+  this page again" gesture, but nothing calls it yet — **owed a desk crit**. The
+  workaround meanwhile is that the cache is keyed on the exact URL, so adding a
+  `#` fragment forces a fresh extraction.
+
+**Note for testing:** this is why re-firing the same page repeatedly no longer
+costs a call — which is also why a test loop needs the fragment trick above.
 
 ### Video capture and social pages
 

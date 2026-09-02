@@ -10,6 +10,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "build:ext": "node extension/build.mjs",
+    "build:ext:dev": "node extension/build.mjs --dev",
     "watch:ext": "node extension/build.mjs --watch",
     "test:ext": "vitest run --root extension",
     "port:design": "node extension/scripts/port-design.mjs",

@@ -409,12 +409,31 @@ writeFileSync(
 );
 
 // ── 5. glyphs.ts — the pixel-art stamp marks ─────────────────────
-const svgs = [...html.matchAll(/<span class="glyph-mark">(<svg[\s\S]*?<\/svg>)<\/span>/g)].map(
-  (m) => m[1],
-);
-if (svgs.length !== 2) throw new Error(`expected 2 glyph SVGs, found ${svgs.length}`);
-const [OFF_MENU, BROKEN_PLATE] = svgs;
+const glyphs = new Map();
+for (const m of html.matchAll(/<svg data-glyph="([a-z0-9-]+)"[\s\S]*?<\/svg>/g)) {
+  glyphs.set(m[1], m[0]);
+}
+const WANTED_GLYPHS = ["off-menu", "broken-plate", "fired-flame"];
+for (const want of WANTED_GLYPHS) {
+  if (!glyphs.has(want)) throw new Error(`specimen is missing the ${want} stamp glyph`);
+}
+const OFF_MENU = glyphs.get("off-menu");
+const BROKEN_PLATE = glyphs.get("broken-plate");
+const FIRED_FLAME = glyphs.get("fired-flame");
 const esc = (s) => s.replace(/\\/g, "\\\\").replace(/`/g, "\\`").replace(/\$\{/g, "\\${");
+
+// Tier two: the Tabler outline icons the action row wears. Lifted from the
+// specimen the same way the stamp glyphs are, so the buttons in the design
+// document and the buttons that ship cannot drift apart. Keyed by data-icon
+// rather than by position — the row's button order changes per view.
+const icons = new Map();
+for (const m of html.matchAll(/<svg class="btn-icon" data-icon="([a-z0-9-]+)"[\s\S]*?<\/svg>/g)) {
+  icons.set(m[1], m[0]);
+}
+const WANTED = ["cake", "settings", "history", "refresh", "copy", "arrow-left", "device-floppy"];
+for (const want of WANTED) {
+  if (!icons.has(want)) throw new Error(`specimen is missing the ${want} button icon`);
+}
 
 mkdirSync(`${ext}/src/popup`, { recursive: true });
 writeFileSync(
@@ -427,8 +446,9 @@ writeFileSync(
  *
  * Per CLAUDE.md the icon system is two-tier: stamp glyphs are pixel art
  * (pixellation reads at stamp size), all other chrome is Tabler outline.
- * Both use fill="currentColor" so they inherit the stamp's colour — neutral
- * ink for Off Menu, --flame-deep for Kitchen Error.
+ * Both use fill="currentColor" so they inherit the stamp's colour — paper
+ * knocked out of a filled block: --ink-dim for Off Menu, --ink-primary for
+ * FIRED, --flame-deep for Kitchen Error.
  */
 
 /** The off-menu sheet — nothing on this page to extract. */
@@ -436,10 +456,50 @@ export const GLYPH_OFF_MENU = \`${esc(OFF_MENU)}\`;
 
 /** The broken plate — extraction failed. Figma node 122:1728. */
 export const GLYPH_BROKEN_PLATE = \`${esc(BROKEN_PLATE)}\`;
+
+/**
+ * The flame — the artifact is on disk. Replaces a ✓ character: a tick is
+ * app-generic, and FIRE is the verb the whole product is built around.
+ * Master at type-specimens/mark/mise-fired-flame.svg.
+ */
+export const GLYPH_FIRED = \`${esc(FIRED_FLAME)}\`;
+
+/**
+ * Action-row icons — Tabler Icons v3.46.0, outline set, verbatim geometry.
+ * Stroke is currentColor, so each one inherits its button's ink: paper on
+ * the flame fill, paper-muted when Fire is disabled.
+ */
+
+/**
+ * Fire — the primary action. Tabler \`cake\`, Ben's call 2026-08-31, chosen
+ * over the \`flame\` this button used to wear. The pixel flame still marks
+ * the FIRED stamp, so the two are no longer the same glyph.
+ */
+export const ICON_FIRE = \`${esc(icons.get("cake"))}\`;
+
+/** Prep — settings. */
+export const ICON_PREP = \`${esc(icons.get("settings"))}\`;
+
+/** Archive — everything fired from this device, newest first. */
+export const ICON_ARCHIVE = \`${esc(icons.get("history"))}\`;
+
+/** Retry — run the failed extraction again. */
+export const ICON_RETRY = \`${esc(icons.get("refresh"))}\`;
+
+/** Copy — the finished .md to the clipboard. */
+export const ICON_COPY = \`${esc(icons.get("copy"))}\`;
+
+/** Back — out of a pane, to the extraction card. */
+export const ICON_BACK = \`${esc(icons.get("arrow-left"))}\`;
+
+/** Save — commit the Prep form. */
+export const ICON_SAVE = \`${esc(icons.get("device-floppy"))}\`;
 `,
 );
 
 console.log(`ported from type-specimens/popup-states.html`);
 console.log(`  tokens      lines ${FONTS_START + 1}–${TOKENS_END}`);
 console.log(`  popup rules lines ${POPUP_START + 1}–${POPUP_END}`);
-console.log(`  glyphs      off-menu ${OFF_MENU.length}B, broken-plate ${BROKEN_PLATE.length}B`);
+console.log(
+  `  glyphs      off-menu ${OFF_MENU.length}B, broken-plate ${BROKEN_PLATE.length}B, fired-flame ${FIRED_FLAME.length}B`,
+);

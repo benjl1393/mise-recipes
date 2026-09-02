@@ -682,21 +682,30 @@
 
       /* ─── Stamp — FIRED / KITCHEN ERROR / OFF MENU ───────── */
 
-      /* Horizontal [icon] LABEL stamp — border = icon = text (currentColor), matches popup-motion-states */
+      /* Inverted stamp — the impression, not the outline (2026-08-30).
+         A 2px box around near-black text made the stamp the loudest object on
+         an otherwise empty screen, so it out-shouted the sentence that
+         actually says what happened. Filling the block and knocking the mark
+         out of it is what a rubber stamp does; dropping the fill to --ink-dim
+         pulls its contrast back so the message below can lead.
+         Measured in-browser: paper-100 on ink-dim = 5.93:1, which clears AA
+         for normal text, never mind the 3:1 the 28px title needs. The err
+         fill is flame-deep, and keeps colour v2.2's rule that failure owns
+         the red. */
       .stamp {
         margin: 14px 18px;
-        border: 2px solid currentColor;
-        background: var(--paper-100);
+        border: none;
+        background: var(--ink-dim);
         padding: 14px 20px;
         display: flex;
         flex-direction: row;
         align-items: center;
         justify-content: center;
         gap: 12px;
-        color: var(--ink-primary);
+        color: var(--paper-100);
       }
 
-      .stamp.err { color: var(--flame-deep); }
+      .stamp.err { background: var(--flame-deep); color: var(--paper-50); }
 
       .stamp .glyph-mark { height: 30px; flex-shrink: 0; display: flex; }
       .stamp .glyph-mark svg { display: block; height: 100%; width: auto; }
@@ -712,15 +721,37 @@
         white-space: nowrap;
       }
 
-      /* off-menu explanatory note — sits below the stamp box, not inside it */
+      /* Off-menu message — sits below the stamp box, not inside it.
+         This is the user feedback, so it carries the weight (2026-08-30).
+         "OFF MENU" is brand voice: it names the state without explaining it,
+         and on its own it reads as cryptic. The headline states the outcome
+         in plain words at full ink and no italic — italics on a 12px mono
+         face at --ink-dim was the quietest text on a screen whose only job
+         is to tell you something. The hint below stays quiet and carries the
+         recovery, so the two lines read in the right order. */
       .off-note {
-        margin: 6px 18px 0;
+        margin: 14px 18px 0;
         font-family: var(--font-body);
-        font-style: italic;
+        font-size: 15px;
+        line-height: 1.35;
+        color: var(--ink-primary);
+        max-width: 34ch;
+      }
+
+      /* The recovery line, and the breathing room before the action row —
+         the ticket used to butt straight into the button panel. */
+      /* No max-width: at 40ch the line broke after "Open" with a third of the
+         card empty beside it. The block is two lines, so `balance` is the
+         right tool — it evens them and keeps a word off its own line.
+         --ink-dim on the card measures 5.93:1, so the quiet line is still AA
+         at 12px. */
+      .off-hint {
+        margin: 7px 18px 20px;
+        font-family: var(--font-body);
         font-size: 12px;
-        line-height: 1.5;
+        line-height: 1.55;
         color: var(--ink-dim);
-        max-width: 42ch;
+        text-wrap: balance;
       }
 
       /* Empty / Error — full 1px bordered callout instead of banned side-stripe */
@@ -901,14 +932,22 @@
         pointer-events: none;
       }
 
+      /* Inverted like .stamp — a filled block with the mark knocked out,
+         which is what a rubber stamp actually looks like. Fill is
+         --ink-primary, not flame: the colour system gives success no
+         dedicated hue ("the glyph carries the meaning"), and red is
+         contextually exclusive, so it stays with failure. The three
+         stamps read as a value ladder — dim grey nothing-here, near-black
+         delivered, red broken. */
       .fired-stamp .mark {
-        border: 2px solid var(--ink-primary);
-        padding: 18px 22px 16px;
+        border: none;
+        padding: 16px 20px 14px;
         display: flex;
         flex-direction: column;
         gap: 8px;
         align-items: center;
-        background: var(--paper-100);
+        background: var(--ink-primary);
+        color: var(--paper-100);
       }
 
       .fired-stamp .mark .line1 {
@@ -916,22 +955,32 @@
         font-size: 28px;
         letter-spacing: 0.14em;
         text-transform: uppercase;
-        color: var(--ink-primary);
+        color: var(--paper-100);
         line-height: 1.0;
         display: flex;
-        gap: 10px;
-        align-items: baseline;
+        gap: 12px;
+        align-items: center;
       }
 
-      .fired-stamp .mark .line1 .check {
-        font-size: 22px;
-        color: var(--ink-primary);
+      /* 34px is not arbitrary: the flame's viewBox is 28x34, so this puts
+         exactly one grid unit on one CSS pixel and crispEdges can then
+         switch anti-aliasing off without tearing anything. It is the only
+         stamp glyph drawn with 1-unit features — at 30px they landed on
+         0.88px and blurred into a smudge beside Departure Mono's chunky
+         letterforms. Deliberately NOT applied to the other two glyphs:
+         checked side by side, and the broken plate's circular rim goes
+         visibly uneven without AA, because its curves render at a
+         fractional scale where the anti-aliasing is doing real work. */
+      .fired-stamp .glyph-mark { height: 34px; flex-shrink: 0; display: flex; }
+      .fired-stamp .glyph-mark svg {
+        display: block; height: 100%; width: auto;
+        shape-rendering: crispEdges;
       }
 
       .fired-stamp .mark .line2 {
         font-family: var(--font-mono);
         font-size: 11px;
-        color: var(--ink-dim);
+        color: var(--paper-dim);
         letter-spacing: 0.02em;
         max-width: 32ch;
         text-align: center;
@@ -975,7 +1024,6 @@
       }
 
       .popup-actions .fire-btn[disabled] .kbd {
-        border-color: var(--paper-muted);
         color: var(--paper-muted);
       }
 
@@ -984,11 +1032,18 @@
         padding-right: 12px;
       }
 
-      .popup-actions .fire-btn .kbd {
+      /* Every button that advertises a key wears the same chip. This was
+         scoped to .fire-btn, which is why the shipped RETRY chip had no box
+         at all — the specimen had been faking one with an inline style, so
+         the design document looked right while the product did not.
+         currentColor rather than a fixed --bg-card so one rule reads on the
+         flame fill and the bone fill alike. */
+      .popup-actions .kbd {
         font-family: var(--font-mono);
         font-size: 10px;
         letter-spacing: 0.08em;
-        border: 1px solid var(--bg-card);
+        border: 1px solid currentColor;
+        border-radius: 2px;
         padding: 1px 5px;
         opacity: 0.7;
       }
@@ -998,18 +1053,44 @@
         font-size: 12px;
       }
 
+      /* 8px horizontal, not 11. The success row is FIRE + Copy + Prep +
+         Archive, and once every button grew an icon (2026-08-30) that row
+         ran 15.8px past the 400px popup — measured as the last button's
+         right edge against the row's content box, which is the only test
+         that catches it: the row is overflow:visible, so scrollWidth does
+         NOT report it and the buttons just quietly spill off the window.
+         At 8px every row in the product fits. */
       .popup-actions .secondary-btn {
         background: transparent;
         border: 1px solid var(--rule-dark);
         color: var(--ink-paper);
-        padding: 10px 12px;
+        padding: 10px 8px;
         font-family: var(--font-body);
         font-weight: 400;
         font-size: 10.5px;
         letter-spacing: 0.12em;
         text-transform: uppercase;
         cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 6px;
       }
+
+      /* Button icons — Tabler outline, per CLAUDE.md's two-tier icon rule:
+         pixel art for stamp glyphs, Tabler vectors for functional chrome.
+         Sized down from the 24px grid, so the 2px stroke lands near 1.2px —
+         the control-panel hairline the rest of the chrome is drawn with. */
+      .popup-actions .btn-icon {
+        flex-shrink: 0;
+        display: block;
+      }
+
+      .popup-actions .secondary-btn .btn-icon { width: 14px; height: 14px; }
+      .popup-actions .fire-btn .btn-icon,
+      .popup-actions .retry-btn .btn-icon { width: 15px; height: 15px; }
+
+      /* Fire disabled: the icon rides the label's ink, not full strength. */
+      .popup-actions .fire-btn[disabled] .btn-icon { opacity: 0.85; }
 
       .popup-actions .retry-btn {
         flex: 1;
@@ -1211,9 +1292,9 @@
               </div>
             </div>
             <div class="popup-actions">
-              <button class="fire-btn" disabled><span>FIRE</span><span class="kbd">↵</span></button>
-              <button class="secondary-btn">Prep</button>
-              <button class="secondary-btn">Archive</button>
+              <button class="fire-btn" disabled><svg class="btn-icon" data-icon="cake" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 20h18v-8a3 3 0 0 0 -3 -3h-12a3 3 0 0 0 -3 3v8"/><path d="M3 14.803c.312 .135 .654 .204 1 .197a2.4 2.4 0 0 0 2 -1a2.4 2.4 0 0 1 2 -1a2.4 2.4 0 0 1 2 1a2.4 2.4 0 0 0 2 1a2.4 2.4 0 0 0 2 -1a2.4 2.4 0 0 1 2 -1a2.4 2.4 0 0 1 2 1a2.4 2.4 0 0 0 2 1c.35 .007 .692 -.062 1 -.197"/><path d="M12 4l1.465 1.638a2 2 0 1 1 -3.015 .099l1.55 -1.737"/></svg><span>FIRE</span><span class="kbd">↵</span></button>
+              <button class="secondary-btn"><svg class="btn-icon" data-icon="settings" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.325 4.317c.426 -1.756 2.924 -1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543 -.94 3.31 .826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756 .426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543 -.826 3.31 -2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756 -2.924 1.756 -3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543 .94 -3.31 -.826 -2.37 -2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756 -.426 -1.756 -2.924 0 -3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94 -1.543 .826 -3.31 2.37 -2.37c1 .608 2.296 .07 2.572 -1.065"/><path d="M9 12a3 3 0 1 0 6 0a3 3 0 0 0 -6 0"/></svg><span>Prep</span></button>
+              <button class="secondary-btn"><svg class="btn-icon" data-icon="history" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 8l0 4l2 2"/><path d="M3.05 11a9 9 0 1 1 .5 4m-.5 5v-5h5"/></svg><span>Archive</span></button>
             </div>
             <p class="chrome-caption">↑ action row disabled until extraction lands</p>
           </div>
@@ -1285,8 +1366,8 @@
             </div>
             <div class="popup-actions">
               <button class="fire-btn" disabled><span>PICK ONE ABOVE</span><span class="kbd">↵</span></button>
-              <button class="secondary-btn">Prep</button>
-              <button class="secondary-btn">Archive</button>
+              <button class="secondary-btn"><svg class="btn-icon" data-icon="settings" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.325 4.317c.426 -1.756 2.924 -1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543 -.94 3.31 .826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756 .426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543 -.826 3.31 -2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756 -2.924 1.756 -3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543 .94 -3.31 -.826 -2.37 -2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756 -.426 -1.756 -2.924 0 -3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94 -1.543 .826 -3.31 2.37 -2.37c1 .608 2.296 .07 2.572 -1.065"/><path d="M9 12a3 3 0 1 0 6 0a3 3 0 0 0 -6 0"/></svg><span>Prep</span></button>
+              <button class="secondary-btn"><svg class="btn-icon" data-icon="history" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 8l0 4l2 2"/><path d="M3.05 11a9 9 0 1 1 .5 4m-.5 5v-5h5"/></svg><span>Archive</span></button>
             </div>
             <p class="chrome-caption">↑ no Claude call until a target is selected</p>
           </div>
@@ -1312,11 +1393,12 @@
               </div>
 
               <div class="stamp">
-                <span class="glyph-mark"><svg viewBox="0 0 27 34" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M9 26H7V24H9V26Z"/><path d="M21 26H19V24H21V26Z"/><path d="M11 24H9V22H11V24Z"/><path d="M19 24H17V22H19V24Z"/><path d="M13 22H11V20H13V22Z"/><path d="M17 22H15V20H17V22Z"/><path d="M15 20H13V18H15V20Z"/><path d="M13 18H11V16H13V18Z"/><path d="M17 18H15V16H17V18Z"/><path d="M11 16H9V14H11V16Z"/><path d="M19 16H17V14H19V16Z"/><path d="M9 14H7V12H9V14Z"/><path d="M21 14H19V12H21V14Z"/><path fill-rule="evenodd" clip-rule="evenodd" d="M27 34H0V7H1V5H3V7H7V3H5V1H7V0H27V34ZM9 9H2V32H25V2H9V9Z"/><path d="M5 5H3V3H5V5Z"/></svg></span>
+                <span class="glyph-mark"><svg data-glyph="off-menu" viewBox="0 0 27 34" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M9 26H7V24H9V26Z"/><path d="M21 26H19V24H21V26Z"/><path d="M11 24H9V22H11V24Z"/><path d="M19 24H17V22H19V24Z"/><path d="M13 22H11V20H13V22Z"/><path d="M17 22H15V20H17V22Z"/><path d="M15 20H13V18H15V20Z"/><path d="M13 18H11V16H13V18Z"/><path d="M17 18H15V16H17V18Z"/><path d="M11 16H9V14H11V16Z"/><path d="M19 16H17V14H19V16Z"/><path d="M9 14H7V12H9V14Z"/><path d="M21 14H19V12H21V14Z"/><path fill-rule="evenodd" clip-rule="evenodd" d="M27 34H0V7H1V5H3V7H7V3H5V1H7V0H27V34ZM9 9H2V32H25V2H9V9Z"/><path d="M5 5H3V3H5V5Z"/></svg></span>
                 <h2 class="stamp-title">Off Menu</h2>
               </div>
-              <p class="off-note">
-                Nothing to extract on <strong>chrome://newtab</strong>. Use one of the options below, or open a recipe page and try again.
+              <p class="off-note">Nothing to cook here.</p>
+              <p class="off-hint">
+                Mise found no recipe on this page. Try a recipe blog, a Reel, or a video.
               </p>
 
               <ul class="fallback-list">
@@ -1344,8 +1426,8 @@
             </div>
             <div class="popup-actions">
               <button class="fire-btn"><span>PASTE URL</span><span class="kbd">⌘V</span></button>
-              <button class="secondary-btn">Prep</button>
-              <button class="secondary-btn">Archive</button>
+              <button class="secondary-btn"><svg class="btn-icon" data-icon="settings" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.325 4.317c.426 -1.756 2.924 -1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543 -.94 3.31 .826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756 .426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543 -.826 3.31 -2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756 -2.924 1.756 -3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543 .94 -3.31 -.826 -2.37 -2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756 -.426 -1.756 -2.924 0 -3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94 -1.543 .826 -3.31 2.37 -2.37c1 .608 2.296 .07 2.572 -1.065"/><path d="M9 12a3 3 0 1 0 6 0a3 3 0 0 0 -6 0"/></svg><span>Prep</span></button>
+              <button class="secondary-btn"><svg class="btn-icon" data-icon="history" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 8l0 4l2 2"/><path d="M3.05 11a9 9 0 1 1 .5 4m-.5 5v-5h5"/></svg><span>Archive</span></button>
             </div>
             <p class="chrome-caption">↑ primary action adapts to state — no Fire when no recipe</p>
           </div>
@@ -1424,9 +1506,9 @@
               </div>
             </div>
             <div class="popup-actions">
-              <button class="fire-btn" disabled><span>FIRE</span><span class="kbd">↵</span></button>
-              <button class="secondary-btn">Prep</button>
-              <button class="secondary-btn">Archive</button>
+              <button class="fire-btn" disabled><svg class="btn-icon" data-icon="cake" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 20h18v-8a3 3 0 0 0 -3 -3h-12a3 3 0 0 0 -3 3v8"/><path d="M3 14.803c.312 .135 .654 .204 1 .197a2.4 2.4 0 0 0 2 -1a2.4 2.4 0 0 1 2 -1a2.4 2.4 0 0 1 2 1a2.4 2.4 0 0 0 2 1a2.4 2.4 0 0 0 2 -1a2.4 2.4 0 0 1 2 -1a2.4 2.4 0 0 1 2 1a2.4 2.4 0 0 0 2 1c.35 .007 .692 -.062 1 -.197"/><path d="M12 4l1.465 1.638a2 2 0 1 1 -3.015 .099l1.55 -1.737"/></svg><span>FIRE</span><span class="kbd">↵</span></button>
+              <button class="secondary-btn"><svg class="btn-icon" data-icon="settings" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.325 4.317c.426 -1.756 2.924 -1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543 -.94 3.31 .826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756 .426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543 -.826 3.31 -2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756 -2.924 1.756 -3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543 .94 -3.31 -.826 -2.37 -2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756 -.426 -1.756 -2.924 0 -3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94 -1.543 .826 -3.31 2.37 -2.37c1 .608 2.296 .07 2.572 -1.065"/><path d="M9 12a3 3 0 1 0 6 0a3 3 0 0 0 -6 0"/></svg><span>Prep</span></button>
+              <button class="secondary-btn"><svg class="btn-icon" data-icon="history" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 8l0 4l2 2"/><path d="M3.05 11a9 9 0 1 1 .5 4m-.5 5v-5h5"/></svg><span>Archive</span></button>
             </div>
             <p class="chrome-caption">↑ head-of-card populates first (title, facts); body fills last</p>
           </div>
@@ -1493,9 +1575,9 @@
               </div>
             </div>
             <div class="popup-actions">
-              <button class="fire-btn" disabled><span>FIRE</span><span class="kbd">↵</span></button>
-              <button class="secondary-btn">Prep</button>
-              <button class="secondary-btn">Archive</button>
+              <button class="fire-btn" disabled><svg class="btn-icon" data-icon="cake" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 20h18v-8a3 3 0 0 0 -3 -3h-12a3 3 0 0 0 -3 3v8"/><path d="M3 14.803c.312 .135 .654 .204 1 .197a2.4 2.4 0 0 0 2 -1a2.4 2.4 0 0 1 2 -1a2.4 2.4 0 0 1 2 1a2.4 2.4 0 0 0 2 1a2.4 2.4 0 0 0 2 -1a2.4 2.4 0 0 1 2 -1a2.4 2.4 0 0 1 2 1a2.4 2.4 0 0 0 2 1c.35 .007 .692 -.062 1 -.197"/><path d="M12 4l1.465 1.638a2 2 0 1 1 -3.015 .099l1.55 -1.737"/></svg><span>FIRE</span><span class="kbd">↵</span></button>
+              <button class="secondary-btn"><svg class="btn-icon" data-icon="settings" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.325 4.317c.426 -1.756 2.924 -1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543 -.94 3.31 .826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756 .426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543 -.826 3.31 -2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756 -2.924 1.756 -3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543 .94 -3.31 -.826 -2.37 -2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756 -.426 -1.756 -2.924 0 -3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94 -1.543 .826 -3.31 2.37 -2.37c1 .608 2.296 .07 2.572 -1.065"/><path d="M9 12a3 3 0 1 0 6 0a3 3 0 0 0 -6 0"/></svg><span>Prep</span></button>
+              <button class="secondary-btn"><svg class="btn-icon" data-icon="history" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 8l0 4l2 2"/><path d="M3.05 11a9 9 0 1 1 .5 4m-.5 5v-5h5"/></svg><span>Archive</span></button>
             </div>
             <p class="chrome-caption">↑ filmstrip previews which frames the model will see</p>
           </div>
@@ -1561,10 +1643,10 @@
               </div>
             </div>
             <div class="popup-actions">
-              <button class="fire-btn"><span>FIRE</span><span class="kbd">↵</span></button>
-              <button class="secondary-btn">Copy</button>
-              <button class="secondary-btn">Prep</button>
-              <button class="secondary-btn">Archive</button>
+              <button class="fire-btn"><svg class="btn-icon" data-icon="cake" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 20h18v-8a3 3 0 0 0 -3 -3h-12a3 3 0 0 0 -3 3v8"/><path d="M3 14.803c.312 .135 .654 .204 1 .197a2.4 2.4 0 0 0 2 -1a2.4 2.4 0 0 1 2 -1a2.4 2.4 0 0 1 2 1a2.4 2.4 0 0 0 2 1a2.4 2.4 0 0 0 2 -1a2.4 2.4 0 0 1 2 -1a2.4 2.4 0 0 1 2 1a2.4 2.4 0 0 0 2 1c.35 .007 .692 -.062 1 -.197"/><path d="M12 4l1.465 1.638a2 2 0 1 1 -3.015 .099l1.55 -1.737"/></svg><span>FIRE</span><span class="kbd">↵</span></button>
+              <button class="secondary-btn"><svg class="btn-icon" data-icon="copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 9.667a2.667 2.667 0 0 1 2.667 -2.667h8.666a2.667 2.667 0 0 1 2.667 2.667v8.666a2.667 2.667 0 0 1 -2.667 2.667h-8.666a2.667 2.667 0 0 1 -2.667 -2.667l0 -8.666"/><path d="M4.012 16.737a2.005 2.005 0 0 1 -1.012 -1.737v-10c0 -1.1 .9 -2 2 -2h10c.75 0 1.158 .385 1.5 1"/></svg><span>Copy</span></button>
+              <button class="secondary-btn"><svg class="btn-icon" data-icon="settings" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.325 4.317c.426 -1.756 2.924 -1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543 -.94 3.31 .826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756 .426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543 -.826 3.31 -2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756 -2.924 1.756 -3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543 .94 -3.31 -.826 -2.37 -2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756 -.426 -1.756 -2.924 0 -3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94 -1.543 .826 -3.31 2.37 -2.37c1 .608 2.296 .07 2.572 -1.065"/><path d="M9 12a3 3 0 1 0 6 0a3 3 0 0 0 -6 0"/></svg><span>Prep</span></button>
+              <button class="secondary-btn"><svg class="btn-icon" data-icon="history" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 8l0 4l2 2"/><path d="M3.05 11a9 9 0 1 1 .5 4m-.5 5v-5h5"/></svg><span>Archive</span></button>
             </div>
             <p class="chrome-caption">↑ Fire primary · Copy puts the same .md on the clipboard · Prep for unit/tag tweaks</p>
           </div>
@@ -1626,8 +1708,8 @@
             </div>
             <div class="popup-actions">
               <button class="fire-btn warn"><span class="warn-glyph">⚠</span><span>FIRE ANYWAY</span><span class="kbd">↵</span></button>
-              <button class="secondary-btn">Prep</button>
-              <button class="secondary-btn">Archive</button>
+              <button class="secondary-btn"><svg class="btn-icon" data-icon="settings" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.325 4.317c.426 -1.756 2.924 -1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543 -.94 3.31 .826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756 .426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543 -.826 3.31 -2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756 -2.924 1.756 -3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543 .94 -3.31 -.826 -2.37 -2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756 -.426 -1.756 -2.924 0 -3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94 -1.543 .826 -3.31 2.37 -2.37c1 .608 2.296 .07 2.572 -1.065"/><path d="M9 12a3 3 0 1 0 6 0a3 3 0 0 0 -6 0"/></svg><span>Prep</span></button>
+              <button class="secondary-btn"><svg class="btn-icon" data-icon="history" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 8l0 4l2 2"/><path d="M3.05 11a9 9 0 1 1 .5 4m-.5 5v-5h5"/></svg><span>Archive</span></button>
             </div>
             <p class="chrome-caption">↑ Fire retained — Mise surfaces doubt, user decides</p>
           </div>
@@ -1653,7 +1735,7 @@
               </div>
 
               <div class="stamp err">
-                <span class="glyph-mark"><svg viewBox="0 0 104 112" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><rect x="32" y="0" width="8" height="8"/><rect x="40" y="0" width="8" height="8"/><rect x="48" y="0" width="8" height="8"/><rect x="40" y="8" width="8" height="8"/><rect x="48" y="16" width="8" height="8"/><rect x="56" y="32" width="8" height="8"/><rect x="48" y="32" width="8" height="8"/><rect x="56" y="24" width="8" height="8"/><rect x="64" y="16" width="8" height="8"/><rect x="40" y="40" width="8" height="8"/><rect x="32" y="48" width="8" height="8"/><rect x="24" y="40" width="8" height="8"/><rect x="16" y="32" width="8" height="8"/><rect x="48" y="56" width="8" height="8"/><rect x="56" y="64" width="8" height="8"/><rect x="64" y="72" width="8" height="8"/><rect x="72" y="64" width="8" height="8"/><rect x="80" y="56" width="8" height="8"/><rect x="88" y="48" width="8" height="8"/><rect x="72" y="80" width="8" height="8"/><rect x="40" y="56" width="8" height="8"/><rect x="40" y="64" width="8" height="8"/><rect x="40" y="80" width="8" height="8"/><rect x="48" y="88" width="8" height="8"/><rect x="56" y="96" width="8" height="8"/><rect x="32" y="72" width="8" height="8"/><rect x="24" y="80" width="8" height="8"/><rect x="56" y="0" width="8" height="8"/><rect x="64" y="0" width="8" height="8"/><rect x="16" y="8" width="8" height="8"/><rect x="24" y="8" width="8" height="8"/><rect x="72" y="8" width="8" height="8"/><rect x="80" y="8" width="8" height="8"/><rect x="8" y="16" width="8" height="8"/><rect x="16" y="16" width="8" height="8"/><rect x="80" y="16" width="8" height="8"/><rect x="88" y="16" width="8" height="8"/><rect x="8" y="24" width="8" height="8"/><rect x="88" y="24" width="8" height="8"/><rect x="0" y="32" width="8" height="8"/><rect x="96" y="32" width="8" height="8"/><rect x="0" y="40" width="8" height="8"/><rect x="96" y="40" width="8" height="8"/><rect x="0" y="48" width="8" height="8"/><rect x="96" y="48" width="8" height="8"/><rect x="0" y="56" width="8" height="8"/><rect x="96" y="56" width="8" height="8"/><rect x="0" y="64" width="8" height="8"/><rect x="0" y="72" width="8" height="8"/><rect x="96" y="64" width="8" height="8"/><rect x="96" y="72" width="8" height="8"/><rect x="8" y="80" width="8" height="8"/><rect x="88" y="80" width="8" height="8"/><rect x="8" y="88" width="8" height="8"/><rect x="16" y="88" width="8" height="8"/><rect x="80" y="88" width="8" height="8"/><rect x="88" y="88" width="8" height="8"/><rect x="16" y="96" width="8" height="8"/><rect x="24" y="96" width="8" height="8"/><rect x="72" y="96" width="8" height="8"/><rect x="80" y="96" width="8" height="8"/><rect x="32" y="104" width="8" height="8"/><rect x="40" y="104" width="8" height="8"/><rect x="48" y="104" width="8" height="8"/><rect x="56" y="104" width="8" height="8"/><rect x="64" y="104" width="8" height="8"/></svg></span>
+                <span class="glyph-mark"><svg data-glyph="broken-plate" viewBox="0 0 104 112" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><rect x="32" y="0" width="8" height="8"/><rect x="40" y="0" width="8" height="8"/><rect x="48" y="0" width="8" height="8"/><rect x="40" y="8" width="8" height="8"/><rect x="48" y="16" width="8" height="8"/><rect x="56" y="32" width="8" height="8"/><rect x="48" y="32" width="8" height="8"/><rect x="56" y="24" width="8" height="8"/><rect x="64" y="16" width="8" height="8"/><rect x="40" y="40" width="8" height="8"/><rect x="32" y="48" width="8" height="8"/><rect x="24" y="40" width="8" height="8"/><rect x="16" y="32" width="8" height="8"/><rect x="48" y="56" width="8" height="8"/><rect x="56" y="64" width="8" height="8"/><rect x="64" y="72" width="8" height="8"/><rect x="72" y="64" width="8" height="8"/><rect x="80" y="56" width="8" height="8"/><rect x="88" y="48" width="8" height="8"/><rect x="72" y="80" width="8" height="8"/><rect x="40" y="56" width="8" height="8"/><rect x="40" y="64" width="8" height="8"/><rect x="40" y="80" width="8" height="8"/><rect x="48" y="88" width="8" height="8"/><rect x="56" y="96" width="8" height="8"/><rect x="32" y="72" width="8" height="8"/><rect x="24" y="80" width="8" height="8"/><rect x="56" y="0" width="8" height="8"/><rect x="64" y="0" width="8" height="8"/><rect x="16" y="8" width="8" height="8"/><rect x="24" y="8" width="8" height="8"/><rect x="72" y="8" width="8" height="8"/><rect x="80" y="8" width="8" height="8"/><rect x="8" y="16" width="8" height="8"/><rect x="16" y="16" width="8" height="8"/><rect x="80" y="16" width="8" height="8"/><rect x="88" y="16" width="8" height="8"/><rect x="8" y="24" width="8" height="8"/><rect x="88" y="24" width="8" height="8"/><rect x="0" y="32" width="8" height="8"/><rect x="96" y="32" width="8" height="8"/><rect x="0" y="40" width="8" height="8"/><rect x="96" y="40" width="8" height="8"/><rect x="0" y="48" width="8" height="8"/><rect x="96" y="48" width="8" height="8"/><rect x="0" y="56" width="8" height="8"/><rect x="96" y="56" width="8" height="8"/><rect x="0" y="64" width="8" height="8"/><rect x="0" y="72" width="8" height="8"/><rect x="96" y="64" width="8" height="8"/><rect x="96" y="72" width="8" height="8"/><rect x="8" y="80" width="8" height="8"/><rect x="88" y="80" width="8" height="8"/><rect x="8" y="88" width="8" height="8"/><rect x="16" y="88" width="8" height="8"/><rect x="80" y="88" width="8" height="8"/><rect x="88" y="88" width="8" height="8"/><rect x="16" y="96" width="8" height="8"/><rect x="24" y="96" width="8" height="8"/><rect x="72" y="96" width="8" height="8"/><rect x="80" y="96" width="8" height="8"/><rect x="32" y="104" width="8" height="8"/><rect x="40" y="104" width="8" height="8"/><rect x="48" y="104" width="8" height="8"/><rect x="56" y="104" width="8" height="8"/><rect x="64" y="104" width="8" height="8"/></svg></span>
                 <h2 class="stamp-title">Kitchen Error</h2>
               </div>
 
@@ -1683,9 +1765,9 @@
               </div>
             </div>
             <div class="popup-actions">
-              <button class="retry-btn"><span>RETRY</span><span class="kbd" style="border:1px solid var(--ink-primary); color: var(--ink-primary); opacity: .5">↵</span></button>
-              <button class="secondary-btn">Prep</button>
-              <button class="secondary-btn">Archive</button>
+              <button class="retry-btn"><svg class="btn-icon" data-icon="refresh" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4"/><path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4"/></svg><span>RETRY</span><span class="kbd">↵</span></button>
+              <button class="secondary-btn"><svg class="btn-icon" data-icon="settings" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.325 4.317c.426 -1.756 2.924 -1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543 -.94 3.31 .826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756 .426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543 -.826 3.31 -2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756 -2.924 1.756 -3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543 .94 -3.31 -.826 -2.37 -2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756 -.426 -1.756 -2.924 0 -3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94 -1.543 .826 -3.31 2.37 -2.37c1 .608 2.296 .07 2.572 -1.065"/><path d="M9 12a3 3 0 1 0 6 0a3 3 0 0 0 -6 0"/></svg><span>Prep</span></button>
+              <button class="secondary-btn"><svg class="btn-icon" data-icon="history" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 8l0 4l2 2"/><path d="M3.05 11a9 9 0 1 1 .5 4m-.5 5v-5h5"/></svg><span>Archive</span></button>
             </div>
             <p class="chrome-caption">↑ Fire replaced by Retry when there is no artifact to save. Prep and Archive are the window's only navigation, so both persist here — Copy text was cut at the 2026-08-18 crit.</p>
           </div>
@@ -1736,15 +1818,15 @@
               </div>
               <div class="fired-stamp" aria-live="polite">
                 <div class="mark">
-                  <div class="line1"><span class="check">✓</span><span>FIRED</span></div>
+                  <div class="line1"><span class="glyph-mark"><svg data-glyph="fired-flame" viewBox="0 0 28 34" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M15 29H17V27H19V29H18V32H20V34H8V32H7V30H9V32H10V27H12V29H13V25H15V29ZM22 32H20V30H22V32ZM11 24H7V22H6V28H7V30H5V28H4V22H3V20H5V18H4V17H3V15H5V16H6V18H8V16H7V13H5V10H3V11H4V13H2V11H1V9H3V8H2V6H4V8H5V9H7V12H9V8H11V12H10V13H12V11H14V8H12V3H13V2H15V4H14V5H16V8H18V10H20V18H22V14H24V18H26V27H24V30H22V22H21V24H19V22H18V21H14V17H16V14H14V17H12V22H11V24ZM2 17H0V15H2V17ZM27 8H28V10H26V11H24V10H22V6H24V9H26V8H25V4H27V8ZM9 6H7V3H9V6ZM24 4H22V2H24V4ZM17 2H15V0H17V2Z"/></svg></span><span>FIRED</span></div>
                   <div class="line2">saved to ~/Recipes/2026-04-24-gochujang-pork-belly.md</div>
                 </div>
               </div>
             </div>
             <div class="popup-actions">
               <span class="countdown">Closing in <strong>2s</strong> · <span style="font-family: var(--font-mono); border:1px solid var(--rule-dark); padding:1px 5px">ESC</span> to cancel</span>
-              <button class="secondary-btn">Prep</button>
-              <button class="secondary-btn">Archive</button>
+              <button class="secondary-btn"><svg class="btn-icon" data-icon="settings" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.325 4.317c.426 -1.756 2.924 -1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543 -.94 3.31 .826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756 .426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543 -.826 3.31 -2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756 -2.924 1.756 -3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543 .94 -3.31 -.826 -2.37 -2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756 -.426 -1.756 -2.924 0 -3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94 -1.543 .826 -3.31 2.37 -2.37c1 .608 2.296 .07 2.572 -1.065"/><path d="M9 12a3 3 0 1 0 6 0a3 3 0 0 0 -6 0"/></svg><span>Prep</span></button>
+              <button class="secondary-btn"><svg class="btn-icon" data-icon="history" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 8l0 4l2 2"/><path d="M3.05 11a9 9 0 1 1 .5 4m-.5 5v-5h5"/></svg><span>Archive</span></button>
             </div>
             <p class="chrome-caption">↑ auto-close is the default; reaching for Prep or Archive cancels it — navigating is the decision to stay</p>
           </div>
@@ -1763,6 +1845,11 @@
         <div class="row"><span class="k">Callout shape</span><span class="v">Full 1px border box (not side-stripe). Stamp register, not alert register. Border color carries severity.</span></div>
         <div class="row"><span class="k">Flame budget</span><span class="v">Fire · ✶ · extraction badge (ember) · urgent states. Never chromatic decoration.</span></div>
       </div>
+
+      <!-- Action-row icons used only by extension-only chrome (the Prep
+           form and the Archive pane have no specimen variant). Declared so
+           the whole Tabler set has exactly one source. -->
+      <div hidden aria-hidden="true" id="icon-inventory"><svg class="btn-icon" data-icon="arrow-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l14 0"/><path d="M5 12l6 6"/><path d="M5 12l6 -6"/></svg><svg class="btn-icon" data-icon="device-floppy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 4h10l4 4v10a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2"/><path d="M10 14a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"/><path d="M14 4l0 4l-6 0l0 -4"/></svg></div>
     </main>
   </body>
 </html>

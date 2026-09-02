@@ -1,11 +1,12 @@
 import { createClient, extractRecipe, OffMenuError } from "../lib/anthropic";
-import { clearCache, readCache, writeCache } from "../lib/cache";
+import { readCache, writeCache } from "../lib/cache";
 import { captureFrames } from "../lib/frames";
 import { fire, filenameFor } from "../lib/fire";
 import { serializeRecipe } from "../lib/markdown";
 import { getSettings, nextTicket, peekTicket } from "../lib/storage";
 import type { ExtractionPayload } from "../lib/page-source";
 import type { Frontmatter, Recipe, ViaMethod } from "../lib/types";
+import { ACTIONS, errorActions, FIRED_ACTIONS, NAV, SUCCESS_ACTIONS } from "./actions";
 import {
   formatElapsed,
   renderCard,
@@ -27,52 +28,6 @@ const actions = document.getElementById("actions") as HTMLElement;
 
 const byId = <T extends HTMLElement>(id: string) => document.getElementById(id) as T | null;
 const fireBtn = () => byId<HTMLButtonElement>("fire");
-
-/**
- * Action rows, one per view. Prep and Archive are panes rather than tabs, so
- * the row has to change with the view — there is no window chrome to carry
- * navigation.
- */
-const NAV =
-  `<button id="prep" class="secondary-btn" type="button">Prep</button>` +
-  `<button id="archive" class="secondary-btn" type="button">Archive</button>`;
-
-// The label is bare FIRE rather than "FIRE · save .md" because the success row
-// carries four buttons and the longer label wraps to two lines at that width
-// (measured: the fire button is flex:1, so it gets 152px once Copy joins Prep
-// and Archive). Bare FIRE also matches RETRY's idiom in the error row, and the
-// format is no longer a variable — every fire writes .md, and the receipt names
-// the file.
-const FIRE_BTN = (disabled: boolean) =>
-  `<button id="fire" class="fire-btn" type="button"${disabled ? " disabled" : ""}>` +
-  `<span>FIRE</span><span class="kbd">↵</span></button>`;
-
-const ACTIONS = {
-  // Idle, skeleton and Off Menu: nothing to fire or copy yet.
-  extract: FIRE_BTN(true) + NAV,
-  prep:
-    `<button id="save" class="fire-btn" type="button">` +
-    `<span>SAVE</span><span class="kbd">↵</span></button>` +
-    `<button id="back" class="secondary-btn" type="button">Back</button>`,
-  // The Archive is the closest thing this window has to a home, so Prep hangs
-  // off it — that is the route to settings once a recipe has been fired.
-  archive:
-    `<button id="back" class="secondary-btn" type="button">Back</button>` +
-    `<button id="prep" class="secondary-btn" type="button">Prep</button>`,
-} as const;
-
-/** A landed recipe: fire it, or copy the same .md to the clipboard. */
-const SUCCESS_ACTIONS =
-  FIRE_BTN(false) +
-  `<button id="copy" class="secondary-btn" type="button">Copy</button>` +
-  NAV;
-
-/**
- * After firing there is nothing left to do to this recipe, so the row becomes
- * pure navigation. This is what stops the fired state dead-ending: it used to
- * resolve to "Saved · Esc to close" with no route anywhere.
- */
-const FIRED_ACTIONS = `<span class="countdown">Saved</span>` + NAV;
 
 type View = keyof typeof ACTIONS;
 
@@ -164,9 +119,9 @@ function bindActions() {
   byId("copy")?.addEventListener("click", () => void copyMarkdown());
 }
 
-function showStamp(kind: "error" | "offmenu", detail?: string) {
+function showStamp(kind: "error" | "offmenu", detail?: string, hint?: string) {
   settle();
-  card.innerHTML = renderStamp(kind, detail);
+  card.innerHTML = renderStamp(kind, detail, hint);
   setExtractActions(ACTIONS.extract);
   const btn = fireBtn();
   if (btn) btn.disabled = true;
@@ -190,22 +145,7 @@ function showError(error: unknown) {
 
   card.innerHTML = renderError(failure, { url: activeTabUrl, fallbacks });
 
-  const retry = failure.canRetry
-    ? `<button id="retry" class="retry-btn" type="button">` +
-      `<span>RETRY</span><span class="kbd">↵</span></button>`
-    : "";
-  // One row for every failure scenario, settled at the 2026-08-18 desk crit.
-  // Prep and Archive are the only navigation this window has, so both persist
-  // here — dropping Archive would strand the user in a failed extraction with
-  // no route to their recipes. The specimen's third slot was Copy text; it was
-  // cut rather than reinstated, because raw page text is not the clean .md the
-  // product promises, and on the failures that most look like "nothing came
-  // back" (NO API KEY, PAGE UNREADABLE) there is no text to copy at all.
-  setExtractActions(
-    retry +
-      `<button id="prep" class="secondary-btn" type="button">Prep</button>` +
-      `<button id="archive" class="secondary-btn" type="button">Archive</button>`,
-  );
+  setExtractActions(errorActions(failure.canRetry));
 
   (byId("retry") ?? byId("prep"))?.focus();
 }
@@ -312,6 +252,9 @@ async function run() {
   showView("extract");
   setExtractActions(ACTIONS.extract);
   current = null;
+  // .fired dims the card and survives an innerHTML swap, so a re-run would
+  // otherwise render the new extraction greyed out under nothing.
+  card.classList.remove("fired");
   showSkeleton("reading");
 
   try {
@@ -328,6 +271,15 @@ async function run() {
     const cached = await readCache(tab.id, activeTabUrl);
     if (cached) {
       present(cached.recipe, cached.fm);
+      // Already fired on this tab: show what was written where, rather than
+      // offering Fire a second time. No countdown — re-opening is a deliberate
+      // act, so closing the window out from under the user would be hostile.
+      if (cached.firedAs) {
+        card.scrollTop = 0;
+        card.classList.add("fired");
+        card.insertAdjacentHTML("beforeend", renderFired(cached.firedAs));
+        setExtractActions(FIRED_ACTIONS);
+      }
       return;
     }
 
@@ -382,7 +334,11 @@ async function run() {
     await writeCache(tab.id, activeTabUrl, recipe, fm);
   } catch (error) {
     if (error instanceof OffMenuError) {
-      showStamp("offmenu", "Nothing to extract here.");
+      showStamp(
+        "offmenu",
+        "Nothing to cook here.",
+        "Mise found no recipe on this page. Try a recipe blog, a Reel, or a video.",
+      );
       return;
     }
     showError(error);
@@ -431,16 +387,22 @@ async function onFire() {
     const fm = { ...current.fm, ticket: await nextTicket() };
     await fire(current.recipe, fm);
 
-    // The recipe is on disk; the cached card would otherwise re-offer it
-    // with a ticket number that has since been consumed.
-    if (activeTabId !== null) await clearCache(activeTabId);
+    // Re-open on this tab must not re-extract: that is another billed call
+    // for a recipe already on disk. Rewrite the entry rather than dropping it
+    // — with the *committed* frontmatter, which also settles the stale-ticket
+    // problem that deleting it was there to avoid — and record the filename so
+    // the next open restores the receipt instead of offering Fire again.
+    const savedAs = filenameFor(current.recipe, fm);
+    if (activeTabId !== null) {
+      await writeCache(activeTabId, activeTabUrl, current.recipe, fm, savedAs);
+    }
 
     // The card stays, dimmed, under the receipt — the user sees what was
     // written and where. The overlay is absolutely positioned, so pin the
     // card to the top first or a scrolled card hides it.
     card.scrollTop = 0;
     card.classList.add("fired");
-    card.insertAdjacentHTML("beforeend", renderFired(filenameFor(current.recipe, fm)));
+    card.insertAdjacentHTML("beforeend", renderFired(savedAs));
     startCountdown();
   } catch (error) {
     showError(error);
@@ -478,6 +440,22 @@ document.addEventListener("keydown", (event) => {
       void onFire();
     }
     return;
+  }
+
+  // Copy advertises ⌘C on the button, so the binding has to exist — a chip
+  // promising a shortcut that does nothing is worse than no chip. Guarded on
+  // an empty selection: if the user has actually selected recipe text, ⌘C
+  // means copy that, and the browser's own handling should win.
+  if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "c") {
+    const selection = window.getSelection();
+    if (!selection || selection.isCollapsed) {
+      const copyBtn = byId<HTMLButtonElement>("copy");
+      if (copyBtn) {
+        event.preventDefault();
+        copyBtn.click();
+        return;
+      }
+    }
   }
 
   if (view !== "extract") return;

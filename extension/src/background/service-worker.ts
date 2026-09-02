@@ -28,8 +28,6 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
 // Recipe detection → toolbar pulse
 // ---------------------------------------------------------------------------
 
-const DETECTOR_ID = "mise-detect";
-const ALL_URLS = { origins: ["<all_urls>"] };
 
 const DEFAULT_ICON = { 16: "icons/mise-icon-16.png", 32: "icons/mise-icon-32.png" };
 const DEFAULT_TITLE = "Fire this recipe to Mise";
@@ -123,40 +121,3 @@ chrome.tabs.onRemoved.addListener((tabId) => {
   armed.delete(tabId);
 });
 
-// ---------------------------------------------------------------------------
-// Detector registration
-// ---------------------------------------------------------------------------
-
-/**
- * Seeing every page requires `<all_urls>`, which Mise keeps *optional* so a
- * plain install asks for nothing and the extraction path keeps working on
- * `activeTab` alone. The pulse is therefore a progressive enhancement: register
- * the detector when the user grants the permission, tear it down if they take
- * it back.
- */
-export async function syncDetector(): Promise<void> {
-  try {
-    const granted = await chrome.permissions.contains(ALL_URLS);
-    const registered = await chrome.scripting.getRegisteredContentScripts({ ids: [DETECTOR_ID] });
-    if (granted && registered.length === 0) {
-      await chrome.scripting.registerContentScripts([
-        {
-          id: DETECTOR_ID,
-          js: ["content/detect.js"],
-          matches: ["<all_urls>"],
-          runAt: "document_idle",
-          allFrames: false,
-        },
-      ]);
-    } else if (!granted && registered.length > 0) {
-      await chrome.scripting.unregisterContentScripts({ ids: [DETECTOR_ID] });
-    }
-  } catch {
-    // Registration is best-effort: a failure costs the pulse, never extraction.
-  }
-}
-
-chrome.runtime.onInstalled.addListener(() => void syncDetector());
-chrome.runtime.onStartup.addListener(() => void syncDetector());
-chrome.permissions.onAdded.addListener(() => void syncDetector());
-chrome.permissions.onRemoved.addListener(() => void syncDetector());

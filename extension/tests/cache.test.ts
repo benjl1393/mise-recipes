@@ -71,6 +71,40 @@ describe("extraction cache", () => {
     expect(await readCache(1, URL_A)).toBeNull();
   });
 
+  it("survives firing, so re-opening a saved tab costs no billed call", async () => {
+    // The regression this guards: firing used to clearCache(), so re-opening
+    // the popup on a page you had just saved re-ran the whole pipeline —
+    // content script, frame capture and another paid Anthropic call — for a
+    // recipe already sitting on disk.
+    await writeCache(1, URL_A, recipe, fm());
+    await writeCache(1, URL_A, recipe, { ...fm(), ticket: 428 }, "00428-pork-belly.md");
+
+    const hit = await readCache(1, URL_A);
+    expect(hit).not.toBeNull();
+    expect(hit!.firedAs).toBe("00428-pork-belly.md");
+  });
+
+  it("keeps the committed ticket, not the peeked one, after firing", async () => {
+    // Deleting the entry on fire was there to stop a consumed ticket number
+    // being re-offered. Rewriting it with the committed frontmatter is the
+    // fix that does not cost a re-extraction.
+    await writeCache(1, URL_A, recipe, fm()); // peeked 427
+    await writeCache(1, URL_A, recipe, { ...fm(), ticket: 428 }, "00428-pork-belly.md");
+    expect((await readCache(1, URL_A))!.fm.ticket).toBe(428);
+  });
+
+  it("leaves firedAs unset on an extraction that was never fired", async () => {
+    await writeCache(1, URL_A, recipe, fm());
+    expect((await readCache(1, URL_A))!.firedAs).toBeUndefined();
+  });
+
+  it("does not resurface a fired card after the tab navigates away", async () => {
+    // firedAs must not outlive the url guard: a new page on the same tab is a
+    // different recipe, and must extract rather than show the old receipt.
+    await writeCache(1, URL_A, recipe, fm(), "00428-pork-belly.md");
+    expect(await readCache(1, "https://example.com/other")).toBeNull();
+  });
+
   it("clears a single tab without disturbing the others", async () => {
     await writeCache(1, URL_A, recipe, fm());
     await writeCache(2, URL_A, recipe, fm());

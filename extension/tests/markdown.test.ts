@@ -1,8 +1,13 @@
 import { describe, it, expect } from "vitest";
-import { serializeRecipe, formatTicket, formatCaptured } from "../src/lib/markdown";
+import {
+  serializeRecipe,
+  formatTicket,
+  formatCaptured,
+  formatCapturedYaml,
+} from "../src/lib/markdown";
 import type { Recipe, Frontmatter } from "../src/lib/types";
 
-const SEP = "  ·  ";
+const SEP = "  |  ";
 
 const recipe: Recipe = {
   title: "Gochujang-Glazed Pork Belly",
@@ -45,7 +50,31 @@ describe("formatTicket", () => {
 
 describe("formatCaptured", () => {
   it("emits ISO 8601 to the minute, no seconds, no zone", () => {
+    // Unchanged: this is the popup's ticket-top stamp, where minute precision
+    // and no timezone noise is the point.
     expect(formatCaptured(new Date("2026-04-22T16:28:31"))).toBe("2026-04-22T16:28");
+  });
+});
+
+describe("formatCapturedYaml", () => {
+  // Obsidian parses frontmatter with js-yaml. These two properties are what
+  // make `captured` a real date there rather than a string, and a date at the
+  // RIGHT time rather than one silently shifted by the UTC offset.
+  const out = formatCapturedYaml(new Date("2026-04-22T16:28:31"));
+
+  it("carries seconds, without which YAML types the value as text", () => {
+    expect(out).toMatch(/^2026-04-22T16:28:31/);
+  });
+
+  it("carries a UTC offset, without which YAML reads the local time as UTC", () => {
+    expect(out).toMatch(/[+-]\d{2}:\d{2}$/);
+  });
+
+  it("round-trips through a YAML timestamp back to the same instant", () => {
+    // The whole point: parse it the way Obsidian would and land on the same
+    // moment we captured, not one shifted by the zone.
+    const captured = new Date("2026-04-22T16:28:31");
+    expect(new Date(formatCapturedYaml(captured)).getTime()).toBe(captured.getTime());
   });
 });
 
@@ -56,8 +85,8 @@ describe("serializeRecipe", () => {
     expect(md).toBe(
       [
         "---",
-        "ticket: 00427",
-        "captured: 2026-04-22T16:28",
+        'ticket: "00427"',
+        `captured: ${formatCapturedYaml(fm.captured)}`,
         "source: https://instagram.com/p/C9xK2",
         "via: 8 video frames",
         "serves: 4",

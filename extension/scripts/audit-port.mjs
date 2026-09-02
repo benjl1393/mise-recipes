@@ -25,7 +25,16 @@ const here = dirname(fileURLToPath(import.meta.url));
 const at = (...p) => resolve(here, "..", ...p);
 
 const css = readFileSync(at("src/popup/popup.css"), "utf8");
-const sources = ["src/popup/render.ts", "src/popup/popup.ts", "src/popup/popup.html"]
+const sources = [
+  "src/popup/render.ts",
+  "src/popup/popup.ts",
+  // The action rows moved out of popup.ts on 2026-08-30. Without this the
+  // audit reported every button class as styled-but-never-emitted.
+  "src/popup/actions.ts",
+  // Carries the Tabler icon markup, and so the only source of .btn-icon.
+  "src/popup/glyphs.ts",
+  "src/popup/popup.html",
+]
   .map((f) => readFileSync(at(f), "utf8"))
   .join("\n");
 

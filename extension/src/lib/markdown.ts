@@ -1,14 +1,37 @@
 import type { Frontmatter, Recipe } from "./types";
 
 /**
- * Ingredient separator: two spaces, middle-dot (U+00B7), two spaces. Five
+ * Ingredient separator: two spaces, pipe (U+007C), two spaces. Five
  * characters — it doubles as the qty/item column gutter in mono renderings.
+ *
+ * A pipe rather than a middle dot (changed 2026-09-01). Obsidian renders
+ * Markdown to HTML and HTML collapses whitespace runs, so the five-character
+ * gutter arrives as a single space and a U+00B7 all but vanishes between the
+ * two columns — the gutter only survives intact in source view, `cat`, and on
+ * paper. A pipe spans the full line height, so it reads as a rule rather than
+ * a mark once collapsed, which is also the brand's own "real lines, no soft
+ * elements" language.
+ *
+ * Rejected en route: an em-dash (already the qty placeholder for garnishes,
+ * so `- — — spring onion` would be unreadable), `::` (Dataview inline-field
+ * syntax — every ingredient would spawn a phantom field), an asterisk (rides
+ * toward cap-height, so it reads as a footnote marker attached to the qty
+ * rather than a divider, and it puts four star-ish marks in a file whose
+ * signature glyph is ✶), and U+2502 box-drawing (a finer rule in mono, but no
+ * better once collapsed and less certain in the proportional fallback fonts
+ * Apple Notes uses).
+ *
+ * Markdown-safe, verified through a CommonMark parser: a list item carrying
+ * pipes cannot become a table — GFM requires a delimiter row — and the pipe
+ * has no inline meaning outside a wikilink, which this format never emits.
  */
-export const SEPARATOR = "  ·  ";
+export const SEPARATOR = "  |  ";
 
 /**
- * Tag-line separator: single spaces. Narrower than the ingredient separator
- * because the tag line is an inline run, not an aligned column.
+ * Tag-line separator: a middle dot with single spaces. Deliberately still a
+ * dot, and deliberately narrower: the tag line is an inline run with nothing
+ * to align, so it wants a mark between items rather than a column rule, and
+ * the collapse that defeats U+00B7 as a gutter is harmless in a run.
  */
 export const TAG_SEPARATOR = " · ";
 
@@ -28,13 +51,42 @@ export function formatCaptured(d: Date): string {
   );
 }
 
+/**
+ * `captured` as YAML sees it: seconds AND a UTC offset. Both are load-bearing.
+ *
+ * Obsidian parses frontmatter with js-yaml, and the minute-precision form
+ * `2026-04-22T16:28` misses the YAML timestamp pattern entirely — it types as
+ * Text, so the Properties panel will not treat it as a date and it will not
+ * sort or filter in Bases or Dataview.
+ *
+ * Adding seconds alone fixes the type and introduces a worse bug: a bare
+ * `2026-04-22T16:28:00` is read as **UTC**, so a recipe captured at 16:28 in
+ * Zurich renders as 18:28. A wrong time that looks right beats no date only
+ * from the parser's point of view. The offset is what makes it round-trip.
+ *
+ * Verified against js-yaml 4.1.1, the engine behind Obsidian's `parseYaml`.
+ */
+export function formatCapturedYaml(d: Date): string {
+  const p = (n: number) => String(n).padStart(2, "0");
+  const offsetMin = -d.getTimezoneOffset();
+  const sign = offsetMin >= 0 ? "+" : "-";
+  const abs = Math.abs(offsetMin);
+  return (
+    `${formatCaptured(d)}:${p(d.getSeconds())}` +
+    `${sign}${p(Math.floor(abs / 60))}:${p(abs % 60)}`
+  );
+}
+
 export function serializeRecipe(recipe: Recipe, fm: Frontmatter): string {
   const lines: string[] = [];
 
   // 1–3: frontmatter, in the spec's mandatory field order.
   lines.push("---");
-  lines.push(`ticket: ${formatTicket(fm.ticket)}`);
-  lines.push(`captured: ${formatCaptured(fm.captured)}`);
+  // Quoted: unquoted `00427` is a YAML integer, so Obsidian's Properties
+  // panel renders the ticket as `427` and the zero-padding that carries the
+  // whole ticket-printer identity is gone before the user ever sees it.
+  lines.push(`ticket: "${formatTicket(fm.ticket)}"`);
+  lines.push(`captured: ${formatCapturedYaml(fm.captured)}`);
   lines.push(`source: ${fm.source}`);
   lines.push(`via: ${fm.via}`);
   if (recipe.author) lines.push(`author: ${recipe.author}`);

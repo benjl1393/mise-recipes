@@ -39,6 +39,9 @@ describe("settings", () => {
       units: "metric",
       model: "claude-haiku-4-5",
       captureFrames: true,
+      // On by default: the detector only fires on a declared schema.org/Recipe,
+      // so the feature is quiet on everything else and does not need opting in.
+      pulseOnDetect: true,
     });
   });
 

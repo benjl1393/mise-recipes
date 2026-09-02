@@ -1,6 +1,6 @@
 import { formatCaptured, formatTicket } from "../lib/markdown";
 import type { Frontmatter, Recipe, ViaMethod } from "../lib/types";
-import { GLYPH_BROKEN_PLATE, GLYPH_OFF_MENU } from "./glyphs";
+import { GLYPH_BROKEN_PLATE, GLYPH_FIRED, GLYPH_OFF_MENU } from "./glyphs";
 
 /**
  * Markup here mirrors type-specimens/popup-states.html exactly — the ported
@@ -220,7 +220,17 @@ const STAMPS = {
   error: { title: "Kitchen Error", glyph: GLYPH_BROKEN_PLATE, modifier: " err" },
 } as const;
 
-export function renderStamp(kind: keyof typeof STAMPS, detail?: string): string {
+/**
+ * @param detail The message under the stamp. `note` is the headline and does
+ *   the work the stamp cannot: "OFF MENU" names the state in brand voice
+ *   without explaining it, so the plain sentence is what the user actually
+ *   reads. `hint` is the quieter recovery line beneath it.
+ */
+export function renderStamp(
+  kind: keyof typeof STAMPS,
+  detail?: string,
+  hint?: string,
+): string {
   const { title, glyph, modifier } = STAMPS[kind];
   return (
     `<div class="popup-body">` +
@@ -229,6 +239,7 @@ export function renderStamp(kind: keyof typeof STAMPS, detail?: string): string 
     `<h2 class="stamp-title">${title}</h2>` +
     `</div>` +
     (detail ? `<p class="off-note">${esc(detail)}</p>` : "") +
+    (hint ? `<p class="off-hint">${esc(hint)}</p>` : "") +
     `</div>`
   );
 }
@@ -297,12 +308,19 @@ export function renderError(
  * The FIRED receipt. The card stays on screen, dimmed, under the stamp —
  * the artifact is delivered, and the user sees what was written where.
  * Caller adds the `fired` class to the .popup element.
+ *
+ * The mark is a filled --ink-primary block with the glyph and wordmark
+ * knocked out, the same inversion the Off Menu and Kitchen Error stamps
+ * take, so the three read as one family. It carries the pixel flame rather
+ * than a ✓: a tick is app-generic, and Fire is the verb this product is
+ * built on. Deliberately not flame-coloured — red is contextually exclusive
+ * and belongs to failure (colour v2.2, Principle 6).
  */
 export function renderFired(filename: string): string {
   return (
     `<div class="fired-stamp" aria-live="polite">` +
     `<div class="mark">` +
-    `<div class="line1"><span class="check">✓</span><span>FIRED</span></div>` +
+    `<div class="line1"><span class="glyph-mark">${GLYPH_FIRED}</span><span>FIRED</span></div>` +
     `<div class="line2">saved to ${esc(filename)}</div>` +
     `</div></div>`
   );

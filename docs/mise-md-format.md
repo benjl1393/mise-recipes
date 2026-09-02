@@ -21,8 +21,8 @@ A Mise `.md` file has three zones:
 
 ```yaml
 ---
-ticket: 00427
-captured: 2026-04-22T16:28
+ticket: "00427"
+captured: 2026-04-22T16:28:31+02:00
 source: https://instagram.com/p/C9xK2
 via: 8 video frames
 author: J. Kenji López-Alt   # optional — only when the source credits someone
@@ -38,9 +38,28 @@ scaled: 1.0              # optional — only if user changed servings
 
 | Field | Type | Required | Source |
 |---|---|---|---|
-| `ticket` | 5-digit zero-padded integer | yes | device-local counter in `chrome.storage.local`, incremented per capture. Displayed in popup/PDF as `NO. XXXXX` (typographic convention for numbered tickets). |
-| `captured` | ISO 8601 datetime | yes | extension generates at save time |
+| `ticket` | 5-digit zero-padded integer, **quoted** | yes | device-local counter in `chrome.storage.local`, incremented per capture. Displayed in popup/PDF as `NO. XXXXX` (typographic convention for numbered tickets). The quotes are load-bearing — see YAML typing below. |
+| `captured` | ISO 8601 datetime, **with seconds and a UTC offset** | yes | extension generates at save time. Both parts are load-bearing — see YAML typing below. |
 | `source` | URL | yes | tab URL at capture time |
+
+### YAML typing — why two fields are punctuated the way they are
+
+Obsidian parses frontmatter with **js-yaml**, and two fields are silently
+mangled without the punctuation above. Verified against js-yaml 4.1.1:
+
+| Emitted | Parsed as | Result in Obsidian |
+|---|---|---|
+| `ticket: 00427` | `427` *(number)* | ✗ zero-padding gone — the Properties panel shows `427` |
+| `ticket: "00427"` | `"00427"` *(string)* | ✓ the ticket reads as printed |
+| `captured: 2026-04-22T16:28` | `"2026-04-22T16:28"` *(string)* | ✗ Text, not a date — will not sort or filter |
+| `captured: 2026-04-22T16:28:31` | `Date` | ✗ **read as UTC** — a 16:28 Zurich capture shows as 18:28 |
+| `captured: 2026-04-22T16:28:31+02:00` | `Date` | ✓ the right instant, in the reader's zone |
+
+The seconds and the offset are separate fixes for separate bugs. Seconds alone
+make the value a date at the **wrong time**, which is worse than a string
+because it looks correct. `formatCapturedYaml()` in `extension/src/lib/markdown.ts`
+emits both; `formatCaptured()` is unchanged and still produces the
+minute-precision, zone-free form the popup's ticket-top stamp wants.
 | `via` | string (vocabulary below) | yes | inferred from successful extraction path |
 | `author` | string | no | Mise-extracted — the recipe's credited writer, as the source names them, without titles or affiliations. Omitted when the source attributes nobody; never inferred from the site or channel name. Rendered on the card as a byline beneath the subtitle. |
 | `serves` | string | yes | Mise-extracted, Claude-normalized (`"4"`, `"makes 12"`, `"serves 6-8"`). Rendered as `SERVES X`. |
@@ -92,17 +111,20 @@ Reserved for v2: `"translated from {lang}"` (suffix appended when recipe-transla
 
 ```markdown
 ## Ingredients
-- 800 g  ·  pork belly, skin-on
-- 3 tbsp  ·  gochujang paste
-- 2 tbsp  ·  honey or maltose
-- 1½ tbsp  ·  soy sauce (light)
-- 4 cloves  ·  garlic, crushed
-- 1 thumb  ·  ginger, julienned
-- —  ·  spring onion & sesame to finish
+- 800 g  |  pork belly, skin-on
+- 3 tbsp  |  gochujang paste
+- 2 tbsp  |  honey or maltose
+- 1½ tbsp  |  soy sauce (light)
+- 4 cloves  |  garlic, crushed
+- 1 thumb  |  ginger, julienned
+- —  |  spring onion & sesame to finish
 ```
 
-- Each line: `- <qty>  ·  <item>`
-- Separator: `  ·  ` — two spaces, middle-dot (`U+00B7`), two spaces. Five characters total, gives visual breathing room in mono-rendered plain text.
+- Each line: `- <qty>  |  <item>`
+- Separator: `  |  ` — two spaces, pipe (`U+007C`), two spaces. Five characters total, gives visual breathing room in mono-rendered plain text.
+- **Why a pipe and not a middle dot** (changed 2026-09-01): Obsidian renders Markdown to HTML, and HTML collapses whitespace runs — so the five-character gutter reaches the reader as a *single space*, and a `·` all but disappears between the columns. The gutter survives intact only in source view, `cat`, and on paper. A pipe spans the full line height and so reads as a rule rather than a mark once collapsed. It is ASCII, so it is safe in the proportional fallback fonts Apple Notes uses, and it leaves `✶` as the only star in the file.
+- Rejected en route: an em-dash (already the qty placeholder, so `- — — spring onion` would be unreadable), `::` (Dataview inline-field syntax — every ingredient would spawn a phantom field), an asterisk (rides toward cap-height, so it reads as a footnote marker on the qty rather than a divider, and it dilutes the `✶` signature), and `│` box-drawing (a finer rule in mono, no better once collapsed, less certain in fallback fonts).
+- The pipe is Markdown-safe, verified through a CommonMark parser: a list item carrying pipes cannot become a table (GFM requires a delimiter row), and the pipe has no inline meaning outside a wikilink, which this format never emits.
 - `<qty>` format: space between number and unit (`800 g`, `1½ tbsp`). Vulgar fractions (`½`, `⅓`, `¼`, `¾`) preferred over decimals when culturally natural.
 - `<item>` format: lowercase prose, brief modifiers acceptable (`crushed`, `julienned`, `skin-on`).
 - No measurable quantity: use em-dash `—` as the qty placeholder (`— · spring onion & sesame to finish`). Common for finishing garnishes.
@@ -213,8 +235,8 @@ Conversion rules:
 
 ```markdown
 ---
-ticket: 00427
-captured: 2026-04-22T16:28
+ticket: "00427"
+captured: 2026-04-22T16:28:31+02:00
 source: https://instagram.com/p/C9xK2
 via: 8 video frames
 serves: 4
@@ -227,13 +249,13 @@ total: 2h 10m
 *slow-rendered, sharply-sauced, served over rice with a soft egg.*
 
 ## Ingredients
-- 800 g  ·  pork belly, skin-on
-- 3 tbsp  ·  gochujang paste
-- 2 tbsp  ·  honey or maltose
-- 1½ tbsp  ·  soy sauce (light)
-- 4 cloves  ·  garlic, crushed
-- 1 thumb  ·  ginger, julienned
-- —  ·  spring onion & sesame to finish
+- 800 g  |  pork belly, skin-on
+- 3 tbsp  |  gochujang paste
+- 2 tbsp  |  honey or maltose
+- 1½ tbsp  |  soy sauce (light)
+- 4 cloves  |  garlic, crushed
+- 1 thumb  |  ginger, julienned
+- —  |  spring onion & sesame to finish
 
 ## Method
 1. Score the pork belly skin in a crosshatch, just through the fat. Salt heavily, uncovered in the fridge overnight — this is non-negotiable.

@@ -32,6 +32,18 @@ interface CachedExtraction {
   /** Frontmatter with `captured` flattened to ISO — Date does not survive JSON. */
   fm: Omit<Frontmatter, "captured"> & { captured: string };
   at: number;
+  /**
+   * The filename this recipe was written to, once it has been fired.
+   *
+   * Firing used to *delete* the entry, on the reasoning that the cached card
+   * would otherwise re-offer a ticket number that had since been consumed.
+   * True, but the cure cost a full billed re-extraction every time the user
+   * re-opened the popup on a page they had just saved — which is exactly when
+   * they are most likely to. Rewriting the entry with the committed
+   * frontmatter fixes the stale ticket properly, and this field lets the popup
+   * restore the receipt instead of offering Fire a second time.
+   */
+  firedAs?: string;
 }
 
 type CacheMap = Record<string, CachedExtraction>;
@@ -59,12 +71,16 @@ async function readAll(): Promise<CacheMap> {
 export async function readCache(
   tabId: number,
   url: string,
-): Promise<{ recipe: Recipe; fm: Frontmatter } | null> {
+): Promise<{ recipe: Recipe; fm: Frontmatter; firedAs?: string } | null> {
   const entry = (await readAll())[String(tabId)];
   if (!entry) return null;
   // A navigated tab must re-extract; a stale one must not resurface.
   if (entry.url !== url || Date.now() - entry.at > TTL_MS) return null;
-  return { recipe: entry.recipe, fm: { ...entry.fm, captured: new Date(entry.fm.captured) } };
+  return {
+    recipe: entry.recipe,
+    fm: { ...entry.fm, captured: new Date(entry.fm.captured) },
+    firedAs: entry.firedAs,
+  };
 }
 
 export async function writeCache(
@@ -72,6 +88,8 @@ export async function writeCache(
   url: string,
   recipe: Recipe,
   fm: Frontmatter,
+  /** Set once the .md is on disk, so re-opening restores the receipt. */
+  firedAs?: string,
 ): Promise<void> {
   const area = session();
   if (!area) return;
@@ -81,6 +99,7 @@ export async function writeCache(
     recipe,
     fm: { ...fm, captured: fm.captured.toISOString() },
     at: Date.now(),
+    ...(firedAs ? { firedAs } : {}),
   };
 
   // Evict oldest first so a long browsing session cannot grow without bound.
@@ -94,7 +113,13 @@ export async function writeCache(
   }
 }
 
-/** Drop a tab's entry once its recipe has been fired and written to disk. */
+/**
+ * Drop a tab's entry outright, forcing the next open to re-extract.
+ *
+ * NOT called on fire any more — see `firedAs`. Kept as the primitive for a
+ * deliberate "extract this page again" gesture, which costs a billed call and
+ * so must always be something the user asked for.
+ */
 export async function clearCache(tabId: number): Promise<void> {
   const area = session();
   if (!area) return;
