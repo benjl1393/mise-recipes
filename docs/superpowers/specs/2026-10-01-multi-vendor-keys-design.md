@@ -69,9 +69,16 @@ moves the menu off Custom, because several OpenAI-compatible vendors issue
 
 | state | hint |
 |---|---|
-| key empty, any preset | Stored on this device only. Works with Anthropic, OpenAI, Gemini, Grok, Mistral, OpenRouter, or any OpenAI-compatible API. |
-| key present, `detectProvider` null, preset selected | Couldn't tell which provider this key is for. Pick it below. |
-| preset | Stored on this device only. Sent to {host} and nowhere else. No key yet? [Make one at {label}]({keyUrl}). You pay {label} directly. |
+| key empty, preset | Stored on this device only. Works with Anthropic, OpenAI, Gemini, Grok, Mistral, OpenRouter, or any OpenAI-compatible API. No key yet? [Make one at {label}]({keyUrl}). |
+| `undetected` (below) | Couldn't tell which provider this key is for. Pick it below. |
+| key present, preset | Stored on this device only. Sent to {host} and nowhere else. You pay {label} directly. |
+
+The key-page link sits on the empty state because that is when someone has
+no key; once a key is in, the hint says where it goes.
+
+`.field` is `display: grid`, which outranks the user-agent `[hidden]` rule, so
+the Prep CSS must restate `#prep-view [hidden] { display: none; }` or the
+hidden fields stay visible.
 | Custom | Stored on this device only. Sent to {host of Base URL, or "the base URL below" while it is empty} and nowhere else. Leave it empty if your server needs no key. |
 
 The "couldn't tell" row is driven by one boolean, `undetected`: key `input`
