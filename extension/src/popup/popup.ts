@@ -1,4 +1,4 @@
-import { createClient, extractRecipe, OffMenuError } from "../lib/anthropic";
+import { extractRecipe, OffMenuError, sampleFrames } from "../lib/extract";
 import { resolveConnection } from "../lib/providers/connection";
 import { readCache, writeCache } from "../lib/cache";
 import { captureFrames } from "../lib/frames";
@@ -253,7 +253,10 @@ async function run() {
 
   try {
     const settings = await getSettings();
-    if (!settings.apiKey) throw new NoKeyError();
+    // Custom may be a keyless local server; every preset needs a key.
+    if (!settings.apiKey && settings.provider !== "custom") throw new NoKeyError();
+    // Before the tab query and frame capture, so a configuration error never costs a capture.
+    const connection = resolveConnection(settings);
 
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
     if (!tab?.id) throw new Error("No active tab.");
@@ -292,10 +295,15 @@ async function run() {
         // permissions.request() requires a live user gesture — which is long
         // gone after awaiting settings, the tab query, the cache and the
         // content script. Asking here threw and killed every video capture.
-        frames = await captureFrames(tab.id, {
-          crop: reply.videoRect,
-          devicePixelRatio: reply.devicePixelRatio,
-        });
+        // Sampled before `via` is written, so the .md records the frames the
+        // model actually saw — Mistral takes 8 of a Reel's 24.
+        frames = sampleFrames(
+          await captureFrames(tab.id, {
+            crop: reply.videoRect,
+            devicePixelRatio: reply.devicePixelRatio,
+          }),
+          connection.maxImages,
+        );
         if (frames.length > 0) {
           payload.via = `${frames.length} video frames` as ViaMethod;
         }
@@ -307,9 +315,8 @@ async function run() {
 
     showSkeleton("extracting", { url: activeTabUrl, via: payload.via });
     const recipe = await extractRecipe(payload, {
-      client: createClient(settings.apiKey),
+      connection,
       units: settings.units,
-      model: resolveConnection(settings).model,
       frames,
     });
 

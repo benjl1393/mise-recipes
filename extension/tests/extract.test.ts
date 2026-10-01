@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
-import { extractRecipe, OffMenuError } from "../src/lib/anthropic";
+import { extractRecipe, OffMenuError } from "../src/lib/extract";
+import { resolveConnection } from "../src/lib/providers/connection";
 import type { ExtractionPayload } from "../src/lib/page-source";
 
 const payload: ExtractionPayload = {
@@ -9,6 +10,14 @@ const payload: ExtractionPayload = {
   title: "Gochujang Pork Belly",
   hasVideo: false,
 };
+
+const connection = resolveConnection({
+  apiKey: "k",
+  provider: "anthropic",
+  tier: "fast",
+  baseURL: "",
+  customModel: "",
+});
 
 describe("extractRecipe", () => {
   function clientReturning(parsed: unknown) {
@@ -27,7 +36,7 @@ describe("extractRecipe", () => {
       method: ["Roast."],
       tags: ["Pork", "pork", "Slow Cooker"],
     });
-    const recipe = await extractRecipe(payload, { client, units: "metric", model: "m" });
+    const recipe = await extractRecipe(payload, { connection, units: "metric", transport: { anthropic: client } });
     expect(recipe.title).toBe("Gochujang Pork Belly");
     // deduped, kebab-cased, and #weeknight computed from hands_on: 25m
     expect(recipe.tags).toEqual(["#pork", "#slow-cooker", "#weeknight"]);
@@ -43,7 +52,7 @@ describe("extractRecipe", () => {
       tags: [],
     });
     await expect(
-      extractRecipe(payload, { client, units: "metric", model: "m" }),
+      extractRecipe(payload, { connection, units: "metric", transport: { anthropic: client } }),
     ).rejects.toBeInstanceOf(OffMenuError);
   });
 
@@ -57,15 +66,15 @@ describe("extractRecipe", () => {
       tags: [],
     });
     await expect(
-      extractRecipe(payload, { client, units: "metric", model: "m" }),
+      extractRecipe(payload, { connection, units: "metric", transport: { anthropic: client } }),
     ).rejects.toBeInstanceOf(OffMenuError);
   });
 
-  it("throws when structured output fails to parse", async () => {
+  it("throws malformed when structured output is missing", async () => {
     const client = clientReturning(null);
     await expect(
-      extractRecipe(payload, { client, units: "metric", model: "m" }),
-    ).rejects.toThrow(/structured output/i);
+      extractRecipe(payload, { connection, units: "metric", transport: { anthropic: client } }),
+    ).rejects.toMatchObject({ name: "ProviderError", kind: "malformed" });
   });
 
   it("sends frames as image blocks ahead of the text block", async () => {
@@ -79,7 +88,7 @@ describe("extractRecipe", () => {
     });
     await extractRecipe(
       { ...payload, via: "2 video frames" },
-      { client, units: "metric", model: "m", frames: ["AAA", "BBB"] },
+      { connection, units: "metric", frames: ["AAA", "BBB"], transport: { anthropic: client } },
     );
     const parse = (client as never as { messages: { parse: ReturnType<typeof vi.fn> } })
       .messages.parse;
@@ -100,12 +109,76 @@ describe("extractRecipe", () => {
       method: ["y"],
       tags: ["#pork"],
     });
-    await extractRecipe(payload, { client, units: "metric", model: "claude-haiku-4-5" });
+    await extractRecipe(payload, { connection, units: "metric", transport: { anthropic: client } });
     const parse = (client as never as { messages: { parse: ReturnType<typeof vi.fn> } })
       .messages.parse;
     const args = parse.mock.calls[0]![0] as Record<string, unknown>;
     expect(args).not.toHaveProperty("thinking");
     expect(args).not.toHaveProperty("output_config.effort");
     expect((args.output_config as Record<string, unknown>).effort).toBeUndefined();
+  });
+
+  it("goes through Chat Completions with the nullable schema for a non-Anthropic provider", async () => {
+    const openai = resolveConnection({
+      apiKey: "sk-proj-x",
+      provider: "openai",
+      tier: "fast",
+      baseURL: "",
+      customModel: "",
+    });
+    const content = JSON.stringify({
+      found: true,
+      title: "T",
+      subtitle: null,
+      author: null,
+      serves: "2",
+      hands_on: "25m",
+      total: null,
+      ingredients: [{ qty: "1", item: "x" }],
+      method: ["y"],
+      notes: null,
+      tags: ["Pork"],
+    });
+    const fetchImpl = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify({ choices: [{ finish_reason: "stop", message: { content } }] }), {
+        status: 200,
+      }),
+    );
+    const recipe = await extractRecipe(payload, {
+      connection: openai,
+      units: "metric",
+      transport: { fetch: fetchImpl },
+    });
+    expect(recipe.subtitle).toBeUndefined();
+    expect(recipe.tags).toEqual(["#pork", "#weeknight"]);
+    const sent = JSON.parse((fetchImpl.mock.calls[0]![1] as RequestInit).body as string);
+    expect(sent.response_format.json_schema.schema.required).toContain("subtitle");
+  });
+
+  it("samples frames down to the connection's cap", async () => {
+    const mistral = resolveConnection({
+      apiKey: "m",
+      provider: "mistral",
+      tier: "fast",
+      baseURL: "",
+      customModel: "",
+    });
+    const fetchImpl = vi.fn().mockResolvedValue(
+      new Response(
+        JSON.stringify({ choices: [{ finish_reason: "stop", message: { content: '{"found":false}' } }] }),
+        { status: 200 },
+      ),
+    );
+    await expect(
+      extractRecipe(payload, {
+        connection: mistral,
+        units: "metric",
+        frames: Array(24).fill("AAA"),
+        transport: { fetch: fetchImpl },
+      }),
+    ).rejects.toBeInstanceOf(OffMenuError);
+    const sent = JSON.parse((fetchImpl.mock.calls[0]![1] as RequestInit).body as string);
+    const images = sent.messages[0].content.filter((p: { type: string }) => p.type === "image_url");
+    expect(images).toHaveLength(8);
   });
 });

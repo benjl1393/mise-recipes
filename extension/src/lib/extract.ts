@@ -1,7 +1,10 @@
-import { TAXONOMY } from "./tags";
+import { normalizeTags, TAXONOMY } from "./tags";
 import type { ExtractionPayload } from "./page-source";
 import type { Recipe, Units } from "./types";
+import { callAnthropic, type AnthropicLike } from "./providers/anthropic";
+import { contextOf, type Connection, type ModelRequest } from "./providers/connection";
 import { ProviderError, type ErrorContext } from "./providers/errors";
+import { callOpenAICompat } from "./providers/openai-compat";
 
 /**
  * The vendor-independent half of extraction: the schema, the prompt, and the
@@ -215,4 +218,51 @@ export function sampleFrames<T>(frames: T[], max: number): T[] {
     { length: max },
     (_, i) => frames[Math.round((i * (frames.length - 1)) / (max - 1))]!,
   );
+}
+
+const MAX_TOKENS = 8000;
+
+export interface ExtractOptions {
+  connection: Connection;
+  units: Units;
+  /** Base64 JPEG frames, already downsampled to <=1568px on the long edge. */
+  frames?: string[];
+  /** Test seams only. */
+  transport?: { fetch?: typeof fetch; anthropic?: AnthropicLike };
+}
+
+export async function extractRecipe(
+  payload: ExtractionPayload,
+  { connection, units, frames = [], transport = {} }: ExtractOptions,
+): Promise<Recipe> {
+  const request: ModelRequest = {
+    prompt: buildPrompt(payload, units),
+    frames: sampleFrames(frames, connection.maxImages),
+    schema:
+      connection.protocol === "anthropic"
+        ? RECIPE_SCHEMA
+        : toNullableSchema(RECIPE_SCHEMA as unknown as JsonSchema),
+    maxTokens: MAX_TOKENS,
+  };
+
+  const raw =
+    connection.protocol === "anthropic"
+      ? await callAnthropic(connection, request, transport.anthropic)
+      : await callOpenAICompat(connection, request, transport.fetch);
+
+  const parsed = validateOutput(raw, contextOf(connection));
+  if (!parsed.found || parsed.ingredients.length === 0) throw new OffMenuError();
+
+  return {
+    title: parsed.title,
+    subtitle: parsed.subtitle,
+    author: parsed.author,
+    serves: parsed.serves,
+    hands_on: parsed.hands_on,
+    total: parsed.total,
+    ingredients: parsed.ingredients,
+    method: parsed.method,
+    notes: parsed.notes,
+    tags: normalizeTags(parsed.tags, parsed.hands_on),
+  };
 }
