@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Mise — design pipeline</title>
+<!-- Fonts and tokens come from the shipped stylesheet, so the diagram is set in
+     the system it describes. -->
+<link rel="stylesheet" href="/popup/popup.css">
+<style>
+  html, body { width: auto; max-height: none; display: block; margin: 0; background: #fff; }
+  * { box-sizing: border-box; }
+
+  /* 684 CSS px = the portfolio column; captured at 2x. */
+  #pipeline {
+    position: relative; width: 684px; height: 492px;
+    background: var(--bg-page); color: var(--paper-primary);
+    font-family: var(--font-body); font-size: 11px; line-height: 1.35;
+  }
+  svg.wires { position: absolute; inset: 0; }
+
+  .stage {
+    position: absolute; top: 26px;
+    font-family: var(--font-display); font-size: 11px; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--paper-muted);
+  }
+  .stage em { display: block; margin-top: 4px; font-family: var(--font-body); font-style: italic;
+              font-size: 10.5px; letter-spacing: 0; text-transform: none; }
+
+  .box { position: absolute; padding: 9px 10px; }
+  .box b { display: block; font-weight: 400; font-size: 11.5px; }
+  .box span { display: block; color: var(--paper-muted); margin-top: 3px; }
+  /* Authored: a solid rule. Generated: dashed, like the ticket's own rules —
+     derived, never hand-edited. Shipped: filled, inverted like the stamps. */
+  .src { border: 1px solid var(--paper-dim); }
+  .gen { border: 1px dashed var(--paper-muted); }
+  .ship { background: var(--paper-primary); color: var(--ink-primary); }
+  .ship span { color: var(--ink-dim); }
+
+  .cmd { position: absolute; font-size: 10.5px; color: var(--paper-primary); }
+
+  .checks { position: absolute; left: 276px; top: 316px; width: 380px;
+            border: 1px solid var(--rule-ink); padding: 10px 12px; }
+  .checks .lbl { font-family: var(--font-display); letter-spacing: 0.08em; color: var(--paper-muted); }
+  .checks dl { margin: 7px 0 0; display: grid; grid-template-columns: 104px 1fr; row-gap: 5px; }
+  .checks dt { color: var(--paper-primary); }
+  .checks dd { margin: 0; color: var(--paper-muted); }
+  /* Failure owns the red, as a fill — the Kitchen Error stamp's rule. */
+  .caught { margin-top: 9px; display: flex; gap: 8px; align-items: baseline; }
+  .caught i { font-style: normal; font-family: var(--font-display); letter-spacing: 0.08em;
+              background: var(--flame-deep); color: var(--paper-primary); padding: 2px 5px 1px; }
+
+  .loop { position: absolute; left: 28px; top: 396px; width: 226px; font-size: 10.5px;
+          color: var(--paper-muted); }
+</style></head><body>
+<div id="pipeline">
+  <svg class="wires" width="684" height="492" viewBox="0 0 684 492" fill="none"
+       stroke="oklch(0.62 0 0)" stroke-width="1">
+    <defs>
+      <marker id="a" viewBox="0 0 6 6" refX="5.5" refY="3" markerWidth="6" markerHeight="6" orient="auto">
+        <path d="M0 0 L6 3 L0 6 Z" fill="oklch(0.62 0 0)" stroke="none"/>
+      </marker>
+    </defs>
+    <!-- mark: svg → gen:icons → png/geometry → toolbar -->
+    <path d="M192 110 H272" marker-end="url(#a)"/>
+    <path d="M440 110 H476" marker-end="url(#a)"/>
+    <!-- popup: specimen → port:design → css/glyphs → popup -->
+    <path d="M192 226 H272" marker-end="url(#a)"/>
+    <path d="M440 226 H476" marker-end="url(#a)"/>
+    <!-- the popup row is what the checks read -->
+    <path d="M358 272 V312" marker-end="url(#a)"/>
+    <path d="M568 272 V312" marker-end="url(#a)"/>
+    <!-- the loop back: a defect is fixed in the specimen, never in the output -->
+    <path d="M276 384 H110 V276" marker-end="url(#a)"/>
+  </svg>
+
+  <div class="stage" style="left:28px">Source</div>
+  <div class="stage" style="left:276px">Generated<em>never hand-edited</em></div>
+  <div class="stage" style="left:480px">Shipped</div>
+
+  <!-- the mark -->
+  <div class="box src" style="left:28px; top:68px; width:164px; height:84px">
+    <b>mise-plate-icon.svg</b><span>the mark</span>
+  </div>
+  <div class="cmd" style="left:206px; top:93px">gen:icons</div>
+  <div class="box gen" style="left:276px; top:68px; width:164px; height:84px">
+    <b>4 PNG sizes</b><b>mark-geometry.ts</b><span>icon set, runtime geometry</span>
+  </div>
+  <div class="box ship" style="left:480px; top:68px; width:176px; height:84px">
+    <b>the toolbar icon</b><span>pulses red when a page declares a recipe</span>
+  </div>
+
+  <!-- the popup -->
+  <div class="box src" style="left:28px; top:180px; width:164px; height:92px">
+    <b>popup-states.html</b><span>the specimen: type, colour, icons, every popup state</span>
+  </div>
+  <div class="cmd" style="left:200px; top:209px">port:design</div>
+  <div class="box gen" style="left:276px; top:180px; width:164px; height:92px">
+    <b>popup.css</b><b>glyphs.ts</b><span>stylesheet, stamp glyphs, Tabler icons</span>
+  </div>
+  <div class="box ship" style="left:480px; top:180px; width:176px; height:92px">
+    <b>the popup</b><span>400 × 600 window; render.ts emits the specimen's classes</span>
+  </div>
+
+  <div class="checks">
+    <div class="lbl">CHECKS</div>
+    <dl>
+      <dt>audit:ext</dt><dd>classes the CSS styles vs classes the code emits</dd>
+      <dt>render:states</dt><dd>every state, real renderer, real CSS, to look at</dd>
+    </dl>
+    <div class="caught"><i>CAUGHT</i><span>a loading shimmer that never ran · a button row 15.8px wider than its window</span></div>
+  </div>
+
+  <div class="loop">fixed in the specimen, then crit and re-port — never in the output</div>
+</div>
+</body></html>
