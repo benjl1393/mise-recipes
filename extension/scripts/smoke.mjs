@@ -3,10 +3,12 @@
  * Verifies the MV3 manifest is accepted, the service worker registers, and
  * each page boots without console errors — none of which unit tests can see.
  *
- * Playwright is deliberately NOT a dependency (it pulls a ~95MB browser).
- * Install it on demand:
+ * Playwright is a devDependency (2026-10-01). It used to be left out because
+ * it pulled a ~95MB browser, but the package has no install script any more:
+ * `npm i` adds ~18MB of JS and no browser. The browser is a separate,
+ * one-off step per machine:
  *
- *   npm i -D playwright && npx playwright install chromium
+ *   npx playwright install chromium
  *   npm run build:ext && npm run smoke:ext
  */
 import { chromium } from "playwright";
