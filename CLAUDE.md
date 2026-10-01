@@ -800,14 +800,14 @@ live test is what notices.
   `presets.ts`, so `lib/providers` is in the embed's import graph via
   `fire.ts`; tree-shaking keeps the prefixes out, and `build-embed.test.ts`
   fails loudly if that ever changes.
-- **Verified live: Anthropic only (2026-10-01).** Through the new code path on
-  `claude-haiku-4-5`: text extraction, the `found: false` decline, and frames
-  (`providers.live.ts`), plus `extract.live.ts`'s article test. The same run's
-  other six calls came back 401 on a key that had just succeeded — a freshly
-  made key not yet valid everywhere, not code. OpenAI, Gemini, Grok, Mistral,
-  OpenRouter and Custom are **unverified**: proven only against their
-  documented request and error shapes until `npm run test:live` passes with
-  their keys. Record each here when it does.
+- **Verified live: Anthropic only (2026-10-01).** A clean `npm run test:live`,
+  10/10 on `claude-haiku-4-5` through the new code path: article, imperial
+  units, schema.org block, the `found: false` decline, tags, both vision tests,
+  and `providers.live.ts`'s text / decline / frames. (Two earlier runs that day
+  hit 401s — first a dead key, then a fresh key still propagating.) OpenAI,
+  Gemini, Grok, Mistral, OpenRouter and Custom are **unverified**: proven only
+  against their documented request and error shapes until `test:live` passes
+  with their keys. Record each here when it does.
 - **Prep in Custom scrolls** by about 70px inside Chrome's 600px popup cap; the
   pane was already a scroll container.
 
