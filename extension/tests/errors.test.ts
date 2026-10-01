@@ -1,6 +1,7 @@
 // @vitest-environment happy-dom
 import { describe, it, expect } from "vitest";
 import { classify, NoKeyError } from "../src/popup/errors";
+import { errorFallbacks } from "../src/popup/actions";
 import { renderError } from "../src/popup/render";
 
 /** Mimics the SDK's APIError, which carries an HTTP status. */
@@ -97,9 +98,13 @@ describe("renderError", () => {
     expect(doc.querySelector(".callout.error")!.getAttribute("role")).toBe("alert");
   });
 
-  it("shouts the label with the warning glyph and shows the code", () => {
+  it("shouts the label behind a Tabler alert icon and shows the code", () => {
     const doc = parse(renderError(failure));
-    expect(doc.querySelector(".callout .hdr")!.textContent).toContain("▲ CLAUDE OVERLOADED");
+    const hdr = doc.querySelector(".callout .hdr")!;
+    // An icon, never a text glyph (design-anti-ai-defaults: "a glyph is not an icon").
+    expect(hdr.querySelector('svg[data-icon="alert-triangle"]')).not.toBeNull();
+    expect(hdr.textContent).not.toContain("▲");
+    expect(hdr.textContent).toContain("CLAUDE OVERLOADED");
     expect(doc.querySelector(".callout .hdr .code")!.textContent).toBe("HTTP 529");
     expect(doc.querySelector(".callout .body")!.textContent).toBe("Servers are busy.");
   });
@@ -108,20 +113,22 @@ describe("renderError", () => {
     expect(parse(renderError(failure)).querySelector(".fallback-list")).toBeNull();
   });
 
-  it("renders each fallback with its glyph and key hint", () => {
-    const doc = parse(
-      renderError(failure, {
-        fallbacks: [
-          { glyph: "↻", text: "Retry with the same model", key: "↵" },
-          { glyph: "→", text: "Open Prep", key: "P" },
-        ],
-      }),
-    );
+  it("renders each fallback with the icon of the button it names, and its key", () => {
+    const doc = parse(renderError(failure, { fallbacks: errorFallbacks(true) }));
     const items = [...doc.querySelectorAll(".fallback-list li")];
     expect(items.length).toBe(2);
-    expect(items[0]!.querySelector(".gl")!.textContent).toBe("↻");
+    // Retry wears RETRY's icon, Open Prep wears Prep's — and no text glyph remains.
+    expect(items[0]!.querySelector('.gl svg[data-icon="refresh"]')).not.toBeNull();
+    expect(items[1]!.querySelector('.gl svg[data-icon="settings"]')).not.toBeNull();
+    for (const li of items) expect(li.querySelector(".gl")!.textContent!.trim()).toBe("");
     expect(items[0]!.querySelector(".kbd")!.textContent).toBe("↵");
-    expect(items[1]!.textContent).toContain("Open Prep");
+    expect(items[1]!.textContent).toContain("Open Prep to change key or model");
+    expect(items[1]!.querySelector(".kbd")!.textContent).toBe("P");
+  });
+
+  it("offers Retry as a fallback only when the failure is retryable", () => {
+    expect(errorFallbacks(false).map((f) => f.key)).toEqual(["P"]);
+    expect(errorFallbacks(true).map((f) => f.key)).toEqual(["↵", "P"]);
   });
 
   it("escapes an upstream message rather than injecting it as markup", () => {

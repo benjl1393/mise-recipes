@@ -1,6 +1,6 @@
 import { formatCaptured, formatTicket } from "../lib/markdown";
 import type { Frontmatter, Recipe, ViaMethod } from "../lib/types";
-import { GLYPH_BROKEN_PLATE, GLYPH_FIRED, GLYPH_OFF_MENU } from "./glyphs";
+import { GLYPH_BROKEN_PLATE, GLYPH_FIRED, GLYPH_OFF_MENU, ICON_ALERT } from "./glyphs";
 
 /**
  * Markup here mirrors type-specimens/popup-states.html exactly — the ported
@@ -246,8 +246,9 @@ export function renderStamp(
 
 /** One escape hatch in the error card's fallback list. */
 export interface Fallback {
-  /** Tabler-style glyph in the leading slot. */
-  glyph: string;
+  /** The SVG of the button this fallback names (glyphs.ts) — trusted markup,
+   *  inserted unescaped. Never a text glyph. */
+  icon: string;
   text: string;
   /** Keyboard hint, rendered in a .kbd chip. */
   key: string;
@@ -280,7 +281,7 @@ export function renderError(
     `<h2 class="stamp-title">Kitchen Error</h2>` +
     `</div>` +
     `<div class="callout error" role="alert">` +
-    `<div class="hdr"><span>▲ ${esc(failure.label)}</span>` +
+    `<div class="hdr"><span>${ICON_ALERT}${esc(failure.label)}</span>` +
     `<span class="code">${esc(failure.code)}</span></div>` +
     `<div class="body">${esc(failure.body)}</div>` +
     `</div>` +
@@ -289,7 +290,7 @@ export function renderError(
         fallbacks
           .map(
             (f) =>
-              `<li><span class="gl">${esc(f.glyph)}</span>` +
+              `<li><span class="gl">${f.icon}</span>` +
               `<span>${esc(f.text)}</span>` +
               `<span class="kbd">${esc(f.key)}</span></li>`,
           )

@@ -6,7 +6,7 @@ import { serializeRecipe } from "../lib/markdown";
 import { getSettings, nextTicket, peekTicket } from "../lib/storage";
 import type { ExtractionPayload } from "../lib/page-source";
 import type { Frontmatter, Recipe, ViaMethod } from "../lib/types";
-import { ACTIONS, errorActions, FIRED_ACTIONS, NAV, SUCCESS_ACTIONS } from "./actions";
+import { ACTIONS, errorActions, errorFallbacks, FIRED_ACTIONS, NAV, SUCCESS_ACTIONS } from "./actions";
 import {
   formatElapsed,
   renderCard,
@@ -14,7 +14,6 @@ import {
   renderFired,
   renderSkeleton,
   renderStamp,
-  type Fallback,
   type Phase,
 } from "./render";
 import { classify, NoKeyError } from "./errors";
@@ -137,13 +136,7 @@ function showError(error: unknown) {
   const failure = classify(error);
   settle();
 
-  const fallbacks: Fallback[] = [];
-  if (failure.canRetry) {
-    fallbacks.push({ glyph: "↻", text: "Retry with the same model", key: "↵" });
-  }
-  fallbacks.push({ glyph: "→", text: "Open Prep to change key or model", key: "P" });
-
-  card.innerHTML = renderError(failure, { url: activeTabUrl, fallbacks });
+  card.innerHTML = renderError(failure, { url: activeTabUrl, fallbacks: errorFallbacks(failure.canRetry) });
 
   setExtractActions(errorActions(failure.canRetry));
 

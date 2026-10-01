@@ -8,7 +8,7 @@
  */
 
 export interface Classified {
-  /** Shouted label, sits after the ▲ warning glyph. */
+  /** Shouted label, sits after the alert icon. */
   label: string;
   /** Machine-readable code in the callout's right slot. */
   code: string;

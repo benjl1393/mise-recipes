@@ -684,6 +684,17 @@ v2.2's rule that red is contextually exclusive (failure owns the red, so the
 primary button goes bone). A raw SDK message like "400 Bad Request" tells a
 home cook nothing, which is why the taxonomy exists.
 
+**The error card wears icons, not glyphs (2026-10-01).** The callout's `▲`
+became Tabler `alert-triangle`, and the fallback list's `↻` / `→` became the
+icons of the buttons they name — `refresh` (Retry) and `settings` (Open Prep)
+— so the list and the row below read as one set. The list lives in
+`errorFallbacks(canRetry)` in `actions.ts`, beside `errorActions`, so it is
+testable and the portfolio renders the real one. The specimen's 03C card was
+brought back in line with the product at the same time (it still showed
+"Switch to Haiku (H)"). **Not yet fixed:** the Off Menu specimen (01C) still
+draws an unbuilt fallback list with `↵ ⇞ ⋆` text glyphs; choosing icons for
+features that do not exist yet is Ben's call.
+
 ### Not built yet
 
 - **PDF export** — see "Deferred — PDF export and the format dropdown" above

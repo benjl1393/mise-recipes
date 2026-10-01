@@ -784,6 +784,9 @@
         color: var(--flame-deep);
       }
 
+      .callout .hdr > span:first-child { display: inline-flex; align-items: center; gap: 6px; }
+      .callout .hdr svg { width: 12px; height: 12px; flex: none; }
+
       .callout .hdr .code {
         font-family: var(--font-mono);
         color: var(--ink-dim);
@@ -817,11 +820,14 @@
         line-height: 1.4;
       }
 
+      /* Each fallback wears the icon of the button it names (Retry → refresh,
+         Open Prep → settings). Icons, never text glyphs. */
       .fallback-list li .gl {
-        font-family: var(--font-display);
-        font-size: 14px;
+        display: inline-flex;
         color: var(--flame);
       }
+
+      .fallback-list li .gl svg { width: 14px; height: 14px; }
 
       .fallback-list li .kbd {
         font-family: var(--font-mono);
@@ -1740,22 +1746,22 @@
               </div>
 
               <div class="callout error" role="alert">
-                <div class="hdr"><span>▲ CLAUDE OVERLOADED</span><span class="code">HTTP 529</span></div>
+                <div class="hdr"><span><svg class="btn-icon" data-icon="alert-triangle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4"/><path d="M10.363 3.591l-8.106 13.534a1.914 1.914 0 0 0 1.636 2.871h16.214a1.914 1.914 0 0 0 1.636 -2.87l-8.106 -13.536a1.914 1.914 0 0 0 -3.274 0"/><path d="M12 16h.01"/></svg>CLAUDE OVERLOADED</span><span class="code">HTTP 529</span></div>
                 <div class="body">
-                  Claude's servers are busy right now. Your page is saved — retry in ~30s, or switch to Haiku in Prep.
+                  Claude's servers are busy right now. Retry in ~30s, or switch model in Prep.
                 </div>
               </div>
 
               <ul class="fallback-list">
                 <li>
-                  <span class="gl">↻</span>
+                  <span class="gl"><svg class="btn-icon" data-icon="refresh" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4"/><path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4"/></svg></span>
                   <span>Retry with the same model</span>
                   <span class="kbd">↵</span>
                 </li>
                 <li>
-                  <span class="gl">↓</span>
-                  <span>Switch to Haiku (cheaper, less nuance)</span>
-                  <span class="kbd">H</span>
+                  <span class="gl"><svg class="btn-icon" data-icon="settings" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.325 4.317c.426 -1.756 2.924 -1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543 -.94 3.31 .826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756 .426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543 -.826 3.31 -2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756 -2.924 1.756 -3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543 .94 -3.31 -.826 -2.37 -2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756 -.426 -1.756 -2.924 0 -3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94 -1.543 .826 -3.31 2.37 -2.37c1 .608 2.296 .07 2.572 -1.065"/><path d="M9 12a3 3 0 1 0 6 0a3 3 0 0 0 -6 0"/></svg></span>
+                  <span>Open Prep to change key or model</span>
+                  <span class="kbd">P</span>
                 </li>
               </ul>
 

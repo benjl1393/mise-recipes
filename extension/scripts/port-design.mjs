@@ -430,7 +430,7 @@ const icons = new Map();
 for (const m of html.matchAll(/<svg class="btn-icon" data-icon="([a-z0-9-]+)"[\s\S]*?<\/svg>/g)) {
   icons.set(m[1], m[0]);
 }
-const WANTED = ["flame", "settings", "history", "refresh", "copy", "arrow-left", "device-floppy"];
+const WANTED = ["flame", "settings", "history", "refresh", "copy", "arrow-left", "device-floppy", "alert-triangle"];
 for (const want of WANTED) {
   if (!icons.has(want)) throw new Error(`specimen is missing the ${want} button icon`);
 }
@@ -478,6 +478,9 @@ export const GLYPH_FIRED = \`${esc(FIRED_FLAME)}\`;
  * cause, then effect, in one symbol at two levels of finish.
  */
 export const ICON_FIRE = \`${esc(icons.get("flame"))}\`;
+
+/** The error callout's warning, before the shouted label. Was a ▲ glyph until 2026-10-01. */
+export const ICON_ALERT = \`${esc(icons.get("alert-triangle"))}\`;
 
 /** Prep — settings. */
 export const ICON_PREP = \`${esc(icons.get("settings"))}\`;

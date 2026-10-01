@@ -7,6 +7,7 @@ import {
   ICON_RETRY,
   ICON_SAVE,
 } from "./glyphs";
+import type { Fallback } from "./render";
 
 /**
  * The action row, one per view.
@@ -87,5 +88,15 @@ export const errorActions = (canRetry: boolean): string =>
     ? `<button id="retry" class="retry-btn" type="button" aria-keyshortcuts="Enter">` +
       `${ICON_RETRY}<span>RETRY</span><span class="kbd">↵</span></button>`
     : "") + NAV;
+
+/**
+ * The escape hatches listed inside the error card, matching the error row:
+ * Retry only when the failure is retryable, Prep always. Each wears the icon
+ * of the button it names, so the list and the row read as one set.
+ */
+export const errorFallbacks = (canRetry: boolean): Fallback[] => [
+  ...(canRetry ? [{ icon: ICON_RETRY, text: "Retry with the same model", key: "↵" }] : []),
+  { icon: ICON_PREP, text: "Open Prep to change key or model", key: "P" },
+];
 
 export type View = keyof typeof ACTIONS;
