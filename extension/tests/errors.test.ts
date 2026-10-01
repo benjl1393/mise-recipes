@@ -3,11 +3,11 @@ import { describe, it, expect } from "vitest";
 import { classify, NoKeyError } from "../src/popup/errors";
 import { errorFallbacks } from "../src/popup/actions";
 import { renderError } from "../src/popup/render";
-
-/** Mimics the SDK's APIError, which carries an HTTP status. */
-function apiError(status: number, message = "boom") {
-  return Object.assign(new Error(message), { status });
-}
+import {
+  ProviderError,
+  type ErrorContext,
+  type ProviderErrorKind,
+} from "../src/lib/providers/errors";
 
 const parse = (html: string) => {
   const host = document.createElement("div");
@@ -16,72 +16,88 @@ const parse = (html: string) => {
   return host;
 };
 
+const preset: ErrorContext = {
+  label: "OpenAI",
+  host: "api.openai.com",
+  model: "gpt-6-luna",
+  custom: false,
+  url: "https://api.openai.com/v1/chat/completions",
+};
+const custom: ErrorContext = {
+  label: "Your provider",
+  host: "localhost:11434",
+  model: "llama3.3",
+  custom: true,
+  url: "http://localhost:11434/v1/chat/completions",
+};
+const err = (kind: ProviderErrorKind, status: number | null = null, ctx = preset, detail = "") =>
+  new ProviderError(kind, ctx, { status, detail });
+
 describe("classify", () => {
-  it("names an overloaded upstream and allows retry", () => {
-    const c = classify(apiError(529));
-    expect(c.label).toBe("CLAUDE OVERLOADED");
-    expect(c.code).toBe("HTTP 529");
-    expect(c.canRetry).toBe(true);
+  it.each([
+    ["auth", 401, "KEY REJECTED", false],
+    ["billing", 402, "OUT OF CREDIT", true],
+    ["rate", 429, "RATE LIMITED", true],
+    ["overloaded", 529, "OVERLOADED", true],
+    ["rejected", 400, "REQUEST REJECTED", false],
+    ["server", 500, "UPSTREAM ERROR", true],
+    ["network", null, "NETWORK DROP", true],
+    ["timeout", null, "TIMED OUT", true],
+    ["truncated", null, "REPLY CUT OFF", false],
+    ["malformed", null, "PARSE FAILURE", true],
+  ] as const)("%s → %s", (kind, status, label, canRetry) => {
+    const c = classify(err(kind, status));
+    expect(c.label).toBe(label);
+    expect(c.canRetry).toBe(canRetry);
   });
 
-  it("treats a rejected key as unretryable — retrying cannot help", () => {
-    const c = classify(apiError(401));
-    expect(c.label).toBe("KEY REJECTED");
-    expect(c.canRetry).toBe(false);
+  it("names the vendor in every provider failure", () => {
+    const kinds = ["auth", "billing", "rate", "overloaded", "server", "timeout", "truncated", "malformed"] as const;
+    for (const kind of kinds) expect(classify(err(kind, 500)).body).toContain("OpenAI");
+    expect(classify(err("network")).body).toContain("api.openai.com");
   });
 
-  it("maps 403 onto the same rejected-key advice", () => {
-    expect(classify(apiError(403)).label).toBe("KEY REJECTED");
+  it("puts the HTTP status in the code slot", () => {
+    expect(classify(err("overloaded", 503)).code).toBe("HTTP 503");
+    expect(classify(err("auth", 400)).code).toBe("HTTP 400");
   });
 
-  it("keeps the upstream detail on a 400, since the cause is specific", () => {
-    const c = classify(apiError(400, "effort is not supported"));
-    expect(c.code).toBe("HTTP 400");
+  it("keeps the vendor's detail on a rejected request", () => {
+    const c = classify(err("rejected", 400, preset, "effort is not supported"));
     expect(c.body).toContain("effort is not supported");
-    expect(c.canRetry).toBe(false);
   });
 
-  it("rate limiting is retryable", () => {
-    const c = classify(apiError(429));
-    expect(c.label).toBe("RATE LIMITED");
-    expect(c.canRetry).toBe(true);
+  it("blames the model on a preset 404, and the URL on a Custom 404", () => {
+    expect(classify(err("rejected", 404)).body).toContain("gpt-6-luna");
+    const c = classify(err("rejected", 404, custom));
+    expect(c.body).toContain("http://localhost:11434/v1/chat/completions");
+    expect(c.body).toMatch(/base URL/);
   });
 
-  it("groups 5xx as a retryable upstream error", () => {
-    expect(classify(apiError(503)).label).toBe("UPSTREAM ERROR");
-    expect(classify(apiError(503)).code).toBe("HTTP 503");
-    expect(classify(apiError(500)).canRetry).toBe(true);
-  });
-
-  // A statusless fetch rejection is what a CORS block looks like from script,
-  // and it is the most likely first-run failure for a browser-origin call.
-  it("reads a statusless fetch failure as a network drop", () => {
-    const c = classify(new Error("Failed to fetch"));
-    expect(c.label).toBe("NETWORK DROP");
-    expect(c.code).toBe("OFFLINE");
-    expect(c.canRetry).toBe(true);
-  });
-
-  it("recognises a schema mismatch as a parse failure", () => {
-    expect(classify(new Error("Unexpected token in JSON")).label).toBe("PARSE FAILURE");
+  it("only offers Fast/Thorough where that menu exists", () => {
+    expect(classify(err("overloaded", 529)).body).toMatch(/Fast and Thorough/);
+    expect(classify(err("overloaded", 529, custom)).body).not.toMatch(/Fast and Thorough/);
+    expect(classify(err("overloaded", 529, custom)).body).toMatch(/another model/);
   });
 
   it("recognises an unreachable content script", () => {
-    const c = classify(new Error("Could not read this page."));
-    expect(c.label).toBe("PAGE UNREADABLE");
+    expect(classify(new Error("Could not read this page.")).label).toBe("PAGE UNREADABLE");
   });
 
-  it("treats a missing key as setup, not failure, and offers no retry", () => {
+  it("treats a missing key as setup, without naming a vendor", () => {
     const c = classify(new NoKeyError());
     expect(c.label).toBe("NO API KEY");
     expect(c.code).toBe("SETUP");
     expect(c.canRetry).toBe(false);
+    expect(c.body).not.toMatch(/Anthropic/);
   });
 
   it("falls back to the raw message rather than swallowing it", () => {
-    const c = classify(new Error("something very specific broke"));
+    const c = classify(
+      new Error("A custom provider needs a base URL and a model ID. Open Prep to add them."),
+    );
     expect(c.label).toBe("EXTRACTION FAILED");
-    expect(c.body).toBe("something very specific broke");
+    expect(c.body).toMatch(/base URL/);
   });
 
   it("handles a thrown non-Error without crashing", () => {
@@ -90,7 +106,7 @@ describe("classify", () => {
 });
 
 describe("renderError", () => {
-  const failure = { label: "CLAUDE OVERLOADED", code: "HTTP 529", body: "Servers are busy." };
+  const failure = { label: "OVERLOADED", code: "HTTP 529", body: "Servers are busy." };
 
   it("keeps the Kitchen Error stamp and marks the callout as an alert", () => {
     const doc = parse(renderError(failure));
@@ -104,7 +120,7 @@ describe("renderError", () => {
     // An icon, never a text glyph (design-anti-ai-defaults: "a glyph is not an icon").
     expect(hdr.querySelector('svg[data-icon="alert-triangle"]')).not.toBeNull();
     expect(hdr.textContent).not.toContain("▲");
-    expect(hdr.textContent).toContain("CLAUDE OVERLOADED");
+    expect(hdr.textContent).toContain("OVERLOADED");
     expect(doc.querySelector(".callout .hdr .code")!.textContent).toBe("HTTP 529");
     expect(doc.querySelector(".callout .body")!.textContent).toBe("Servers are busy.");
   });

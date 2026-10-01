@@ -34,6 +34,7 @@ const bundled = await esbuild.build({
       export { ACTIONS, FIRED_ACTIONS, SUCCESS_ACTIONS, errorActions, errorFallbacks } from "./popup/actions";
       export { renderCard, renderFired, renderStamp, renderError } from "./popup/render";
       export { classify } from "./popup/errors";
+      export { ProviderError } from "./lib/providers/errors";
       export * from "./embed/fixture";
     `,
     resolveDir: join(ext, "src"),
@@ -46,7 +47,19 @@ const m = await import(`data:text/javascript;base64,${Buffer.from(bundled.output
 
 const fm = m.fixtureFrontmatter(m.FIRST_TICKET, new Date("2026-04-24T18:03:00"));
 const card = m.renderCard(m.FIXTURE_RECIPE, fm);
-const overloaded = m.classify(Object.assign(new Error("Overloaded"), { status: 529 }));
+const overloaded = m.classify(
+  new m.ProviderError(
+    "overloaded",
+    {
+      label: "Anthropic",
+      host: "api.anthropic.com",
+      model: "claude-haiku-4-5",
+      custom: false,
+      url: "https://api.anthropic.com/v1/messages",
+    },
+    { status: 529 },
+  ),
+);
 
 // renderError stamps the ticket with `new Date()`, so an unpinned render differs on
 // every run and reads today's date beside cards from 2026-04-24. Pin the clock for
