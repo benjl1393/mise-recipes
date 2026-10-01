@@ -811,6 +811,27 @@ live test is what notices.
 - **Prep in Custom scrolls** by about 70px inside Chrome's 600px popup cap; the
   pane was already a scroll container.
 
+### Public repo — `benjl1393/mise-recipes` (2026-10-01)
+
+The project went public as **`benjl1393/mise-recipes`**, MIT. The original
+`benjl1393/mise` stays **private** as the full archive, because its history
+holds Basier Square Mono, a commercial Atipo face whose licence forbids
+redistribution. The public repo was published from a clone with Basier (and the
+unused Open Gorton files) removed from every commit, so no force-push touched
+either repo. Never add a font, image or other asset to this repo without
+checking its licence first — a public history cannot be taken back.
+
+- **Font licences ship with the fonts.** Departure Mono and Commit Mono are MIT;
+  their licences sit beside them in `type-specimens/fonts/` and `build:ext` /
+  `build:embed` copy them into the bundle. Tabler's notice is in
+  `THIRD_PARTY_NOTICES.md`. Redaction (specimens only) keeps its OFL file.
+- **The old "Order Up" web app is retired.** Its `/api/extract` route spent a
+  server-held Anthropic key; it was deleted with the form, extractors and their
+  tests, and `src/app/page.tsx` now only points to the extension. The Next app
+  is a static page. `npm test` runs the extension suite.
+- **The README is the public home page**; the Release zip is a plain
+  `npm run build:ext` (never `build:ext:dev`, which can seed a key).
+
 ### Process — desk crits, not handoffs
 
 Each pipeline step above ends in a **desk crit together**. Mise is a two-designer studio — Ben is the other designer, not a client signing off on deliverables. Every step ships only after we've stood in front of the work and talked through it.

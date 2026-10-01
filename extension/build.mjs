@@ -45,14 +45,17 @@ for (const dir of ["popup"]) {
     filter: (src) => !src.endsWith(".ts"),
   });
 }
-// Only the locked v2.1 faces ship. type-specimens/fonts/ also holds Redaction
-// and Basier Square Mono, both rejected during the type crit — copying the
-// whole directory would put ~140KB of dead weight in the store bundle.
+// Only the locked v2.1 faces ship, each with its MIT licence beside it.
+// type-specimens/fonts/ also holds Redaction, rejected during the type crit —
+// copying the whole directory would put dead weight in the bundle. (Basier
+// Square Mono was rejected too, and removed: its licence forbids
+// redistribution, and this repository is public.)
 const FONTS = [
   "DepartureMono-Regular.woff2",
   "CommitMono-400-Regular.otf",
   "CommitMono-400-Italic.otf",
-  "OFL.txt",
+  "DepartureMono-LICENSE.txt",
+  "CommitMono-LICENSE.txt",
 ];
 await mkdir(`${outdir}/fonts`, { recursive: true });
 for (const font of FONTS) {
