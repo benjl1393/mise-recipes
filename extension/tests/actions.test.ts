@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 import { describe, it, expect } from "vitest";
-import { ACTIONS, errorActions, FIRED_ACTIONS, NAV, SUCCESS_ACTIONS } from "../src/popup/actions";
+import { ACTIONS, closingActions, errorActions, FIRED_ACTIONS, NAV, relabel, SUCCESS_ACTIONS } from "../src/popup/actions";
 
 const parse = (html: string): Document =>
   new DOMParser().parseFromString(`<body><div class="popup-actions">${html}</div></body>`, "text/html");
@@ -12,6 +12,7 @@ const ROWS: Array<[string, string]> = [
   ["archive", ACTIONS.archive],
   ["success", SUCCESS_ACTIONS],
   ["fired", FIRED_ACTIONS],
+  ["closing", closingActions(2)],
   ["error retryable", errorActions(true)],
   ["error terminal", errorActions(false)],
 ];
@@ -116,5 +117,22 @@ describe("action rows", () => {
     const doc = parse(FIRED_ACTIONS);
     expect(doc.querySelector(".countdown")!.textContent).toBe("Saved");
     expect(doc.querySelectorAll("button")).toHaveLength(2);
+  });
+
+  it("counts down in the closing row, with navigation alongside", () => {
+    const doc = parse(closingActions(2));
+    expect(doc.querySelector(".countdown")!.textContent).toBe("Closing in 2s");
+    expect([...doc.querySelectorAll("button")].map((b) => b.id)).toEqual(["prep", "archive"]);
+  });
+
+  it("relabels a button without deleting its icon or chip", () => {
+    const doc = parse(SUCCESS_ACTIONS);
+    const copy = doc.querySelector("#copy")!;
+    relabel(copy, "Copied");
+    expect(copy.querySelector("svg")).not.toBeNull();
+    expect(copy.querySelector("span:not(.kbd)")!.textContent).toBe("Copied");
+    const fire = doc.querySelector("#fire")!;
+    relabel(fire, "FIRE");
+    expect(fire.querySelector(".kbd")!.textContent).toBe("↵");
   });
 });

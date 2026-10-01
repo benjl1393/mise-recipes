@@ -72,6 +72,14 @@ export const SUCCESS_ACTIONS =
 export const FIRED_ACTIONS = `<span class="countdown">Saved</span>` + NAV;
 
 /**
+ * The fired receipt while the window counts down to closing. Prep and Archive
+ * ride alongside: reaching for either is the decision to stay, and popup.ts
+ * cancels the close when they are used.
+ */
+export const closingActions = (remaining: number): string =>
+  `<span class="countdown">Closing in <strong>${remaining}s</strong></span>` + NAV;
+
+/**
  * One row for every failure scenario, settled at the 2026-08-18 desk crit.
  * Prep and Archive are the only navigation this window has, so both persist
  * here — dropping Archive would strand the user in a failed extraction with
@@ -100,3 +108,13 @@ export const errorFallbacks = (canRetry: boolean): Fallback[] => [
 ];
 
 export type View = keyof typeof ACTIONS;
+
+/**
+ * Change a button's label and nothing else. Setting textContent on the button
+ * itself deletes its icon (and Fire's chip) — Copy lost its icon that way
+ * after every copy from 2026-08-30 until this existed.
+ */
+export function relabel(button: Element, text: string): void {
+  const label = button.querySelector("span:not(.kbd)");
+  if (label) label.textContent = text;
+}
