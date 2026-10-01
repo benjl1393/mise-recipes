@@ -1,4 +1,5 @@
 import type { Ticket, Units } from "./types";
+import { detectProvider, PROVIDER_IDS, type ProviderId, type Tier } from "./providers/presets";
 
 const KEY_SETTINGS = "mise:settings";
 const KEY_COUNTER = "mise:counter";
@@ -19,8 +20,13 @@ const MAX_HISTORY = 500;
 
 export interface Settings {
   apiKey: string;
+  provider: ProviderId;
+  tier: Tier;
+  /** Custom only. Kept when another provider is chosen, so switching back loses nothing. */
+  baseURL: string;
+  /** Custom only. */
+  customModel: string;
   units: Units;
-  model: string;
   captureFrames: boolean;
   /** Whether a detected recipe pulses the toolbar icon. */
   pulseOnDetect: boolean;
@@ -28,11 +34,33 @@ export interface Settings {
 
 const DEFAULTS: Settings = {
   apiKey: "",
+  provider: "anthropic",
+  tier: "fast",
+  baseURL: "",
+  customModel: "",
   units: "metric",
-  model: "claude-haiku-4-5",
   captureFrames: true,
   pulseOnDetect: true,
 };
+
+/** Settings before 2026-10-01 stored a model ID instead of provider + tier. */
+type StoredSettings = Partial<Settings> & { model?: unknown };
+
+/**
+ * Decided on the raw stored object: after DEFAULTS are merged, provider and
+ * tier always exist and "nothing stored" can no longer be told apart.
+ */
+function migrate(raw: StoredSettings): Partial<Settings> {
+  const { model, ...rest } = raw;
+  if (rest.provider === undefined && typeof model === "string") {
+    return {
+      ...rest,
+      provider: "anthropic",
+      tier: rest.tier ?? (model.includes("opus") ? "thorough" : "fast"),
+    };
+  }
+  return rest;
+}
 
 /**
  * Injected by build.mjs. Empty string in any build without --dev, so this is
@@ -42,13 +70,23 @@ declare const __MISE_DEV_KEY__: string;
 
 export async function getSettings(): Promise<Settings> {
   const stored = await chrome.storage.local.get(KEY_SETTINGS);
-  const settings = { ...DEFAULTS, ...(stored[KEY_SETTINGS] as Partial<Settings> | undefined) };
+  const raw = (stored[KEY_SETTINGS] as StoredSettings | undefined) ?? {};
+  const settings: Settings = { ...DEFAULTS, ...migrate(raw) };
+  // A preset removed in a later version, or a hand-edited store, must not reach
+  // Prep's menu (which would show blank and save "") or the adapters.
+  if (!PROVIDER_IDS.includes(settings.provider)) settings.provider = DEFAULTS.provider;
+  if (settings.tier !== "fast" && settings.tier !== "thorough") settings.tier = DEFAULTS.tier;
   // Seed a dev key only when nothing is stored — never override a real one the
   // user typed, so a --dev build behaves normally once Prep has been saved.
   // The typeof guard matters: this is a build-time define, so the identifier
   // simply does not exist under vitest, and a bare reference would throw.
+  // The provider follows the seeded key, so a migrated "anthropic" can never
+  // sit beside a seeded OpenAI key. Custom may be keyless on purpose.
   const seed = typeof __MISE_DEV_KEY__ === "string" ? __MISE_DEV_KEY__ : "";
-  if (!settings.apiKey && seed) settings.apiKey = seed;
+  if (!settings.apiKey && seed && settings.provider !== "custom") {
+    settings.apiKey = seed;
+    settings.provider = detectProvider(seed) ?? settings.provider;
+  }
   return settings;
 }
 

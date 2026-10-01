@@ -71,7 +71,7 @@ This means NONE of:
 **Technical:**
 - Chrome MV3 popup, ~400px × variable height; Safari via `safari-web-extension-converter` wrapper
 - Popup opens instantly — skeleton-first, no blocking web fonts on open
-- BYOK: user's Anthropic key in `chrome.storage.local`; zero backend for AI
+- BYOK: the user's own key — Anthropic, OpenAI, Gemini, Grok, Mistral, OpenRouter or any OpenAI-compatible server — in `chrome.storage.local`; zero backend for AI
 - PDF export runs server-side (Next.js `/api/export/pdf` fallback) — reuses the same visual language as the popup
 - Video extraction works on IG Reels, TikTok, YouTube Shorts, and **long-form YouTube of any length** — requires perceptual-hash dedupe + scene-change detection + hard frame cap (~24) to bound Haiku vision cost
 
@@ -271,32 +271,35 @@ states" below.
 ## The extension (`extension/`)
 
 Chrome MV3, TypeScript, esbuild, no framework. Zero backend — the popup calls
-the Anthropic API directly with the user's key from `chrome.storage.local`.
+the chosen provider's API directly with the user's key from `chrome.storage.local`.
 
 ```
 npm run build:ext      # bundle to extension/dist (load unpacked from there)
 npm run watch:ext      # rebuild on change
-npm run test:ext       # vitest, 234 tests
+npm run test:ext       # vitest, 354 tests
 npm run port:design    # re-port CSS + glyphs from type-specimens/
 npm run smoke:ext      # load in real Chromium, assert all surfaces boot
 npm run audit:ext      # diff popup.css classes against what the renderer emits
 npm run render:states  # render every popup state to static HTML, to look at
 npm run build:embed    # the popup as a static folder for the portfolio (--out <dir>/mise)
 npm run render:portfolio # every Mise image on the portfolio (--out <dir>)
-npm run test:live      # REAL billed calls to api.anthropic.com — opt-in, needs a key
+npm run test:live      # REAL billed calls to every vendor you have a key for — opt-in
 ```
 
 **`test:live` is the only thing that proves the API contract.** Every test in
-`tests/*.test.ts` mocks `client.messages.parse`, so they prove this code
-handles a well-formed response and nothing about whether Anthropic produces
-one. The live tests cover request shape, `parsed_output`, unit switching, the
+`tests/*.test.ts` mocks the wire (the Anthropic SDK client, or `fetch`), so they
+prove this code handles a well-formed response and nothing about whether a
+vendor produces one. The live tests cover request shape, `parsed_output`, unit switching, the
 `found: false` decline, and the vision blocks. They live in `tests/live/` under
 a separate filename pattern (`*.live.ts`) and a separate config, so
 `test:ext` can never run them by accident and bill you.
 
-The key is read from `ANTHROPIC_API_KEY` in the environment, or a gitignored
-`.env.local`. **Nothing in this repo ever writes the key** — creating that
-file is the user's job:
+The keys are read from one variable per vendor — `ANTHROPIC_API_KEY`,
+`OPENAI_API_KEY`, `GEMINI_API_KEY`, `XAI_API_KEY`, `MISTRAL_API_KEY`,
+`OPENROUTER_API_KEY` — in the environment, or a gitignored `.env.local`. A
+vendor without a key is skipped, not failed (`tests/live/providers.live.ts`).
+**Nothing in this repo ever writes a key** — creating that file is the user's
+job:
 
 ```
 ANTHROPIC_API_KEY=sk-ant-... npm run test:live
@@ -632,9 +635,11 @@ The shortcut is named in Copy's `title` ("Copy the .md (⌘C)") and in
 `aria-keyshortcuts="Meta+C Control+C"`. Rejected: no chips anywhere (deletes
 the cue for the central gesture) and widening the popup past 400px.
 
-**Model:** `claude-haiku-4-5` by default, switchable to `claude-opus-5` in Prep.
-Haiku 4.5 supports structured outputs and vision but **not** `output_config.effort`
-or adaptive thinking — sending either is a 400.
+**Model:** Prep picks a provider and a tier, **Fast** or **Thorough**; each
+provider maps the two to its own models (see Providers). Anthropic's are
+`claude-haiku-4-5` and `claude-opus-5-5`. Haiku 4.5 supports structured outputs
+and vision but **not** `output_config.effort` or adaptive thinking — sending
+either is a 400.
 
 ### Popup lifecycle — the popup is destroyed on every tab switch
 
@@ -726,6 +731,17 @@ brought back in line with the product at the same time (it still showed
 draws an unbuilt fallback list with `↵ ⇞ ⋆` text glyphs; choosing icons for
 features that do not exist yet is Ben's call.
 
+**Provider failures are classified in the adapters, not here (2026-10-01).**
+Both adapters throw one `ProviderError` with a *kind* — auth, billing, rate,
+overloaded, rejected, server, network, timeout, truncated, malformed — because
+vendors disagree on status codes: a bad key is 401 at OpenAI, Mistral and
+OpenRouter but **400 at Gemini and xAI**, and Anthropic reports a low credit
+balance as a 400. `errors.ts` only words a kind. Labels stay short and
+vendor-free; bodies name the vendor ("OpenAI refused that key"). `CLAUDE
+OVERLOADED` became `OVERLOADED` in the product and in the specimen's 03C card.
+A Custom endpoint's 404 blames the base URL, not the model, and copy only
+offers "switch between Fast and Thorough" where that menu exists.
+
 ### Not built yet
 
 - **PDF export** — see "Deferred — PDF export and the format dropdown" above
@@ -740,21 +756,60 @@ features that do not exist yet is Ben's call.
 - **Safari** — `safari-web-extension-converter` wraps a finished Chrome build.
 - **Landing page.**
 
-### Deferred to launch — multi-provider keys
+### Providers — any vendor's key (2026-10-01)
 
-**Decided 2026-08-17, explicitly not to be built yet.** At launch Prep should
-accept a token from any AI provider — OpenAI, Grok, Anthropic, and whatever
-else — not Anthropic alone. Until then Ben is the only user and BYOK-Anthropic
-is sufficient.
+Ben: *"we need to build it so that users add their own api key … regardless of
+ai vendor"* — scheduled for the portfolio's "Try it" section. Spec and plan:
+`docs/superpowers/specs/2026-10-01-multi-vendor-keys-design.md`,
+`docs/superpowers/plans/2026-10-01-multi-vendor-keys.md`.
 
-Why it is worth noting now rather than discovering later: BYOK already means
-the user brings their own credential, so provider choice is the same shape of
-decision, not a new one. But it does touch three places that are currently
-Anthropic-shaped — `createClient`, the structured-output call in
-`extractRecipe` (`output_config.format`, `parsed_output`), and the vision
-content blocks. Those are the seams to keep clean; a provider adapter is the
-obvious form. Do not generalise them speculatively before the feature is
-actually scheduled.
+**Two paths, one core.** `lib/extract.ts` holds everything vendor-independent
+(schema, prompt, output validation, frame sampling) and dispatches to
+`lib/providers/anthropic.ts` (the SDK call, unchanged in what it sends) or
+`lib/providers/openai-compat.ts` (plain `fetch` to `{baseURL}/chat/completions`,
+the shape OpenAI, Gemini, xAI, Mistral, OpenRouter and most local servers
+speak). `resolveConnection(settings)` turns Prep's settings into what an adapter
+needs; every vendor quirk lives in `lib/providers/presets.ts` and nowhere else.
+
+| Provider | Fast | Thorough | Quirks |
+|---|---|---|---|
+| Anthropic | `claude-haiku-4-5` | `claude-opus-5-5` | native Messages API |
+| OpenAI | `gpt-6-luna` | `gpt-6.1-sol` | strict schema, `max_completion_tokens`, `reasoning_effort: low` |
+| Gemini | `gemini-3.5-flash-lite` | `gemini-3.8-flash` | `reasoning_effort: low` (not `minimal`) |
+| Grok | `grok-4.3` | `grok-4.7` | `max_completion_tokens` |
+| Mistral | `mistral-small-latest` | `mistral-medium-latest` | **8 images max** — frames are sampled evenly |
+| OpenRouter | `google/gemini-3.5-flash-lite` | `anthropic/claude-opus-5.5` | strict, `provider.require_parameters` |
+
+Model IDs were read from each vendor's docs on 2026-10-01 and will drift; the
+live test is what notices.
+
+- **The Chat Completions path sends a nullable rewrite of the schema** (every
+  field required, the five optional ones `T | null`), which OpenAI's strict mode
+  demands; `validateOutput` turns the nulls back into absent fields and rejects
+  anything the card cannot render. The Anthropic path keeps `RECIPE_SCHEMA`.
+- **Key detection is a convenience, never a lock.** Ordered prefixes: `sk-ant-`,
+  `sk-or-`, `xai-`, `AIza`/`AQ.`, then bare `sk-` as OpenAI. Mistral keys have no
+  prefix. Detection never moves the menu off Custom, because DeepSeek and other
+  compatible vendors also issue `sk-` keys.
+- **Custom** takes a base URL (normalised: trailing `/chat/completions` stripped)
+  and a model ID, and may be keyless (no `Authorization` header) for a local
+  server. `http://localhost` is the expected case; LAN addresses are unverified.
+- **Retries are asymmetric on purpose.** The SDK retries twice (it always did);
+  the fetch path makes one attempt with a 120 s timeout, and RETRY is the retry.
+- **The embed bundle must carry no key prefix.** `storage.ts` imports
+  `presets.ts`, so `lib/providers` is in the embed's import graph via
+  `fire.ts`; tree-shaking keeps the prefixes out, and `build-embed.test.ts`
+  fails loudly if that ever changes.
+- **Verified live: Anthropic only (2026-10-01).** Through the new code path on
+  `claude-haiku-4-5`: text extraction, the `found: false` decline, and frames
+  (`providers.live.ts`), plus `extract.live.ts`'s article test. The same run's
+  other six calls came back 401 on a key that had just succeeded — a freshly
+  made key not yet valid everywhere, not code. OpenAI, Gemini, Grok, Mistral,
+  OpenRouter and Custom are **unverified**: proven only against their
+  documented request and error shapes until `npm run test:live` passes with
+  their keys. Record each here when it does.
+- **Prep in Custom scrolls** by about 70px inside Chrome's 600px popup cap; the
+  pane was already a scroll container.
 
 ### Process — desk crits, not handoffs
 

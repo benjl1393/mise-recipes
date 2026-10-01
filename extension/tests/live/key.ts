@@ -11,11 +11,13 @@ const here = dirname(fileURLToPath(import.meta.url));
  * creating it is the user's job. This only reads it, and only when live tests
  * are explicitly invoked.
  *
- * Precedence: ANTHROPIC_API_KEY in the environment, then .env.local, then
- * .env, searched from the extension dir upward to the repo root.
+ * Precedence: the named variable in the environment, then .env.local, then
+ * .env, searched from the extension dir upward to the repo root. One variable
+ * per vendor (ANTHROPIC_API_KEY, OPENAI_API_KEY, …); a vendor whose variable is
+ * absent is skipped by the live tests, not failed.
  */
-export function liveKey(): string | null {
-  const fromEnv = process.env.ANTHROPIC_API_KEY?.trim();
+export function liveKey(envVar = "ANTHROPIC_API_KEY"): string | null {
+  const fromEnv = process.env[envVar]?.trim();
   if (fromEnv) return fromEnv;
 
   const candidates = [
@@ -29,7 +31,7 @@ export function liveKey(): string | null {
     if (!existsSync(path)) continue;
     const contents = readFileSync(path, "utf8");
 
-    const assigned = /^\s*ANTHROPIC_API_KEY\s*=\s*(.+)$/m.exec(contents);
+    const assigned = new RegExp(`^\\s*${envVar}\\s*=\\s*(.+)$`, "m").exec(contents);
     if (assigned?.[1]) {
       // Tolerate quoted values and trailing comments.
       const value = assigned[1].trim().replace(/\s+#.*$/, "").replace(/^["']|["']$/g, "");
@@ -39,7 +41,9 @@ export function liveKey(): string | null {
     // Also accept a file that is just the key. Writing the bare secret is the
     // obvious thing to do when told "put your key in this file", and failing
     // with "no key found" while staring at a file containing the key is a
-    // needlessly bad experience.
+    // needlessly bad experience. Only for Anthropic: a bare key from another
+    // vendor carries no prefix this could recognise reliably.
+    if (envVar !== "ANTHROPIC_API_KEY") continue;
     const bare = /^\s*(sk-ant-[A-Za-z0-9_-]+)\s*$/m.exec(contents);
     if (bare?.[1]) return bare[1];
   }

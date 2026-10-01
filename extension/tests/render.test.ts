@@ -184,11 +184,19 @@ describe("renderSkeleton", () => {
   // The shimmer is scoped to `.skel .bar` in CSS, so the bars are only ever
   // animated if the controller also puts `skel` on the container. These
   // assertions pin the structure the animation depends on.
+  // Any vendor may be doing the reading; the chyron must not credit one.
+  it("names no vendor in any skeleton phase", () => {
+    for (const phase of ["reading", "capturing", "extracting"] as const) {
+      const text = parse(renderSkeleton(phase)).querySelector(".chyron-bar .status")!.textContent;
+      expect(text).not.toMatch(/Claude|Anthropic|OpenAI|Gemini|Grok|Mistral/);
+    }
+  });
+
   it("emits the chyron status line and progress meter", () => {
     const doc = parse(renderSkeleton("extracting"));
     expect(doc.querySelector(".chyron-bar .status .dot")).not.toBeNull();
     expect(doc.querySelector(".chyron-bar .status")!.textContent).toContain(
-      "Claude is reading",
+      "the model is reading",
     );
     expect(doc.querySelector(".chyron-bar .elapsed")!.textContent).toBe("0:00");
     expect(doc.querySelector(".progress")!.getAttribute("style")).toContain("--progress: 74%");

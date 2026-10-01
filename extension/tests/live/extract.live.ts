@@ -1,6 +1,7 @@
 // @vitest-environment happy-dom
 import { describe, it, expect } from "vitest";
-import { createClient, extractRecipe, OffMenuError } from "../../src/lib/anthropic";
+import { extractRecipe, OffMenuError } from "../../src/lib/extract";
+import { resolveConnection } from "../../src/lib/providers/connection";
 import { pickSource } from "../../src/lib/page-source";
 import { serializeRecipe } from "../../src/lib/markdown";
 import { normalizeTags } from "../../src/lib/tags";
@@ -32,7 +33,16 @@ if (!key) {
 
 const doc = (html: string) => new DOMParser().parseFromString(html, "text/html");
 
-const client = () => createClient(key!);
+const connection = () => ({
+  ...resolveConnection({
+    apiKey: key!,
+    provider: "anthropic",
+    tier: "fast",
+    baseURL: "",
+    customModel: "",
+  }),
+  model: LIVE_MODEL,
+});
 
 const BLOG = `<html><head><title>Weeknight Gochujang Pork Belly</title></head><body>
 <article>
@@ -72,9 +82,8 @@ live("live extraction — text", () => {
     expect(payload.via).toBe("article text");
 
     const recipe = await extractRecipe(payload, {
-      client: client(),
+      connection: connection(),
       units: "metric",
-      model: LIVE_MODEL,
     });
 
     expect(recipe.title.toLowerCase()).toContain("pork belly");
@@ -118,9 +127,8 @@ live("live extraction — text", () => {
   it("honours the imperial unit setting", async () => {
     const payload = pickSource(doc(BLOG), "https://example.com/gochujang-pork-belly");
     const recipe = await extractRecipe(payload, {
-      client: client(),
+      connection: connection(),
       units: "imperial",
-      model: LIVE_MODEL,
     });
     const text = recipe.ingredients.map((i) => i.qty).join(" ").toLowerCase();
     // Imperial output should not be leading with grams and millilitres.
@@ -151,9 +159,8 @@ live("live extraction — text", () => {
     expect(payload.via).toBe("schema data");
 
     const recipe = await extractRecipe(payload, {
-      client: client(),
+      connection: connection(),
       units: "metric",
-      model: LIVE_MODEL,
     });
     expect(recipe.title.toLowerCase()).toContain("cacio");
     expect(recipe.ingredients.length).toBeGreaterThanOrEqual(3);
@@ -172,16 +179,15 @@ live("live extraction — text", () => {
     const payload = pickSource(doc(html), "https://example.com/earnings");
 
     await expect(
-      extractRecipe(payload, { client: client(), units: "metric", model: LIVE_MODEL }),
+      extractRecipe(payload, { connection: connection(), units: "metric" }),
     ).rejects.toBeInstanceOf(OffMenuError);
   });
 
   it("produces tags that survive normalisation", async () => {
     const payload = pickSource(doc(BLOG), "https://example.com/gochujang-pork-belly");
     const recipe = await extractRecipe(payload, {
-      client: client(),
+      connection: connection(),
       units: "metric",
-      model: LIVE_MODEL,
     });
     const tags = normalizeTags(recipe.tags, recipe.hands_on);
     expect(tags.length).toBeGreaterThanOrEqual(3);

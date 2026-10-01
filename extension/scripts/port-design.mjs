@@ -184,6 +184,12 @@ const prepView = `
   padding: 0;
 }
 
+/* .field is display:grid, which outranks the user agent's [hidden] rule. The
+   Custom fields hide with the attribute, so restate it. */
+#prep-view [hidden] {
+  display: none;
+}
+
 #prep-view .field .label,
 #prep-view .field legend.label {
   font-family: var(--font-display);
@@ -195,6 +201,8 @@ const prepView = `
 }
 
 #prep-view .field input[type="password"],
+#prep-view .field input[type="text"],
+#prep-view .field input[type="url"],
 #prep-view .field select {
   font-family: var(--font-mono);
   font-size: 13px;

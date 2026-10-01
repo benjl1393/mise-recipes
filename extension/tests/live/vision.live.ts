@@ -1,8 +1,10 @@
 // @vitest-environment happy-dom
 import { describe, it, expect, beforeAll } from "vitest";
-import { createClient, extractRecipe } from "../../src/lib/anthropic";
+import { extractRecipe } from "../../src/lib/extract";
+import { resolveConnection } from "../../src/lib/providers/connection";
 import type { ExtractionPayload } from "../../src/lib/page-source";
 import { liveKey, LIVE_MODEL } from "./key";
+import { chromium, renderFrame } from "./render-frame";
 
 /**
  * The vision path — the last genuinely unverified surface.
@@ -20,30 +22,21 @@ import { liveKey, LIVE_MODEL } from "./key";
 
 const key = liveKey();
 
-/** Playwright is an optional dev dep; skip cleanly rather than fail. */
-let chromium: typeof import("playwright").chromium | null = null;
-try {
-  ({ chromium } = await import("playwright"));
-} catch {
-  chromium = null;
-}
+const connection = () => ({
+  ...resolveConnection({
+    apiKey: key!,
+    provider: "anthropic",
+    tier: "fast",
+    baseURL: "",
+    customModel: "",
+  }),
+  model: LIVE_MODEL,
+});
 
 const live = key && chromium ? describe : describe.skip;
 
 if (key && !chromium) {
   console.warn("\n[live] vision skipped — playwright not installed.\n");
-}
-
-/** Render text as a JPEG frame, base64 encoded exactly as captureFrames emits. */
-async function renderFrame(body: string): Promise<string> {
-  const browser = await chromium!.launch({ channel: "chromium" });
-  const page = await browser.newPage({ viewport: { width: 720, height: 1280 } });
-  await page.setContent(`<html><body style="margin:0;background:#111;color:#fff;
-    font: 30px/1.45 -apple-system, system-ui, sans-serif; padding:56px;
-    letter-spacing:.2px; white-space:pre-wrap;">${body}</body></html>`);
-  const buffer = await page.screenshot({ type: "jpeg", quality: 82 });
-  await browser.close();
-  return buffer.toString("base64");
 }
 
 const captionPayload = (text: string, source: string): ExtractionPayload => ({
@@ -90,7 +83,7 @@ live("live extraction — vision", () => {
 
     const recipe = await extractRecipe(
       captionPayload("miso butter mushroom udon 🍜", "https://instagram.com/reel/TEST"),
-      { client: createClient(key!), units: "metric", model: LIVE_MODEL, frames },
+      { connection: connection(), units: "metric", frames },
     );
 
     // Proof the model actually read the frames: none of this is in the caption.
@@ -114,9 +107,8 @@ live("live extraction — vision", () => {
     const recipe = await extractRecipe(
       captionPayload("miso butter mushroom udon", "https://instagram.com/reel/TEST"),
       {
-        client: createClient(key!),
+        connection: connection(),
         units: "metric",
-        model: LIVE_MODEL,
         frames: [blank, ...frames],
       },
     );

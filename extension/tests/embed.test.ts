@@ -39,7 +39,7 @@ describe("the portfolio embed", () => {
     embed.replay();
     expect(card.textContent).toContain("reading the page");
     vi.advanceTimersByTime(REPLAY_MS.reading);
-    expect(card.textContent).toContain("Claude is reading");
+    expect(card.textContent).toContain("the model is reading");
     vi.advanceTimersByTime(REPLAY_MS.extracting);
     expect(card.classList.contains("skel")).toBe(false);
     expect(card.querySelector("h2.title")!.textContent).toBe(FIXTURE_RECIPE.title);
