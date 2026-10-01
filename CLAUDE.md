@@ -800,10 +800,14 @@ live test is what notices.
   `presets.ts`, so `lib/providers` is in the embed's import graph via
   `fire.ts`; tree-shaking keeps the prefixes out, and `build-embed.test.ts`
   fails loudly if that ever changes.
-- **Verified live: none yet.** No live run has happened on this branch — every
-  preset, Anthropic included, is proven against its documented request and
-  error shapes only. Run `npm run test:live` with a key per vendor and record
-  here which ones passed.
+- **Verified live: Anthropic only (2026-10-01).** Through the new code path on
+  `claude-haiku-4-5`: text extraction, the `found: false` decline, and frames
+  (`providers.live.ts`), plus `extract.live.ts`'s article test. The same run's
+  other six calls came back 401 on a key that had just succeeded — a freshly
+  made key not yet valid everywhere, not code. OpenAI, Gemini, Grok, Mistral,
+  OpenRouter and Custom are **unverified**: proven only against their
+  documented request and error shapes until `npm run test:live` passes with
+  their keys. Record each here when it does.
 - **Prep in Custom scrolls** by about 70px inside Chrome's 600px popup cap; the
   pane was already a scroll container.
 
