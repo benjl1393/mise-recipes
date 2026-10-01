@@ -25,21 +25,24 @@ export const NAV =
   `<button id="prep" class="secondary-btn" type="button">${ICON_PREP}<span>Prep</span></button>` +
   `<button id="archive" class="secondary-btn" type="button">${ICON_ARCHIVE}<span>Archive</span></button>`;
 
-// The label is bare FIRE rather than "FIRE · save .md" because the success row
-// carries four buttons and the longer label wraps to two lines at that width
-// (measured: the fire button is flex:1, so it gets 152px once Copy joins Prep
-// and Archive). Bare FIRE also matches RETRY's idiom in the error row, and the
-// format is no longer a variable — every fire writes .md, and the receipt names
-// the file.
+// The label is bare FIRE rather than "FIRE · save .md", settled at the
+// 2026-10-01 desk crit: the fire button is flex:1 and at its minimum, 118px,
+// once Copy, Prep and Archive take their share, and the longer labels wrap to
+// three and four lines in it (measured) — uppercased to ".MD" on top. The
+// format is taught elsewhere: the title below, and the FIRED stamp, which names
+// the .md file on the first press. Bare FIRE also matches RETRY's idiom.
+//
+// The chip marks the one keystroke Mise teaches; aria-keyshortcuts says it to
+// a screen reader, which cannot see a chip.
 export const FIRE_BTN = (disabled: boolean): string =>
-  `<button id="fire" class="fire-btn" type="button"${disabled ? " disabled" : ""}>` +
+  `<button id="fire" class="fire-btn" type="button" title="Save as .md (Enter)" aria-keyshortcuts="Enter"${disabled ? " disabled" : ""}>` +
   `${ICON_FIRE}<span>FIRE</span><span class="kbd">↵</span></button>`;
 
 export const ACTIONS = {
   // Idle, skeleton and Off Menu: nothing to fire or copy yet.
   extract: FIRE_BTN(true) + NAV,
   prep:
-    `<button id="save" class="fire-btn" type="button">` +
+    `<button id="save" class="fire-btn" type="button" aria-keyshortcuts="Enter">` +
     `${ICON_SAVE}<span>SAVE</span><span class="kbd">↵</span></button>` +
     `<button id="back" class="secondary-btn" type="button">${ICON_BACK}<span>Back</span></button>`,
   // The Archive is the closest thing this window has to a home, so Prep hangs
@@ -52,13 +55,12 @@ export const ACTIONS = {
 /** A landed recipe: fire it, or copy the same .md to the clipboard. */
 export const SUCCESS_ACTIONS =
   FIRE_BTN(false) +
-  // NOTE: Copy has no .kbd chip yet, though ⌘C works — see the keydown
-  // handler. Measured: the chip pushes this four-button row 43px past
-  // the 400px content box, and it is still 12.6px over even with the
-  // shortcut cut to a bare "C", secondary padding at 8px and the row
-  // gap at 6px. Fitting it means tightening every row in the product
-  // to serve one chip, so the tradeoff is Ben's call, not a silent one.
-  `<button id="copy" class="secondary-btn" type="button">${ICON_COPY}<span>Copy</span></button>` +
+  // Copy carries no .kbd chip, by decision (desk crit 2026-10-01): a chip marks
+  // the gesture the product teaches, and ⌘C is the OS's own copy, which every
+  // user already knows. A chip also overflowed this row by 29.9px (23.1px as a
+  // bare "C"). The shortcut is still named — in the title, and to assistive
+  // tech — and the keydown handler binds both modifiers.
+  `<button id="copy" class="secondary-btn" type="button" title="Copy the .md (⌘C)" aria-keyshortcuts="Meta+C Control+C">${ICON_COPY}<span>Copy</span></button>` +
   NAV;
 
 /**
@@ -82,7 +84,7 @@ export const FIRED_ACTIONS = `<span class="countdown">Saved</span>` + NAV;
  */
 export const errorActions = (canRetry: boolean): string =>
   (canRetry
-    ? `<button id="retry" class="retry-btn" type="button">` +
+    ? `<button id="retry" class="retry-btn" type="button" aria-keyshortcuts="Enter">` +
       `${ICON_RETRY}<span>RETRY</span><span class="kbd">↵</span></button>`
     : "") + NAV;
 

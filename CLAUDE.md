@@ -106,7 +106,7 @@ Three systems defined; see canonical docs:
 - **Icons** (2026-06-09): two tiers. **Stamp glyphs = custom pixel art only** (broken plate, off-menu sheet, flame) — pixellation reads at large stamp size, NOT at small sizes. **All other functional chrome = [Tabler outline](https://tabler.io/icons) vector icons** (warning/alert, retry, copy, clipboard, photo, highlight, arrows, status, etc.) — clean technical strokes, referencing stove/oven control-panel iconography. (Switched from Phosphor → Tabler 2026-06-09.) Emojis are reserved for *content* (source-type badges like `🎬` video, `📝` article) — never functional chrome.
 
   **The action row wears them since 2026-08-30**, seven in total, pinned to
-  Tabler v3.46.0: `cake` (Fire), `settings` (Prep), `history` (Archive),
+  Tabler v3.46.0: `flame` (Fire), `settings` (Prep), `history` (Archive),
   `refresh` (Retry), `copy` (Copy), `arrow-left` (Back), `device-floppy`
   (Save). Fire, Prep and Archive were Ben's call; the other four followed
   because a row with icons on some buttons and not others reads as
@@ -122,13 +122,21 @@ Three systems defined; see canonical docs:
   hidden `#icon-inventory` block so the set still has exactly one source.
   `@tabler/icons` is *not* a dependency — it was installed once to copy from.
 
-  **Fire wears `cake`, not `flame`, since 2026-08-31** — Ben's call. Worth
-  knowing the tradeoff, because it is not visible in the markup: at the 15px
-  the button actually renders, the cake's candle collapses to a single dot and
-  its frosting wave flattens, so it reads closer to a generic rounded container
-  than an unmistakable cake. `flame` was the more legible glyph at that size.
-  **Owed a desk crit.** The pixel flame now marks the FIRED stamp instead, so
-  the two are no longer the same glyph.
+  **Fire wears `flame` again since the 2026-10-01 desk crit** (it wore `cake`
+  from 2026-08-31). Decided on real pixels, not a vector zoom: at 1x the
+  cake's candle merged into its frosting and read as a box; the flame reads at
+  both densities and names the verb. Rejected: `chef-hat` (the app, not the
+  action), `bell-ringing` (the pass bell reads as notifications). The old
+  objection — the FIRED stamp already wears the pixel flame — became the
+  argument for it: the outline flame on the button becomes the pixel flame on
+  the stamp, cause then effect in one symbol at two levels of finish.
+
+  **A keystroke chip marks the gesture the product teaches, not every
+  shortcut** (same crit). Enter fires, so Fire, RETRY and SAVE carry `↵`.
+  Copy's ⌘C is the OS's own copy and carries no chip; it is named in the
+  button's `title` and in `aria-keyshortcuts` instead (every keystroke-bound
+  button has one, since a screen reader cannot see a chip). Adding a chip is a
+  design change, and `tests/actions.test.ts` says so.
 
   **Stroke weight is 1.5, not Tabler's default 2** (2026-08-31, Ben's call),
   applied to all 26 icon instances in the specimen.
@@ -184,10 +192,12 @@ See the global `design-anti-ai-defaults.md` rule and `design-studio-principles.m
 6. ~~Final polish~~ — applied 2026-08-20 from the step 5 findings: the API-key link
    (P0), the specimen/product drift (P1), and `color-scheme` (P3).
 
-   **Three findings are deliberately still open, because they are design-authority
-   calls rather than polish** — the 10.5px secondary navigation, the flame focus
-   ring colliding with Principle 6 on error screens, and unvirtualized 500-row
-   Archive rendering. All three are argued in the crit doc. **Owed a desk crit.**
+   **Two findings are deliberately still open, because they are design-authority
+   calls rather than polish** — the flame focus ring colliding with Principle 6
+   on error screens, and unvirtualized 500-row Archive rendering. Both are argued
+   in the crit doc. **Owed a desk crit.** The third, the 10.5px secondary
+   navigation, was settled at the 2026-10-01 crit: 11.5px at 0.06em tracking,
+   size bought with letter-spacing so every row keeps its width.
 
    The error-row crit (2026-08-18) is done and folded in — see "One window,
    three panes".
@@ -247,11 +257,11 @@ that are genuinely Ben's call were left open rather than decided in his absence.
    expensive: ingredient/method grouping via `###`, which changes the `Recipe`
    type, the prompt, the serializer *and* the 400px card.
 2. **Owed a desk crit**, accumulated and each argued where it sits: the Off Menu
-   stamp size; `cake` legibility at 15px (the candle collapses to a dot — `flame`
-   read better, and this was Ben's call made with alternatives on the table); no
-   in-product route to re-extract a fired page inside the 1h TTL; the Copy
-   keystroke chip, which does not fit the four-button row; plus the three older
-   ones from the 2026-08-20 crit.
+   stamp size; no in-product route to re-extract a fired page inside the 1h TTL;
+   plus the two still open from the 2026-08-20 crit. **Settled 2026-10-01**, as
+   the four items visible in the portfolio's embedded popup: Fire's icon
+   (`flame`), its label (bare `FIRE` plus a title), the secondary type (11.5px /
+   0.06em) and the Copy chip (none, by rule) — see the Icons section.
 
 **The render harness is `npm run render:states` now** — promoted out of
 `.scratch/` and committed on 2026-09-02, because it is what found the 15.8px row
@@ -422,11 +432,12 @@ its own string literals instead of reusing `NAV`; it now calls
   the error row on the same day: that offered unstructured scrapings, this
   offers the artifact. It uses the *peeked* ticket, so copying never burns a
   number.
-- **The primary button is bare `FIRE`, not `FIRE · save .md`.** At four buttons
-  the fire button is flex-sized to 152px and the longer label wraps to two
-  lines (measured). Bare FIRE matches RETRY's idiom, and the format stopped
-  being a variable once PDF was parked. The cost is a real loss of
-  plain-language affordance for a first-time user — **owed a desk crit.**
+- **The primary button is bare `FIRE`, not `FIRE · save .md`** — settled at the
+  2026-10-01 desk crit. Fire is flex:1 and at its 118px minimum in the
+  four-button row; `FIRE · .md` wraps to three lines and `FIRE · save .md` to
+  four (measured), and the uppercase transform renders `.md` as `.MD`. The
+  format is taught where it fits: the button's title ("Save as .md (Enter)"),
+  and the FIRED stamp, which names the file on the first press.
 
 ### Deferred — PDF export and the format dropdown
 
@@ -579,17 +590,16 @@ last.right - (row.getBoundingClientRect().right - parseFloat(cs.paddingRight))
 Run that against every row after any change to a button's label, icon, padding
 or chip.
 
-### Deferred — the Copy chip does not fit
+### Decided — Copy carries no chip (2026-10-01)
 
-**⌘C is wired** (`popup.ts` keydown, guarded on an empty selection so a real
-text selection still copies normally), but **Copy carries no `.kbd` chip yet**,
-which is half of what Ben asked for. Measured: the chip pushes the four-button
-success row 43px past the content box. Cutting the shortcut to a bare `C`
-(consistent with the `P` the error card already advertises), taking secondary
-padding to 8px and the row gap to 6px still leaves it **28.6px over**. Fitting
-it means tightening every row in the product to serve one chip, or widening the
-popup past 400px — both are Ben's call, so the chip waits rather than being
-forced in. **Owed a desk crit.**
+**⌘C is wired** (`popup.ts` keydown, either modifier, guarded on an empty
+selection so a real text selection still copies normally). Copy has **no
+`.kbd` chip, by rule rather than by squeeze**: a chip marks the gesture the
+product teaches, and ⌘C is the OS's own. Measured at the crit with the new
+11.5px type: `⌘C` overflows the success row by 29.9px, a bare `C` by 23.1px.
+The shortcut is named in Copy's `title` ("Copy the .md (⌘C)") and in
+`aria-keyshortcuts="Meta+C Control+C"`. Rejected: no chips anywhere (deletes
+the cue for the central gesture) and widening the popup past 400px.
 
 **Model:** `claude-haiku-4-5` by default, switchable to `claude-opus-5` in Prep.
 Haiku 4.5 supports structured outputs and vision but **not** `output_config.effort`

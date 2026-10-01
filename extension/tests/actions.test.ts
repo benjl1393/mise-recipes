@@ -87,6 +87,31 @@ describe("action rows", () => {
     }
   });
 
+  it("names the shortcut on every keystroke-bound button, for screen readers", () => {
+    // The chip is visual only; aria-keyshortcuts is what assistive tech reads.
+    for (const row of [ACTIONS.extract, ACTIONS.prep, SUCCESS_ACTIONS, errorActions(true)]) {
+      const primary = parse(row).querySelector("#fire, #retry, #save")!;
+      expect(primary.getAttribute("aria-keyshortcuts"), `#${primary.id}`).toBe("Enter");
+    }
+    // The keydown handler accepts either modifier, so both are named.
+    expect(parse(SUCCESS_ACTIONS).querySelector("#copy")!.getAttribute("aria-keyshortcuts")).toBe("Meta+C Control+C");
+  });
+
+  it("says in plain words what Fire and Copy produce", () => {
+    // Bare FIRE stays (desk crit 2026-10-01): the longer label wrapped to three
+    // lines in the 118px the row leaves it. The tooltip carries the format.
+    const doc = parse(SUCCESS_ACTIONS);
+    expect(doc.querySelector("#fire")!.getAttribute("title")).toBe("Save as .md (Enter)");
+    expect(doc.querySelector("#copy")!.getAttribute("title")).toBe("Copy the .md (⌘C)");
+  });
+
+  it("boxes only the gesture Mise teaches, not every shortcut", () => {
+    // Desk crit 2026-10-01: a chip marks the one keystroke the product teaches
+    // (Enter fires). ⌘C is the OS's own copy, and a chip for it overflowed the
+    // row by 29.9px. Adding one is a design change, not a fix — revisit here.
+    expect(parse(SUCCESS_ACTIONS).querySelector("#copy .kbd")).toBeNull();
+  });
+
   it("gives the fired row navigation instead of a dead end", () => {
     const doc = parse(FIRED_ACTIONS);
     expect(doc.querySelector(".countdown")!.textContent).toBe("Saved");
