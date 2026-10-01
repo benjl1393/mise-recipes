@@ -25,7 +25,7 @@ if (!["mise", ".embed"].includes(basename(out))) {
 }
 
 // Same faces build.mjs ships.
-const FONTS = ["DepartureMono-Regular.woff2", "CommitMono-400-Regular.otf", "CommitMono-400-Italic.otf", "OFL.txt"];
+const FONTS = ["DepartureMono-Regular.woff2", "CommitMono-400-Regular.otf", "CommitMono-400-Italic.otf", "DepartureMono-LICENSE.txt", "CommitMono-LICENSE.txt"];
 
 await rm(out, { recursive: true, force: true });
 await mkdir(`${out}/popup`, { recursive: true });

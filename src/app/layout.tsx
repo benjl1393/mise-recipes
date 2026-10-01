@@ -4,8 +4,8 @@ import { GeistPixelSquare } from "geist/font/pixel";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Order Up",
-  description: "Extract recipes from any source. Download as markdown.",
+  title: "Mise",
+  description: "Mise is a browser extension now: github.com/benjl1393/mise-recipes",
 };
 
 export default function RootLayout({

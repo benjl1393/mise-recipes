@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "vitest run",
+    "test": "npm run test:ext",
     "test:watch": "vitest",
     "build:ext": "node extension/build.mjs",
     "build:ext:dev": "node extension/build.mjs --dev",
