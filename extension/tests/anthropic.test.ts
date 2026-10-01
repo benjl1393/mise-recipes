@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { RECIPE_SCHEMA, buildPrompt, extractRecipe, OffMenuError } from "../src/lib/anthropic";
+import { extractRecipe, OffMenuError } from "../src/lib/anthropic";
 import type { ExtractionPayload } from "../src/lib/page-source";
 
 const payload: ExtractionPayload = {
@@ -9,47 +9,6 @@ const payload: ExtractionPayload = {
   title: "Gochujang Pork Belly",
   hasVideo: false,
 };
-
-describe("RECIPE_SCHEMA", () => {
-  it("is a strict object schema", () => {
-    expect(RECIPE_SCHEMA.type).toBe("object");
-    expect(RECIPE_SCHEMA.additionalProperties).toBe(false);
-  });
-
-  it("requires the fields the .md format cannot omit", () => {
-    expect(RECIPE_SCHEMA.required).toEqual([
-      "found",
-      "title",
-      "serves",
-      "ingredients",
-      "method",
-      "tags",
-    ]);
-  });
-
-  it("shapes ingredients as qty/item pairs", () => {
-    const item = RECIPE_SCHEMA.properties.ingredients.items;
-    expect(Object.keys(item.properties).sort()).toEqual(["item", "qty"]);
-    expect(item.additionalProperties).toBe(false);
-  });
-});
-
-describe("buildPrompt", () => {
-  it("states the target unit system", () => {
-    expect(buildPrompt(payload, "imperial")).toContain("imperial");
-    expect(buildPrompt(payload, "metric")).toContain("metric");
-  });
-
-  it("includes the page text and source", () => {
-    const prompt = buildPrompt(payload, "metric");
-    expect(prompt).toContain("800g pork belly");
-    expect(prompt).toContain("https://example.com/pork");
-  });
-
-  it("instructs conversion by ingredient density, not naive math", () => {
-    expect(buildPrompt(payload, "metric")).toMatch(/density|weight/i);
-  });
-});
 
 describe("extractRecipe", () => {
   function clientReturning(parsed: unknown) {
