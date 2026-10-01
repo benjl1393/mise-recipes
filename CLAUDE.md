@@ -276,11 +276,13 @@ the Anthropic API directly with the user's key from `chrome.storage.local`.
 ```
 npm run build:ext      # bundle to extension/dist (load unpacked from there)
 npm run watch:ext      # rebuild on change
-npm run test:ext       # vitest, 145 tests
+npm run test:ext       # vitest, 234 tests
 npm run port:design    # re-port CSS + glyphs from type-specimens/
 npm run smoke:ext      # load in real Chromium, assert all surfaces boot
 npm run audit:ext      # diff popup.css classes against what the renderer emits
 npm run render:states  # render every popup state to static HTML, to look at
+npm run build:embed    # the popup as a static folder for the portfolio (--out <dir>/mise)
+npm run render:portfolio # every Mise image on the portfolio (--out <dir>)
 npm run test:live      # REAL billed calls to api.anthropic.com — opt-in, needs a key
 ```
 
@@ -308,6 +310,35 @@ to `.skel .bar` and nothing added `skel`, and the whole error callout +
 fallback list was missing. Remaining `MISSING` entries are the unbuilt picker
 / filmstrip states plus dead specimen scaffolding (`.popup-frame`,
 `.chrome-caption`) — treat a *new* entry as a regression.
+
+### The portfolio embed — the real popup, on benjaminli.xyz
+
+**Added 2026-10-01** for the long-form `/work/mise` page. `src/embed/` drives
+the real renderer, action rows and serializer with a fixture (specimen 03A, the
+Gochujang card): it replays the real skeleton phases, Fire downloads exactly
+the `.md` the extension writes, and where the extension would close the card
+resets with the next ticket. Prep and Archive are `aria-disabled` with an
+"In the extension" title — not `disabled`, which would swallow the title.
+
+- **`npm run build:embed -- --out <portfolio>/public/embeds/mise`** writes it
+  as a static folder plus `provenance.json` (commit, dirty, builtAt). The
+  portfolio copy is generated, never hand-edited: change the popup here,
+  rebuild, recopy.
+- **It is published on a public site, so it can never carry a key**: the
+  build never reads `api_key.txt` and defines `__MISE_DEV_KEY__` as `""`, and
+  a test asserts the bundle has no `sk-ant-`.
+- **It deletes its output folder first**, so it refuses any `--out` whose last
+  segment is not `mise` or `.embed`. The test proves the guard with a sentinel
+  file, not merely that the script throws.
+- **`dirty` ignores untracked files** (`--untracked-files=no`): they are not
+  build inputs, and this checkout carries some that are not ours.
+- **`npm run render:portfolio -- --out <dir>`** regenerates every Mise image on
+  the portfolio — cover, card stills, the April/now before pair, the stamp
+  ladder, the pipeline diagram — serving its own pages, so it needs no `dist/`.
+
+The page talks to the embed with two same-origin messages: `mise:visible`
+starts the first replay once the iframe is loaded and half on screen, and
+`mise:replay` restarts it.
 
 ### Looking at the popup states
 
