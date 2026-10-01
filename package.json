@@ -18,6 +18,7 @@
     "smoke:ext": "node extension/scripts/smoke.mjs",
     "audit:ext": "node extension/scripts/audit-port.mjs",
     "render:states": "node extension/scripts/render-states.mjs",
+    "build:embed": "node extension/scripts/build-embed.mjs",
     "test:live": "vitest run --root extension --config vitest.live.config.ts"
   },
   "dependencies": {
