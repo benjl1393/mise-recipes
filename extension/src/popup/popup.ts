@@ -1,4 +1,5 @@
 import { createClient, extractRecipe, OffMenuError } from "../lib/anthropic";
+import { resolveConnection } from "../lib/providers/connection";
 import { readCache, writeCache } from "../lib/cache";
 import { captureFrames } from "../lib/frames";
 import { fire, filenameFor } from "../lib/fire";
@@ -308,7 +309,7 @@ async function run() {
     const recipe = await extractRecipe(payload, {
       client: createClient(settings.apiKey),
       units: settings.units,
-      model: settings.model,
+      model: resolveConnection(settings).model,
       frames,
     });
 

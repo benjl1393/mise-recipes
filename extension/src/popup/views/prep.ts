@@ -1,5 +1,6 @@
 import { getSettings, setSettings } from "../../lib/storage";
 import type { Units } from "../../lib/types";
+import type { Tier } from "../../lib/providers/presets";
 
 /**
  * Prep, as a pane inside the popup rather than an options page.
@@ -40,8 +41,8 @@ export function mountPrep(root: HTMLElement): void {
       <label class="field">
         <span class="label">Model</span>
         <select id="model">
-          <option value="claude-haiku-4-5">Haiku 4.5 — fast, cheapest per extraction</option>
-          <option value="claude-opus-5">Opus 5 — slower, best on messy sources</option>
+          <option value="fast">Fast — cheapest per recipe</option>
+          <option value="thorough">Thorough — slower, best on messy sources</option>
         </select>
       </label>
 
@@ -95,7 +96,7 @@ export function mountPrep(root: HTMLElement): void {
   void (async () => {
     const settings = await getSettings();
     apiKey.value = settings.apiKey;
-    model.value = settings.model;
+    model.value = settings.tier;
     captureFrames.checked = settings.captureFrames;
     watchPages.checked = settings.pulseOnDetect;
     const radio = form.querySelector<HTMLInputElement>(
@@ -116,7 +117,7 @@ export function mountPrep(root: HTMLElement): void {
     await setSettings({
       apiKey: apiKey.value.trim(),
       units,
-      model: model.value,
+      tier: model.value as Tier,
       captureFrames: captureFrames.checked,
     });
     status.textContent = "Prepped.";
