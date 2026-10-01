@@ -430,7 +430,7 @@ const icons = new Map();
 for (const m of html.matchAll(/<svg class="btn-icon" data-icon="([a-z0-9-]+)"[\s\S]*?<\/svg>/g)) {
   icons.set(m[1], m[0]);
 }
-const WANTED = ["cake", "settings", "history", "refresh", "copy", "arrow-left", "device-floppy"];
+const WANTED = ["flame", "settings", "history", "refresh", "copy", "arrow-left", "device-floppy", "alert-triangle"];
 for (const want of WANTED) {
   if (!icons.has(want)) throw new Error(`specimen is missing the ${want} button icon`);
 }
@@ -471,11 +471,16 @@ export const GLYPH_FIRED = \`${esc(FIRED_FLAME)}\`;
  */
 
 /**
- * Fire — the primary action. Tabler \`cake\`, Ben's call 2026-08-31, chosen
- * over the \`flame\` this button used to wear. The pixel flame still marks
- * the FIRED stamp, so the two are no longer the same glyph.
+ * Fire — the primary action. Tabler \`flame\`, back since the 2026-10-01 desk
+ * crit (it wore \`cake\` from 2026-08-31). At 1x the cake's candle merged into
+ * its frosting; the flame reads at both densities and names the verb. The
+ * outline flame on the button becomes the pixel flame on the FIRED stamp:
+ * cause, then effect, in one symbol at two levels of finish.
  */
-export const ICON_FIRE = \`${esc(icons.get("cake"))}\`;
+export const ICON_FIRE = \`${esc(icons.get("flame"))}\`;
+
+/** The error callout's warning, before the shouted label. Was a ▲ glyph until 2026-10-01. */
+export const ICON_ALERT = \`${esc(icons.get("alert-triangle"))}\`;
 
 /** Prep — settings. */
 export const ICON_PREP = \`${esc(icons.get("settings"))}\`;

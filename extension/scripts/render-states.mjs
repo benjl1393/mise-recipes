@@ -131,8 +131,11 @@ const page = `<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><title>Mise — popup states</title>
 <link rel="stylesheet" href="../dist/popup/popup.css">
 <style>
+  /* No font-family here: the popup's own body rule sets Commit Mono, and text
+     with no rule of its own (ol.method li) inherits it. A system-ui override
+     here once set the method steps in a sans the product never shows. */
   body { margin: 0; background: #6e6e6e; padding: 28px; display: flex; gap: 28px;
-         align-items: flex-start; flex-wrap: wrap; font-family: system-ui; }
+         align-items: flex-start; flex-wrap: wrap; }
   .win { width: 400px; display: flex; flex-direction: column;
          box-shadow: 0 18px 50px -18px rgba(0,0,0,.6); }
   .win .popup { width: 100%; border: 0; box-shadow: none; }

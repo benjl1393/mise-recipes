@@ -59,3 +59,6 @@ api_key.txt
 *.key
 .env
 .env.*
+
+# build:embed default output — the portfolio copy is the one that is committed
+extension/.embed/

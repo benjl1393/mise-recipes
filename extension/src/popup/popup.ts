@@ -6,7 +6,7 @@ import { serializeRecipe } from "../lib/markdown";
 import { getSettings, nextTicket, peekTicket } from "../lib/storage";
 import type { ExtractionPayload } from "../lib/page-source";
 import type { Frontmatter, Recipe, ViaMethod } from "../lib/types";
-import { ACTIONS, errorActions, FIRED_ACTIONS, NAV, SUCCESS_ACTIONS } from "./actions";
+import { ACTIONS, closingActions, errorActions, errorFallbacks, FIRED_ACTIONS, relabel, SUCCESS_ACTIONS } from "./actions";
 import {
   formatElapsed,
   renderCard,
@@ -14,7 +14,6 @@ import {
   renderFired,
   renderSkeleton,
   renderStamp,
-  type Fallback,
   type Phase,
 } from "./render";
 import { classify, NoKeyError } from "./errors";
@@ -137,13 +136,7 @@ function showError(error: unknown) {
   const failure = classify(error);
   settle();
 
-  const fallbacks: Fallback[] = [];
-  if (failure.canRetry) {
-    fallbacks.push({ glyph: "↻", text: "Retry with the same model", key: "↵" });
-  }
-  fallbacks.push({ glyph: "→", text: "Open Prep to change key or model", key: "P" });
-
-  card.innerHTML = renderError(failure, { url: activeTabUrl, fallbacks });
+  card.innerHTML = renderError(failure, { url: activeTabUrl, fallbacks: errorFallbacks(failure.canRetry) });
 
   setExtractActions(errorActions(failure.canRetry));
 
@@ -164,12 +157,12 @@ async function copyMarkdown() {
   const btn = byId("copy");
   try {
     await navigator.clipboard.writeText(serializeRecipe(current.recipe, current.fm));
-    if (btn) btn.textContent = "Copied";
+    if (btn) relabel(btn, "Copied");
   } catch {
     // Clipboard can be refused; say so rather than silently doing nothing.
-    if (btn) btn.textContent = "Can't copy";
+    if (btn) relabel(btn, "Can't copy");
   }
-  if (btn) window.setTimeout(() => { btn.textContent = "Copy"; }, 1600);
+  if (btn) window.setTimeout(() => relabel(btn, "Copy"), 1600);
 }
 
 interface SkeletonOpts {
@@ -361,9 +354,7 @@ function cancelCountdown() {
  */
 function startCountdown() {
   let remaining = Math.round(SPIKE_MS / 1000);
-  setExtractActions(
-    `<span class="countdown">Closing in <strong>${remaining}s</strong></span>` + NAV,
-  );
+  setExtractActions(closingActions(remaining));
 
   countdownTimer = setInterval(() => {
     remaining -= 1;
