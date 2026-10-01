@@ -5,7 +5,11 @@ import {
   APIConnectionTimeoutError,
   APIError,
 } from "@anthropic-ai/sdk";
-import { callAnthropic, type AnthropicLike } from "../src/lib/providers/anthropic";
+import {
+  callAnthropic,
+  createAnthropicClient,
+  type AnthropicLike,
+} from "../src/lib/providers/anthropic";
 import { resolveConnection } from "../src/lib/providers/connection";
 import { ProviderError } from "../src/lib/providers/errors";
 
@@ -34,6 +38,14 @@ async function kindOf(p: Promise<unknown>) {
 
 const apiError = (status: number, type: string, message: string) =>
   new APIError(status, { type: "error", error: { type, message } }, message, new Headers());
+
+describe("createAnthropicClient", () => {
+  // The TIMED OUT card says "didn't answer within 2 minutes"; the SDK's own
+  // default is 10, so the client has to be told.
+  it("gives up after 2 minutes, matching the error copy", () => {
+    expect((createAnthropicClient("k") as unknown as { timeout: number }).timeout).toBe(120_000);
+  });
+});
 
 describe("callAnthropic", () => {
   it("returns parsed_output and sends images before the text", async () => {

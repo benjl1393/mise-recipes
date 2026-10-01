@@ -146,6 +146,17 @@ describe("callOpenAICompat", () => {
     expect(await kindOf(callOpenAICompat(conn(), req(), fetchImpl))).toBe("malformed");
   });
 
+  // AbortSignal.timeout also aborts body consumption, and a socket can drop
+  // after the headers arrive: both reject response.text(), not fetch().
+  it("maps a failure while reading the body like a failure to connect", async () => {
+    const bodyFails = (error: unknown) =>
+      vi.fn().mockResolvedValue({ ok: true, status: 200, text: () => Promise.reject(error) });
+    const timedOut = bodyFails(new DOMException("signal timed out", "TimeoutError"));
+    expect(await kindOf(callOpenAICompat(custom(), req(), timedOut))).toBe("timeout");
+    const dropped = bodyFails(new TypeError("network error"));
+    expect(await kindOf(callOpenAICompat(custom(), req(), dropped))).toBe("network");
+  });
+
   it("reads a timeout as timeout, and any other fetch rejection as network", async () => {
     const timeout = vi.fn().mockRejectedValue(new DOMException("signal timed out", "TimeoutError"));
     expect(await kindOf(callOpenAICompat(custom(), req(), timeout))).toBe("timeout");

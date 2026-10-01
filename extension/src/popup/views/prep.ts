@@ -136,8 +136,10 @@ export function mountPrep(root: HTMLElement): void {
     setTimeout(() => (status.textContent = ""), hold);
   };
 
-  /** Set when a pasted key matched no prefix; cleared once a provider is picked. */
+  /** Set when a pasted key matched no prefix and the user has not picked yet. */
   let undetected = false;
+  /** Once the user has chosen from the menu, the menu is the answer; stop asking. */
+  let picked = false;
 
   /*
    * Everything derived from the form lives here. Setting select.value from
@@ -158,10 +160,13 @@ export function mountPrep(root: HTMLElement): void {
     const detected = detectProvider(key);
     // Never off Custom: several OpenAI-compatible vendors issue sk- keys.
     if (detected && provider.value !== "custom") provider.value = detected;
-    undetected = key !== "" && detected === null;
+    // Mistral keys carry no prefix, so an unrecognised key on Mistral is the
+    // expected case, not a question.
+    undetected = key !== "" && detected === null && !picked && provider.value !== "mistral";
     sync();
   });
   provider.addEventListener("change", () => {
+    picked = true;
     undetected = false;
     sync();
   });

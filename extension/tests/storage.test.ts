@@ -91,6 +91,17 @@ describe("settings migration", () => {
   });
 });
 
+describe("settings sanitising", () => {
+  // A preset removed in a later version, or a hand-edited store, must not
+  // reach Prep's menu or the adapters as an id nothing recognises.
+  it("falls back to Anthropic and Fast for ids it does not know", async () => {
+    installChromeMock({ "mise:settings": { apiKey: "k", provider: "groq", tier: "turbo" } });
+    const s = await getSettings();
+    expect(s.provider).toBe("anthropic");
+    expect(s.tier).toBe("fast");
+  });
+});
+
 describe("dev key seed", () => {
   it("lets the provider follow the seeded key", async () => {
     vi.stubGlobal("__MISE_DEV_KEY__", "sk-proj-seeded");

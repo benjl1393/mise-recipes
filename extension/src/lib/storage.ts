@@ -1,5 +1,5 @@
 import type { Ticket, Units } from "./types";
-import { detectProvider, type ProviderId, type Tier } from "./providers/presets";
+import { detectProvider, PROVIDER_IDS, type ProviderId, type Tier } from "./providers/presets";
 
 const KEY_SETTINGS = "mise:settings";
 const KEY_COUNTER = "mise:counter";
@@ -72,6 +72,10 @@ export async function getSettings(): Promise<Settings> {
   const stored = await chrome.storage.local.get(KEY_SETTINGS);
   const raw = (stored[KEY_SETTINGS] as StoredSettings | undefined) ?? {};
   const settings: Settings = { ...DEFAULTS, ...migrate(raw) };
+  // A preset removed in a later version, or a hand-edited store, must not reach
+  // Prep's menu (which would show blank and save "") or the adapters.
+  if (!PROVIDER_IDS.includes(settings.provider)) settings.provider = DEFAULTS.provider;
+  if (settings.tier !== "fast" && settings.tier !== "thorough") settings.tier = DEFAULTS.tier;
   // Seed a dev key only when nothing is stored — never override a real one the
   // user typed, so a --dev build behaves normally once Prep has been saved.
   // The typeof guard matters: this is a build-time define, so the identifier

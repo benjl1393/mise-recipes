@@ -276,7 +276,7 @@ the chosen provider's API directly with the user's key from `chrome.storage.loca
 ```
 npm run build:ext      # bundle to extension/dist (load unpacked from there)
 npm run watch:ext      # rebuild on change
-npm run test:ext       # vitest, 348 tests
+npm run test:ext       # vitest, 354 tests
 npm run port:design    # re-port CSS + glyphs from type-specimens/
 npm run smoke:ext      # load in real Chromium, assert all surfaces boot
 npm run audit:ext      # diff popup.css classes against what the renderer emits

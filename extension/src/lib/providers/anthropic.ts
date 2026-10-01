@@ -19,6 +19,9 @@ export function createAnthropicClient(apiKey: string): AnthropicLike {
     // the caller opts in explicitly. BYOK means the key never leaves the device.
     dangerouslyAllowBrowser: true,
     defaultHeaders: { "anthropic-dangerous-direct-browser-access": "true" },
+    // The SDK's default is 10 minutes per attempt; the TIMED OUT card promises
+    // 2, the same limit the fetch path uses.
+    timeout: 120_000,
   }) as unknown as AnthropicLike;
 }
 

@@ -46,6 +46,7 @@ export async function callOpenAICompat(
   if (conn.apiKey) headers.Authorization = `Bearer ${conn.apiKey}`;
 
   let response: Response;
+  let text: string;
   try {
     response = await fetchImpl(endpointOf(conn), {
       method: "POST",
@@ -53,6 +54,9 @@ export async function callOpenAICompat(
       body: JSON.stringify(buildBody(conn, req)),
       signal: AbortSignal.timeout(TIMEOUT_MS),
     });
+    // Inside the same try: the timeout signal also aborts reading the body,
+    // and a socket can drop after the headers arrive.
+    text = await response.text();
   } catch (error) {
     const { name, message } = error as { name?: string; message?: string };
     throw new ProviderError(name === "TimeoutError" ? "timeout" : "network", ctx, {
@@ -60,7 +64,6 @@ export async function callOpenAICompat(
     });
   }
 
-  const text = await response.text();
   const body = parseJson(text);
 
   if (!response.ok) {

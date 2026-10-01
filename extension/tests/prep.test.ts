@@ -84,6 +84,20 @@ describe("Prep", () => {
     expect($("#key-hint").textContent).toContain("api.mistral.ai");
   });
 
+  it("does not nag a Mistral user who picked the provider before pasting", async () => {
+    await mount();
+    choose("mistral");
+    type("#apiKey", "a1B2c3D4e5F6g7H8i9J0k1L2m3N4o5P6");
+    expect($("#key-hint").textContent).not.toMatch(/Couldn't tell/);
+    expect($("#key-hint").textContent).toContain("api.mistral.ai");
+  });
+
+  it("shows a real provider when the stored one no longer exists", async () => {
+    await mount({ "mise:settings": { apiKey: "k", provider: "groq", tier: "turbo" } });
+    expect($<HTMLSelectElement>("#provider").value).toBe("anthropic");
+    expect($<HTMLSelectElement>("#tier").value).toBe("fast");
+  });
+
   it("shows Base URL and Model ID only on Custom, and hides the tier menu there", async () => {
     await mount();
     expect($("#baseURL-field").hidden).toBe(true);

@@ -126,7 +126,7 @@ export function renderCard(recipe: Recipe, fm: Frontmatter): string {
 export const PHASES = {
   reading: { label: "Opening · reading the page", progress: 8 },
   capturing: { label: "Capturing · sampling frames", progress: 42 },
-  extracting: { label: "Extracting · Claude is reading", progress: 74 },
+  extracting: { label: "Extracting · the model is reading", progress: 74 },
 } as const;
 
 export type Phase = keyof typeof PHASES;
