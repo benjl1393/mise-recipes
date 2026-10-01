@@ -14,8 +14,7 @@
  */
 import * as esbuild from "esbuild";
 import { createServer } from "node:http";
-import { readFile } from "node:fs/promises";
-import { mkdir } from "node:fs/promises";
+import { mkdir, readFile } from "node:fs/promises";
 import { dirname, extname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { chromium } from "playwright";

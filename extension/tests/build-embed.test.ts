@@ -1,5 +1,5 @@
 import { execFileSync } from "node:child_process";
-import { existsSync, mkdtempSync, readFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -23,7 +23,22 @@ describe("build:embed", () => {
     expect(typeof p.dirty).toBe("boolean");
   }, 30_000);
 
-  it("refuses an --out it would be unsafe to delete", () => {
-    expect(() => build(tmpdir())).toThrow();
+  it("refuses an --out it would be unsafe to delete, and deletes nothing", () => {
+    // The guard protects an rm -rf, so assert the guard itself: its message,
+    // and that a sentinel inside the refused folder survives. Merely throwing
+    // proves nothing (the script would also have thrown before it existed).
+    const out = join(mkdtempSync(join(tmpdir(), "embed-")), "keep-me");
+    mkdirSync(out);
+    const sentinel = join(out, "sentinel.txt");
+    writeFileSync(sentinel, "do not delete");
+
+    let stderr = "";
+    try {
+      build(out);
+    } catch (e) {
+      stderr = String((e as { stderr?: Buffer }).stderr ?? "");
+    }
+    expect(stderr).toContain("refusing --out");
+    expect(existsSync(sentinel)).toBe(true);
   });
 });
