@@ -831,6 +831,12 @@ checking its licence first — a public history cannot be taken back.
   is a static page. `npm test` runs the extension suite.
 - **The README is the public home page**; the Release zip is a plain
   `npm run build:ext` (never `build:ext:dev`, which can seed a key).
+- **Remotes (since 2026-10-02).** In this checkout `origin` is
+  `benjl1393/mise-recipes`, and the private repo is the remote `archive`,
+  frozen at `b81981a`. Never push to `archive`: its history differs from
+  `origin`'s from 2026-04-23 on, so a push would either fail or reintroduce
+  the old history. Vercel is still connected to the archive, so it no longer
+  deploys; it keeps serving the pointer page from the archive's last push.
 
 ### Process — desk crits, not handoffs
 
