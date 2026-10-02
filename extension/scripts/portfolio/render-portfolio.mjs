@@ -138,10 +138,13 @@ const ctx = await browser.newContext({ viewport: { width: 1500, height: 1000 }, 
 // coordinates, which go wrong when the element sits below the fold. It also pins
 // the element to the origin: the snapshot's card lands at y=468.42, and an element
 // screenshot rounds a fractional box outward, so it came out 1202px tall, not 1200.
+// It also drops the popup's own frame (border and shadow) from both halves: the
+// "now" page renders the card without one, and the snapshot's 1px border, baked
+// into the PNG, broke against the portfolio's rounded corners.
 async function shoot(path, selector, file, crop = false) {
   const p = await ctx.newPage();
   await p.goto(base + path);
-  if (crop) await p.addStyleTag({ content: `${selector} { max-height: 600px !important; overflow: hidden !important; position: fixed !important; top: 0 !important; left: 0 !important; margin: 0 !important; }` });
+  if (crop) await p.addStyleTag({ content: `${selector} { max-height: 600px !important; overflow: hidden !important; position: fixed !important; top: 0 !important; left: 0 !important; margin: 0 !important; border: 0 !important; box-shadow: none !important; }` });
   await p.evaluate(() => document.fonts.ready);
   const bad = await p.evaluate(() => [...document.fonts].filter((f) => f.status === "error").map((f) => f.family));
   if (bad.length) throw new Error(`${path}: font failed: ${bad.join(", ")}`);
