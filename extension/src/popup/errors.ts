@@ -105,6 +105,18 @@ function fromProvider(e: ProviderError): Classified {
           canRetry: false,
         };
       }
+      // A proxy or a wrong URL often answers with an HTML error page. Markup
+      // in the callout tells a cook nothing; on Custom it usually means the URL.
+      if (/^\s*</.test(e.detail)) {
+        return {
+          label: "REQUEST REJECTED",
+          code: http,
+          body: e.custom
+            ? `${e.label} rejected the request. Check the base URL in Prep.`
+            : `${e.label} rejected the request.`,
+          canRetry: false,
+        };
+      }
       return {
         label: "REQUEST REJECTED",
         code: http,

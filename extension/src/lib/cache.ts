@@ -7,7 +7,7 @@ import type { Frontmatter, Recipe } from "./types";
  * switching tabs, clicking the page, or opening another window all tear it
  * down. Without a cache, re-opening the popup re-runs the whole pipeline:
  * another content-script injection, another frame capture, and another
- * *billed* Anthropic call for a recipe we already have.
+ * *billed* API call for a recipe we already have.
  *
  * chrome.storage.session is the right home: in-memory, wiped on browser
  * restart, and never written to disk — extraction results are derived data,

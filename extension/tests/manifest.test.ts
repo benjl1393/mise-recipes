@@ -17,7 +17,6 @@ describe("manifest", () => {
     // and ftp://, which Mise has no use for.
     expect((manifest as Record<string, unknown>).optional_host_permissions).toBeUndefined();
     expect(manifest.host_permissions).toEqual([
-      "https://api.anthropic.com/*",
       "https://*/*",
       "http://*/*",
     ]);

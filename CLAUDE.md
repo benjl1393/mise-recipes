@@ -163,7 +163,7 @@ The brand mark is a **top-down plate** — a single-pixel rounded rim — with t
   Change the SVG, then run `gen:icons`; never hand-edit the PNGs or the geometry.
 - **PNG ladder**: `type-specimens/mark/png/mise-icon-{16,32,48,128}.png` (ready for the MV3 manifest at build time). Re-export by rasterizing the master SVGs at exact sizes (Playwright element screenshot, deviceScaleFactor 1) — 16 uses the M-only variant.
 - **Favicon**: wired at `src/app/icon.svg` (Next.js App Router auto-serves it).
-- **Crit trail**: `logo-plate.html` (3 plate directions — top-down / side-dish / knockout) → direction A (top-down) chosen → single-pixel rim → Ben finalised in Figma (`107:1447`) → `logo-mark.html` (the adopted mark, in-context: hero, ladder, lockup, toolbar states). Decision history in MemPalace (code/recipe_archiver, 2026-06-08).
+- **Crit trail**: `logo-plate.html` (3 plate directions — top-down / side-dish / knockout) → direction A (top-down) chosen → single-pixel rim → Ben finalised in Figma (`107:1447`) → `logo-mark.html` (the adopted mark, in-context: hero, ladder, lockup, toolbar states).
 - **Reduction note** (superseded 2026-08-20): the M-only variant existed because a 1px *rim* breaks up when downscaled. The plate is **filled** now, and a solid disc survives downscaling, so **one geometry carries the whole ladder**. On a retina display Chrome renders the 32px asset into the 16px slot, which is where the mark actually reads — the softer true-16px rendering only applies to non-retina.
 - **Toolbar states**: idle = ink disc + paper M; recipe-detected = **flame disc + paper M** — *the whole plate catches fire*, the M stays paper throughout.
 
@@ -178,7 +178,7 @@ The brand mark is a **top-down plate** — a single-pixel rounded rim — with t
 - **"The Spike"** (2026-06-07, retired): a kitchen order-ticket glyph — negative-space notch + flame fired-bar + torn edge (Figma `92:1381`, 80×76 grid). Committed at `7a2a72e`, then reopened. Old masters archived at `type-specimens/mark/_archive-spike/`.
 - **plate + mono-M** (2026-06-08, current): the Mono-M direction (rejected earlier as "a lone M is too generic") revived and fixed by plating it. Monochrome. The spike-themed motion signature (ticket speared onto a rail) was dropped in the same pivot — the FIRED stamp landing is now the motion signature instead.
 
-See the global `design-anti-ai-defaults.md` rule and `design-studio-principles.md` for the cross-project values these project decisions sit inside of.
+The cross-project values these decisions sit inside of (anti-default design rules, studio principles) live in Ben's own setup, not in this repo.
 
 ## What to build next
 
@@ -846,4 +846,4 @@ How a crit runs: bring the artifact up where both of us can see it (local server
 
 Tone: peers, not reporter-to-approver. Strong opinions, loosely held, from both sides. Pushing back is the point of a crit — if Ben proposes something that pulls against the brief or the brand values we've set, say so and make the case.
 
-Studio principles accumulating in `~/.claude/rules/design-studio-principles.md` — consult before crits. Add to that doc whenever a principle surfaces; don't re-derive the same ones each session.
+Studio principles live in Ben's `design-studio` skill — consult it before crits, and add to it whenever a principle surfaces rather than re-deriving the same ones each session.

@@ -110,7 +110,7 @@ extension/src/lib/
                           extractRecipe, toNullableSchema, validateOutput,
                           sampleFrames   (vendor-independent)
   providers/
-    presets.ts            ProviderId, Tier, Preset, PRESETS, PROVIDER_IDS,
+    presets.ts            ProviderId, Tier, Preset, PRESETS, PROVIDER_IDS, DETECTION,
                           CUSTOM_DEFAULTS, detectProvider, normalizeBaseURL
     connection.ts         Connection, resolveConnection(settings)
     errors.ts             ProviderError, ProviderErrorKind, readErrorBody,
@@ -152,7 +152,6 @@ interface Preset {
   label: string;          // "OpenAI" — used in Prep and error copy
   host: string;           // "api.openai.com" — Prep hint, network error
   keyUrl: string;         // where to make a key
-  keyPrefixes: string[];  // for detectProvider
   protocol: "anthropic" | "openai";
   baseURL: string;        // unused for anthropic (SDK default)
   models: Record<Tier, string>;
@@ -203,7 +202,7 @@ unreachable in practice, so it gets no dedicated copy.
 ### Presets
 
 Model IDs and request quirks were read from each vendor's docs on 2026-10-01
-(research drawer `drawer_code_recipe_archiver_a364eba8a02a61f0b89b703b`).
+(a research pass over each vendor's own documentation).
 
 | id | label | host | Fast | Thorough | maxImages | tokenParam | strict | extraBody |
 |---|---|---|---|---|---|---|---|---|

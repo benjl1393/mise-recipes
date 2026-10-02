@@ -42,7 +42,6 @@
     }
   ],
   "host_permissions": [
-    "https://api.anthropic.com/*",
     "https://*/*",
     "http://*/*"
   ],

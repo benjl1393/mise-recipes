@@ -4,7 +4,7 @@ import { MAX_FRAMES } from "../frames";
  * Every vendor Mise can talk to, and what each one needs.
  *
  * Model IDs and request quirks were read from each vendor's own docs on
- * 2026-10-01 (MemPalace drawer drawer_code_recipe_archiver_a364eba8a02a61f0b89b703b).
+ * 2026-10-01.
  * They drift. The live test per vendor (tests/live/providers.live.ts) is what
  * notices; change them here and nowhere else.
  */

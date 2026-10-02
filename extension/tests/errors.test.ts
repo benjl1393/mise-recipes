@@ -62,6 +62,17 @@ describe("classify", () => {
     expect(classify(err("auth", 400)).code).toBe("HTTP 400");
   });
 
+  // A proxy or a wrong URL often answers with an HTML error page; a cook should
+  // never see 200 characters of markup in the callout.
+  it("drops an HTML error page instead of printing it", () => {
+    const page = "<!DOCTYPE html><html><head><title>502 Bad Gateway</title></head><body>nginx</body></html>";
+    const onPreset = classify(err("rejected", 400, preset, page));
+    expect(onPreset.body).toBe("OpenAI rejected the request.");
+    const onCustom = classify(err("rejected", 400, custom, page));
+    expect(onCustom.body).not.toContain("<");
+    expect(onCustom.body).toMatch(/base URL/);
+  });
+
   it("keeps the vendor's detail on a rejected request", () => {
     const c = classify(err("rejected", 400, preset, "effort is not supported"));
     expect(c.body).toContain("effort is not supported");

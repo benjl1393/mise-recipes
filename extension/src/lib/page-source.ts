@@ -6,7 +6,7 @@ export const JSON_LD_SELECTOR = 'script[type="application/ld+json"]';
 /** Below this, prose is a caption rather than an article. */
 const CAPTION_CEILING = 400;
 
-/** Claude gets plenty of signal well before a full long-form blog. */
+/** A model gets plenty of signal well before a full long-form blog. */
 const TEXT_CAP = 24_000;
 
 export interface ExtractionPayload {
