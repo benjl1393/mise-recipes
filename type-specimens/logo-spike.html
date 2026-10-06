@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Mise — The Spike (crit 02)</title>
+    <style>
+      @font-face { font-family:"Departure Mono"; src:url("./fonts/DepartureMono-Regular.woff2") format("woff2"); font-weight:400; font-style:normal; font-display:block; }
+      @font-face { font-family:"Commit Mono"; src:url("./fonts/CommitMono-400-Regular.otf") format("opentype"); font-weight:400; font-style:normal; font-display:swap; }
+      @font-face { font-family:"Commit Mono"; src:url("./fonts/CommitMono-400-Italic.otf") format("opentype"); font-weight:400; font-style:italic; font-display:swap; }
+
+      :root{
+        --font-display:"Departure Mono",ui-monospace,Menlo,monospace;
+        --font-body:"Commit Mono",ui-monospace,Menlo,monospace;
+        --ink-700:oklch(0.200 0 0); --ink-600:oklch(0.280 0 0); --ink-800:oklch(0.150 0 0);
+        --paper-100:oklch(0.965 0 0); --paper-50:oklch(0.985 0 0);
+        --ink-primary:oklch(0.120 0 0); --ink-dim:oklch(0.480 0 0);
+        --paper-primary:oklch(0.965 0 0); --paper-dim:oklch(0.780 0 0); --paper-muted:oklch(0.620 0 0);
+        --rule-ink:oklch(0.280 0 0); --rule-cream:oklch(0.820 0 0);
+        --flame:oklch(0.533 0.212 30.4); --flame-bright:oklch(0.587 0.205 30.4);
+        --flame-deep:oklch(0.452 0.185 30.4); --ember:oklch(0.373 0.151 30.4);
+        --flame-on-dark:oklch(0.620 0.205 30.4);
+      }
+      *{box-sizing:border-box;} html,body{margin:0;padding:0;}
+      body{ background:var(--ink-700); color:var(--paper-primary); font-family:var(--font-body);
+        font-synthesis:none; font-size:14px; line-height:1.55; -webkit-font-smoothing:antialiased; padding:48px 32px 140px; }
+      .wrap{max-width:1100px;margin:0 auto;}
+      .page-header{border-bottom:1px solid var(--rule-ink);padding-bottom:24px;margin-bottom:8px;}
+      .page-header h1{font-family:var(--font-display);font-weight:400;font-size:36px;line-height:1;text-transform:uppercase;margin:0 0 12px;}
+      .page-header .meta{font-size:11px;color:var(--paper-dim);text-transform:uppercase;letter-spacing:0.08em;}
+      nav{margin-top:12px;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;}
+      nav a{color:var(--paper-dim);text-decoration:none;} nav a.active{color:var(--paper-primary);border-bottom:1px solid var(--flame-on-dark);padding-bottom:2px;} nav span{color:var(--paper-muted);margin:0 10px;}
+      .lede{max-width:760px;font-size:13px;line-height:1.65;color:var(--paper-dim);margin:28px 0 8px;}
+      .lede strong{color:var(--paper-primary);} .lede code{font-family:var(--font-body);font-size:12px;background:var(--ink-600);padding:1px 5px;color:var(--paper-primary);}
+
+      .sec-head{display:flex;justify-content:space-between;align-items:baseline;margin:60px 0 6px;border-top:1px solid var(--rule-ink);padding-top:26px;}
+      .sec-head h2{font-family:var(--font-display);font-weight:400;font-size:20px;text-transform:uppercase;margin:0;letter-spacing:0.02em;}
+      .sec-head .idx{font-size:11px;color:var(--paper-muted);letter-spacing:0.1em;text-transform:uppercase;}
+      .sec-sub{max-width:720px;font-size:12.5px;line-height:1.6;color:var(--paper-dim);margin:0 0 26px;}
+
+      /* hero */
+      .hero-row{display:flex;gap:28px;flex-wrap:wrap;align-items:stretch;}
+      .hero{width:240px;height:240px;display:grid;place-items:center;border:1px solid var(--rule-ink);}
+      .hero svg{width:160px;height:160px;display:block;}
+
+      /* size ladder comparison: two candidates side by side */
+      .compare{display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:8px;}
+      @media(max-width:820px){.compare{grid-template-columns:1fr;}}
+      .cand h3{font-family:var(--font-display);font-weight:400;font-size:15px;text-transform:uppercase;letter-spacing:0.04em;margin:0 0 4px;}
+      .cand .note{font-size:11.5px;color:var(--paper-muted);line-height:1.5;margin:0 0 18px;min-height:34px;}
+      .ladder-row{display:flex;align-items:center;gap:22px;flex-wrap:wrap;margin-bottom:16px;}
+      .ladder-row .row-tag{width:58px;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--paper-muted);}
+      .rung{display:grid;gap:7px;justify-items:center;}
+      .tile{display:grid;place-items:center;border:1px solid var(--rule-ink);}
+      .rung .px{font-size:9px;color:var(--paper-muted);letter-spacing:0.08em;}
+      .tile svg{display:block;}
+
+      /* lockups */
+      .lockups{display:grid;gap:16px;margin-top:8px;max-width:560px;}
+      .lockup{display:flex;align-items:center;gap:14px;padding:18px 20px;border:1px solid var(--rule-ink);}
+      .lockup.on-ink{background:var(--ink-700);} .lockup.on-paper{background:var(--paper-100);}
+      .lockup svg{display:block;flex:0 0 auto;}
+      .lockup .wm{font-family:var(--font-display);font-weight:400;text-transform:uppercase;font-size:30px;line-height:1;letter-spacing:0.02em;}
+      .lockup.on-ink .wm{color:var(--paper-primary);} .lockup.on-paper .wm{color:var(--ink-primary);}
+      .lockup .stack{display:grid;gap:3px;}
+      .lockup .tagline{font-size:9.5px;letter-spacing:0.18em;text-transform:uppercase;}
+      .lockup.on-ink .tagline{color:var(--paper-muted);} .lockup.on-paper .tagline{color:var(--ink-dim);}
+
+      /* in-context: real popup ticket-top */
+      .ctx-row{display:flex;gap:28px;flex-wrap:wrap;align-items:flex-start;}
+      .mini-popup{width:300px;background:var(--paper-100);border:1px solid var(--rule-cream);box-shadow:0 16px 40px -16px oklch(0.100 0.015 240 / 0.3);}
+      .mini-popup .ticket-top{padding:12px 14px;border-bottom:1px dashed var(--rule-cream);display:flex;align-items:center;gap:9px;}
+      .mini-popup .ticket-top svg{display:block;flex:0 0 auto;}
+      .mini-popup .ticket-top .brand{font-family:var(--font-display);font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink-primary);}
+      .mini-popup .ticket-top .no{margin-left:auto;font-family:var(--font-display);font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink-dim);}
+      .mini-popup .body{padding:14px;}
+      .mini-popup .title{font-family:var(--font-display);font-size:18px;line-height:1.1;text-transform:uppercase;color:var(--ink-primary);margin:0 0 8px;}
+      .mini-popup .ph{height:7px;background:var(--paper-200,oklch(0.92 0 0));margin:6px 0;border-radius:1px;}
+      .mini-popup .ph.s{width:60%;}
+      .ctx-cap{font-size:10px;color:var(--paper-muted);text-transform:uppercase;letter-spacing:0.08em;margin-top:10px;}
+
+      /* favicon/tab demo */
+      .tabbar{display:flex;align-items:flex-end;gap:2px;background:oklch(0.26 0 0);padding:8px 8px 0;border-radius:6px 6px 0 0;width:360px;}
+      .tab{display:flex;align-items:center;gap:7px;background:var(--ink-700);padding:8px 12px;border-radius:6px 6px 0 0;font-family:var(--font-body);font-size:11px;color:var(--paper-dim);}
+      .tab svg{display:block;}
+      .tab.inactive{background:oklch(0.30 0 0);color:var(--paper-muted);}
+
+      .rationale{margin-top:30px;display:grid;gap:12px;max-width:720px;border-left:1px solid var(--flame-on-dark);padding-left:18px;}
+      .rationale .row{display:grid;grid-template-columns:120px 1fr;gap:14px;align-items:start;}
+      .rationale .k{font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--paper-muted);padding-top:2px;}
+      .rationale .v{font-size:12.5px;line-height:1.6;color:var(--paper-dim);} .rationale .v strong{color:var(--paper-primary);}
+    </style>
+  </head>
+  <body>
+    <!-- ════════ SYMBOLS ════════
+      Duotone via CSS vars on host:  --m = ticket/structure color, --g = ground (knockout) color.
+      Flame bar is always --flame (sanguine), the single accent. Grid: 32 units, clean down to 16px.
+    -->
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+
+      <!-- FULL — ticket impaled on the rail spike. Hero / landing / lockup. -->
+      <symbol id="sp-full" viewBox="0 0 32 32">
+        <!-- slip body, solid, torn bottom -->
+        <path fill="var(--m)" d="M7 9 H25 V23
+          L23.5 26 L22 23 L20.5 26 L19 23 L17.5 26 L16 23 L14.5 26 L13 23 L11.5 26 L10 23 L8.5 26 L7 23 Z"/>
+        <!-- the rail spike: slim spindle point sticking up out of the slip -->
+        <path fill="var(--m)" d="M16 2 L17.5 5.4 L17 5.4 L17 9 L15 9 L15 5.4 L14.5 5.4 Z"/>
+        <!-- pierce hole at slip top (knockout) -->
+        <path fill="var(--g)" d="M14 9 L18 9 L16 11.3 Z"/>
+        <!-- printed lines (knockout) -->
+        <rect x="10.5" y="13.4" width="11" height="1.4" fill="var(--g)"/>
+        <!-- the fired item — single flame bar -->
+        <rect x="10.5" y="16.6" width="12" height="2.6" fill="var(--flame)"/>
+        <rect x="10.5" y="20.8" width="7"  height="1.4" fill="var(--g)"/>
+      </symbol>
+
+      <!-- MARK — the fired ticket, no rail. Robust primary / product icon. -->
+      <symbol id="sp-mark" viewBox="0 0 32 32">
+        <path fill="var(--m)" d="M6 6 H26 V24
+          L24.33 27 L22.66 24 L21 27 L19.33 24 L17.66 27 L16 24 L14.33 27 L12.66 24 L11 27 L9.33 24 L7.66 27 L6 24 Z"/>
+        <!-- punch hole (raffle/order ticket) -->
+        <circle cx="16" cy="9.5" r="1.2" fill="var(--g)"/>
+        <rect x="9.5"  y="13"   width="13" height="1.7" fill="var(--g)"/>
+        <rect x="9.5"  y="16.6" width="13" height="3"   fill="var(--flame)"/>
+        <rect x="9.5"  y="21"   width="8.5" height="1.7" fill="var(--g)"/>
+      </symbol>
+
+      <!-- MARK-16 — minimal reduction for the toolbar. Slip + one flame bar + tear. -->
+      <symbol id="sp-min" viewBox="0 0 16 16">
+        <path fill="var(--m)" d="M2.5 2 H13.5 V12 L12 14 L10.5 12 L9 14 L7.5 12 L6 14 L4.5 12 L3 14 L2.5 13 Z"/>
+        <rect x="4.5" y="5"   width="7" height="1.4" fill="var(--g)"/>
+        <rect x="4.5" y="7.5" width="7" height="2.2" fill="var(--flame)"/>
+      </symbol>
+
+    </defs></svg>
+
+    <div class="wrap">
+      <header class="page-header">
+        <h1>The Spike — refined</h1>
+        <div class="meta">crit 02 · ticket on the rail · 2026-06-07 · the one decision: rail or no rail</div>
+        <nav>
+          <a href="./index.html">Specimen</a><span>·</span>
+          <a href="./logo-marks.html">Logo marks</a><span>·</span>
+          <a class="active" href="./logo-spike.html">The Spike</a>
+        </nav>
+      </header>
+
+      <p class="lede">
+        Two fixes from crit 01 are in: the spike point is now a <strong>slim spindle</strong> (no more download-arrow read), and there's a purpose-built reduction for the toolbar. The decision this crit has to settle: <strong>is the rail part of the core mark, or a large-format flourish?</strong> Below, the full impaled-ticket and the rod-less fired-ticket run down the same size ladder. Whichever survives best small should be the product icon.
+      </p>
+
+      <!-- HERO -->
+      <div class="sec-head"><h2>The mark</h2><span class="idx">full · on ink + paper</span></div>
+      <div class="hero-row">
+        <div class="hero" style="background:var(--ink-700);--m:var(--paper-primary);--g:var(--ink-700);">
+          <svg viewBox="0 0 32 32"><use href="#sp-full"/></svg>
+        </div>
+        <div class="hero" style="background:var(--paper-100);--m:var(--ink-primary);--g:var(--paper-100);">
+          <svg viewBox="0 0 32 32"><use href="#sp-full"/></svg>
+        </div>
+        <div class="hero" style="background:var(--ink-800);--m:var(--paper-primary);--g:var(--ink-800);">
+          <svg viewBox="0 0 32 32"><use href="#sp-mark"/></svg>
+        </div>
+      </div>
+
+      <!-- THE DECISION: full vs mark down the ladder -->
+      <div class="sec-head"><h2>Rail or no rail</h2><span class="idx">the decision · size ladder</span></div>
+      <p class="sec-sub">Left: the full impaled ticket (the story). Right: the rod-less fired ticket (the robust mark). At 16 each shows its real toolbar reduction.</p>
+      <div class="compare">
+        <div class="cand">
+          <h3>Full — with rail</h3>
+          <p class="note">The whole story in one image. The rod is the fragile part small.</p>
+          <div class="ladder-row"><span class="row-tag">On ink</span>
+            <div class="rung"><div class="tile" style="width:96px;height:96px;background:var(--ink-700);--m:var(--paper-primary);--g:var(--ink-700);"><svg width="72" height="72"><use href="#sp-full"/></svg></div><span class="px">96</span></div>
+            <div class="rung"><div class="tile" style="width:48px;height:48px;background:var(--ink-700);--m:var(--paper-primary);--g:var(--ink-700);"><svg width="36" height="36"><use href="#sp-full"/></svg></div><span class="px">48</span></div>
+            <div class="rung"><div class="tile" style="width:32px;height:32px;background:var(--ink-700);--m:var(--paper-primary);--g:var(--ink-700);"><svg width="26" height="26"><use href="#sp-full"/></svg></div><span class="px">32</span></div>
+            <div class="rung"><div class="tile" style="width:16px;height:16px;background:var(--ink-700);--m:var(--paper-primary);--g:var(--ink-700);"><svg width="16" height="16"><use href="#sp-full"/></svg></div><span class="px">16·full</span></div>
+          </div>
+          <div class="ladder-row"><span class="row-tag">On paper</span>
+            <div class="rung"><div class="tile" style="width:96px;height:96px;background:var(--paper-100);--m:var(--ink-primary);--g:var(--paper-100);"><svg width="72" height="72"><use href="#sp-full"/></svg></div><span class="px">96</span></div>
+            <div class="rung"><div class="tile" style="width:48px;height:48px;background:var(--paper-100);--m:var(--ink-primary);--g:var(--paper-100);"><svg width="36" height="36"><use href="#sp-full"/></svg></div><span class="px">48</span></div>
+            <div class="rung"><div class="tile" style="width:32px;height:32px;background:var(--paper-100);--m:var(--ink-primary);--g:var(--paper-100);"><svg width="26" height="26"><use href="#sp-full"/></svg></div><span class="px">32</span></div>
+            <div class="rung"><div class="tile" style="width:16px;height:16px;background:var(--paper-100);--m:var(--ink-primary);--g:var(--paper-100);"><svg width="16" height="16"><use href="#sp-full"/></svg></div><span class="px">16·full</span></div>
+          </div>
+        </div>
+        <div class="cand">
+          <h3>Mark — fired ticket</h3>
+          <p class="note">Punch-hole ticket + one flame bar. 16 swaps to the minimal reduction.</p>
+          <div class="ladder-row"><span class="row-tag">On ink</span>
+            <div class="rung"><div class="tile" style="width:96px;height:96px;background:var(--ink-700);--m:var(--paper-primary);--g:var(--ink-700);"><svg width="72" height="72"><use href="#sp-mark"/></svg></div><span class="px">96</span></div>
+            <div class="rung"><div class="tile" style="width:48px;height:48px;background:var(--ink-700);--m:var(--paper-primary);--g:var(--ink-700);"><svg width="38" height="38"><use href="#sp-mark"/></svg></div><span class="px">48</span></div>
+            <div class="rung"><div class="tile" style="width:32px;height:32px;background:var(--ink-700);--m:var(--paper-primary);--g:var(--ink-700);"><svg width="26" height="26"><use href="#sp-mark"/></svg></div><span class="px">32</span></div>
+            <div class="rung"><div class="tile" style="width:16px;height:16px;background:var(--ink-700);--m:var(--paper-primary);--g:var(--ink-700);"><svg width="16" height="16"><use href="#sp-min"/></svg></div><span class="px">16·min</span></div>
+          </div>
+          <div class="ladder-row"><span class="row-tag">On paper</span>
+            <div class="rung"><div class="tile" style="width:96px;height:96px;background:var(--paper-100);--m:var(--ink-primary);--g:var(--paper-100);"><svg width="72" height="72"><use href="#sp-mark"/></svg></div><span class="px">96</span></div>
+            <div class="rung"><div class="tile" style="width:48px;height:48px;background:var(--paper-100);--m:var(--ink-primary);--g:var(--paper-100);"><svg width="38" height="38"><use href="#sp-mark"/></svg></div><span class="px">48</span></div>
+            <div class="rung"><div class="tile" style="width:32px;height:32px;background:var(--paper-100);--m:var(--ink-primary);--g:var(--paper-100);"><svg width="26" height="26"><use href="#sp-mark"/></svg></div><span class="px">32</span></div>
+            <div class="rung"><div class="tile" style="width:16px;height:16px;background:var(--paper-100);--m:var(--ink-primary);--g:var(--paper-100);"><svg width="16" height="16"><use href="#sp-min"/></svg></div><span class="px">16·min</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- LOCKUPS -->
+      <div class="sec-head"><h2>Wordmark lockup</h2><span class="idx">full mark + MISE</span></div>
+      <div class="lockups">
+        <div class="lockup on-ink" style="--m:var(--paper-primary);--g:var(--ink-700);">
+          <svg width="40" height="40"><use href="#sp-full"/></svg>
+          <div class="stack"><span class="wm">Mise</span><span class="tagline">fire · the pass · prep</span></div>
+        </div>
+        <div class="lockup on-paper" style="--m:var(--ink-primary);--g:var(--paper-100);">
+          <svg width="40" height="40"><use href="#sp-full"/></svg>
+          <div class="stack"><span class="wm">Mise</span><span class="tagline">own your recipes</span></div>
+        </div>
+      </div>
+
+      <!-- IN CONTEXT -->
+      <div class="sec-head"><h2>In context</h2><span class="idx">popup ticket-top · browser tab</span></div>
+      <div class="ctx-row">
+        <div>
+          <div class="mini-popup">
+            <div class="ticket-top" style="--m:var(--ink-primary);--g:var(--paper-100);">
+              <svg width="18" height="18"><use href="#sp-mark"/></svg>
+              <span class="brand">Mise</span>
+              <span class="no">No. 00427</span>
+            </div>
+            <div class="body">
+              <h3 class="title">Gochujang Pork Belly</h3>
+              <div class="ph"></div><div class="ph"></div><div class="ph s"></div>
+            </div>
+          </div>
+          <p class="ctx-cap">↑ mark in the popup ticket-top (18px)</p>
+        </div>
+        <div>
+          <div class="tabbar">
+            <div class="tab" style="--m:var(--paper-primary);--g:var(--ink-700);">
+              <svg width="14" height="14"><use href="#sp-min"/></svg><span>Mise — Pork Belly</span>
+            </div>
+            <div class="tab inactive" style="--m:var(--paper-muted);--g:oklch(0.30 0 0);">
+              <svg width="14" height="14"><use href="#sp-min"/></svg><span>instagram.com</span>
+            </div>
+          </div>
+          <p class="ctx-cap">↑ favicon in a browser tab (14px, minimal reduction)</p>
+        </div>
+      </div>
+
+      <div class="rationale">
+        <div class="row"><span class="k">Decision</span><span class="v">Treat <strong>full</strong> (with rail) as the brand mark for hero/landing/lockup, and the rod-less <strong>fired ticket</strong> as the product icon — with a stripped <strong>minimal</strong> reduction for ≤16px. One family, three levels of detail by size.</span></div>
+        <div class="row"><span class="k">Considered</span><span class="v">Forcing one geometry at every size. The rail just doesn't read at 16 — pretending it does would ship a blob.</span></div>
+        <div class="row"><span class="k">Tension</span><span class="v">Does the rod-less ticket still say <em>Mise</em> without the rail, or does it drift toward a generic receipt? And does the minimal 16px reduction hold its kitchen character, or is it just "doc + red line"?</span></div>
+      </div>
+
+    </div>
+  </body>
+</html>

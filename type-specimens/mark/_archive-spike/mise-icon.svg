@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128" role="img" aria-label="Mise">
+  <!-- Mise app / extension / favicon icon — ink tile so it reads on any theme. -->
+  <rect width="128" height="128" fill="#232323"/>
+  <g transform="translate(26.12 28) scale(0.947)">
+    <path fill="#f3f3f3" fill-rule="evenodd" d="M71.95 76 L63.90 68 L55.85 76 L47.80 68 L39.76 76 L31.71 68 L23.66 76 L15.85 68.24 L8.05 76 L0 68 L0 0 L34.08 0 C34.03 0.33 34 0.66 34 1 C34 4.31 36.69 7 40 7 C43.31 7 46 4.31 46 1 C46 0.66 45.97 0.33 45.92 0 L80 0 L80 68 L71.95 76 Z M12 42 h41.8 v8 h-41.8 Z"/>
+    <rect x="12" y="25" width="57" height="11" fill="#cb1200"/>
+  </g>
+</svg>

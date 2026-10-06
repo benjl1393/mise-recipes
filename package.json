@@ -1,0 +1,53 @@
+{
+  "name": "recipe-archiver",
+  "version": "0.1.1",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "test": "npm run test:ext",
+    "test:watch": "vitest",
+    "build:ext": "node extension/build.mjs",
+    "build:ext:dev": "node extension/build.mjs --dev",
+    "watch:ext": "node extension/build.mjs --watch",
+    "test:ext": "vitest run --root extension",
+    "port:design": "node extension/scripts/port-design.mjs",
+    "gen:icons": "node extension/scripts/gen-icons.mjs",
+    "smoke:ext": "node extension/scripts/smoke.mjs",
+    "audit:ext": "node extension/scripts/audit-port.mjs",
+    "render:states": "node extension/scripts/render-states.mjs",
+    "test:live": "vitest run --root extension --config vitest.live.config.ts"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.89.0",
+    "@mozilla/readability": "^0.6.0",
+    "cheerio": "^1.2.0",
+    "geist": "^1.7.0",
+    "linkedom": "^0.18.12",
+    "next": "^16.2.3",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "youtube-transcript": "^1.3.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@types/chrome": "^0.2.6",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@vitejs/plugin-react": "^6.0.1",
+    "esbuild": "^0.28.2",
+    "eslint": "^9",
+    "eslint-config-next": "16.2.1",
+    "happy-dom": "^20.11.2",
+    "jsdom": "^29.0.1",
+    "playwright": "^1.62.1",
+    "tailwindcss": "^4",
+    "typescript": "^5",
+    "vitest": "^4.1.2"
+  }
+}

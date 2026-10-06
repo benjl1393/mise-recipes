@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Mise — Red-brand vs Blue-flame brand</title>
+    <style>
+      @font-face { font-family:"Departure Mono"; src:url("./fonts/DepartureMono-Regular.woff2") format("woff2"); font-weight:400; font-style:normal; font-display:swap; }
+      @font-face { font-family:"Commit Mono"; src:url("./fonts/CommitMono-400-Regular.otf") format("opentype"); font-weight:400; font-style:normal; font-display:swap; }
+      @font-face { font-family:"Commit Mono"; src:url("./fonts/CommitMono-400-Italic.otf") format("opentype"); font-weight:400; font-style:italic; font-display:swap; }
+
+      :root {
+        --font-display:"Departure Mono",ui-monospace,Menlo,monospace;
+        --font-body:"Commit Mono",ui-monospace,Menlo,monospace;
+        /* shared neutrals (v2.1) */
+        --ink-700:oklch(0.200 0 0); --ink-600:oklch(0.280 0 0);
+        --paper-50:oklch(0.985 0 0); --paper-100:oklch(0.965 0 0); --paper-200:oklch(0.920 0 0); --paper-250:oklch(0.885 0 0);
+        --ink-primary:oklch(0.120 0 0); --ink-dim:oklch(0.480 0 0); --ink-muted:oklch(0.620 0 0);
+        --paper-primary:oklch(0.965 0 0); --paper-dim:oklch(0.780 0 0); --paper-muted:oklch(0.620 0 0);
+        --rule-cream:oklch(0.820 0 0); --rule-ink:oklch(0.280 0 0);
+      }
+
+      /* ── the two systems: only the accent family + error differ ── */
+      .sys-red {
+        --flame:        oklch(0.533 0.212 30.4);  /* #cb1200 */
+        --flame-bright: oklch(0.587 0.205 30.4);  /* #db3523 */
+        --flame-deep:   oklch(0.452 0.185 30.4);  /* #a40200 */
+        --ember:        oklch(0.373 0.151 30.4);  /* #7e0400 */
+        --error:        var(--flame-deep);        /* SAME family → collision */
+        --error-soft:   oklch(0.940 0.025 30);
+      }
+      .sys-blue {
+        --flame:        oklch(0.533 0.158 238);   /* #0075bc */
+        --flame-bright: oklch(0.592 0.150 232);   /* #008ac7  cyan edge */
+        --flame-deep:   oklch(0.452 0.152 240);   /* #005ca0 */
+        --ember:        oklch(0.373 0.112 243);   /* #004476 */
+        --error:        oklch(0.452 0.185 30.4);  /* #a40200  RED, distinct */
+        --error-soft:   oklch(0.940 0.025 30);
+      }
+
+      * { box-sizing:border-box; }
+      html,body { margin:0; background:var(--ink-700); color:var(--paper-primary); font-family:var(--font-body); -webkit-font-smoothing:antialiased; }
+      .page { max-width:1100px; margin:0 auto; padding:clamp(24px,5vw,56px) clamp(16px,4vw,40px) 140px; }
+
+      .page-head { border-bottom:1px solid var(--rule-ink); padding-bottom:24px; margin-bottom:28px; }
+      .page-head h1 { font-family:var(--font-display); font-weight:400; font-size:clamp(20px,3vw,30px); line-height:1.05; letter-spacing:0.02em; text-transform:uppercase; margin:0 0 12px; }
+      .page-head .lead { max-width:78ch; font-size:13px; line-height:1.65; color:var(--paper-dim); margin:0; }
+      .page-head .lead em { font-style:normal; color:var(--paper-primary); }
+
+      .grid { display:grid; grid-template-columns:1fr 1fr; gap:48px; align-items:start; }
+      @media (max-width:920px){ .grid { grid-template-columns:1fr; } }
+
+      .col { display:flex; flex-direction:column; gap:20px; min-width:0; }
+      .col-head { display:flex; flex-direction:column; gap:6px; padding-bottom:12px; border-bottom:1px solid var(--rule-ink); }
+      .col-head .ttl { font-family:var(--font-display); font-size:13px; letter-spacing:0.12em; text-transform:uppercase; display:flex; gap:10px; align-items:baseline; }
+      .col-head .ttl .id { color:var(--flame); }
+      .col-head .verdict { font-family:var(--font-body); font-size:11px; letter-spacing:0.04em; }
+      .col-head .verdict.bad  { color:oklch(0.62 0.16 30.4); }
+      .col-head .verdict.good { color:oklch(0.70 0.13 232); }
+
+      /* family swatches */
+      .swatches { display:flex; gap:6px; }
+      .sw { flex:1; height:54px; border:1px solid var(--rule-ink); display:flex; flex-direction:column; justify-content:flex-end; padding:5px 6px; }
+      .sw .nm { font-family:var(--font-body); font-size:8.5px; letter-spacing:0.02em; text-transform:uppercase; color:rgba(255,255,255,0.88); line-height:1.25; mix-blend-mode:difference; }
+      .sw.f1 { background:var(--ember); }
+      .sw.f2 { background:var(--flame-deep); }
+      .sw.f3 { background:var(--flame); }
+      .sw.f4 { background:var(--flame-bright); }
+      .sw.fe { background:var(--error); position:relative; }
+      .sw.fe::before { content:""; position:absolute; top:-1px; left:-3px; bottom:-1px; width:2px; background:var(--ink-700); }
+
+      .caption { font-family:var(--font-body); font-size:11px; letter-spacing:0.08em; text-transform:uppercase; color:var(--paper-muted); }
+
+      /* ── popup card (faithful to popup-motion-states.html) ── */
+      .popup { width:100%; max-width:400px; background:var(--paper-100); color:var(--ink-primary); border:1px solid var(--rule-cream); box-shadow:0 20px 60px -20px oklch(0.100 0.015 240/0.35); overflow:hidden; }
+      .ticket-top { padding:13px 18px; border-bottom:1px dashed var(--rule-cream); display:flex; justify-content:space-between; align-items:baseline; }
+      .ticket-top .brand { font-family:var(--font-display); font-size:10px; letter-spacing:0.08em; text-transform:uppercase; color:var(--ink-primary); }
+      .ticket-top .captured { font-family:var(--font-display); font-size:10px; color:var(--ink-dim); text-transform:uppercase; letter-spacing:0.08em; }
+      .source { padding:11px 18px; border-bottom:1px dashed var(--rule-cream); font-family:var(--font-body); font-size:10px; color:var(--ink-dim); display:flex; justify-content:space-between; align-items:center; gap:12px; }
+      .source .url { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+      .source .badge { background:var(--ember); color:var(--paper-100); padding:3px 7px 2px; letter-spacing:0.06em; text-transform:uppercase; white-space:nowrap; flex-shrink:0; }
+      .title { font-family:var(--font-display); font-weight:400; font-size:23px; line-height:1.1; text-transform:uppercase; margin:15px 18px 6px; color:var(--ink-primary); }
+      .subtitle { margin:0 18px 13px; font-style:italic; font-size:12px; line-height:1.45; color:var(--ink-dim); }
+      .facts { display:flex; gap:18px; padding:10px 18px; border-top:1px solid var(--rule-cream); border-bottom:1px solid var(--rule-cream); font-family:var(--font-body); font-size:10px; color:var(--ink-dim); text-transform:uppercase; letter-spacing:0.08em; }
+      .facts .fact strong { color:var(--ink-primary); font-weight:400; font-size:11px; margin-left:4px; }
+      .section-h { font-family:var(--font-display); font-weight:400; font-size:13px; margin:16px 18px 9px; letter-spacing:0.1em; text-transform:uppercase; color:var(--ink-primary); border-bottom:1px solid var(--ink-primary); padding-bottom:6px; }
+      ul.ingredients { list-style:none; padding:0; margin:0 18px 16px; font-size:13px; line-height:1.5; }
+      ul.ingredients li { display:grid; grid-template-columns:78px 1fr; gap:8px; align-items:baseline; padding:4px 0; border-bottom:1px dotted var(--rule-cream); }
+      ul.ingredients li .qty { font-family:var(--font-body); font-size:11.5px; color:var(--ink-primary); text-transform:uppercase; }
+      .ticket-bottom { padding:9px 18px 12px; font-family:var(--font-display); font-size:10px; color:var(--ink-dim); letter-spacing:0.08em; text-transform:uppercase; display:flex; justify-content:space-between; }
+      .ticket-bottom .glyph { color:var(--flame); }
+
+      /* error callout (full 1px border, no side-stripe) */
+      .callout.error { margin:14px 18px; border:1px solid var(--error); background:var(--error-soft); padding:11px 13px; display:flex; flex-direction:column; gap:6px; }
+      .callout.error .hdr { font-family:var(--font-display); font-size:10px; letter-spacing:0.16em; text-transform:uppercase; color:var(--error); display:flex; justify-content:space-between; align-items:center; }
+      .callout.error .hdr .lbl { display:flex; align-items:center; gap:7px; }
+      .callout.error .hdr .code { font-family:var(--font-body); color:var(--ink-dim); letter-spacing:0.04em; }
+      .callout.error .body { font-size:12px; line-height:1.5; color:var(--ink-primary); }
+      .ico { width:14px; height:14px; flex-shrink:0; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+
+      /* error stamp (border + text inherit --error) */
+      .stamp.err { margin:14px 18px; border:2px solid var(--error); background:var(--paper-100); padding:13px 18px; display:flex; align-items:center; justify-content:center; gap:11px; color:var(--error); }
+      .stamp.err .pmark { width:28px; height:28px; flex-shrink:0; }
+      .stamp.err h2 { font-family:var(--font-display); font-weight:400; font-size:25px; line-height:1; letter-spacing:0.04em; text-transform:uppercase; margin:0; white-space:nowrap; }
+
+      /* Fire button + states */
+      .fire-row { display:flex; gap:8px; padding:12px 14px; background:var(--ink-700); border:1px solid var(--rule-ink); }
+      .fire-btn { flex:1; background:var(--flame); color:var(--paper-100); border:none; padding:10px 12px; font-family:var(--font-body); font-size:11px; letter-spacing:0.14em; text-transform:uppercase; cursor:pointer; }
+      .fire-btn.hover { background:var(--flame-bright); }
+      .fire-btn.press { background:var(--flame-deep); }
+      .prep-btn { background:transparent; border:1px solid var(--ink-600); color:var(--paper-dim); padding:10px 12px; font-family:var(--font-body); font-size:10.5px; letter-spacing:0.12em; text-transform:uppercase; }
+      .btn-states { display:flex; gap:8px; }
+      .btn-states .fire-btn { padding:9px 10px; font-size:10px; }
+
+      .subcap { font-family:var(--font-body); font-size:10px; letter-spacing:0.06em; text-transform:uppercase; color:var(--paper-muted); margin:-6px 0 -2px; }
+
+      .rationale { font-family:var(--font-body); font-size:12px; line-height:1.6; color:var(--paper-dim); margin:4px 0 0; border-top:1px solid var(--rule-ink); padding-top:14px; }
+      .rationale strong { color:var(--paper-primary); }
+      .rationale .tag { color:var(--flame); }
+
+      /* dark chip to demo ✶ glyph on the popup surround / landing hero */
+      .ondark { display:flex; align-items:center; gap:14px; padding:14px 16px; background:var(--ink-700); border:1px solid var(--rule-ink); font-family:var(--font-display); font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--paper-dim); }
+      .ondark .big { font-size:34px; line-height:1; color:var(--flame); }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <header class="page-head">
+        <h1>Mise — Red brand vs Blue-flame brand</h1>
+        <p class="lead">
+          The brand red (<em>--flame</em>, hue 30.4°) and the error red (<em>--flame-deep</em>, same hue) are the same colour — so <em>brand-action</em> and <em>failure</em> are indistinguishable. Char/near-black error was tried and rejected. This pivots the brand to a <em>gas-flame blue</em> (the cyan-edged ring of a lit service-line burner — blue is the hottest flame), which <em>frees red for error</em>. Same content, same neutrals, same token names — only the accent family and error value change. Each column shows the happy-path card, the error state, and the Fire button states so the brand/error collision (left) vs separation (right) is visible.
+        </p>
+      </header>
+
+      <div class="grid">
+
+        <!-- ═══════════ LEFT — CURRENT RED ═══════════ -->
+        <div class="col sys-red">
+          <div class="col-head">
+            <span class="ttl"><span class="id">CURRENT</span><span>Sanguine-red brand</span></span>
+            <span class="verdict bad">⚠ brand red &amp; error red are one family — collision</span>
+          </div>
+
+          <div class="swatches">
+            <div class="sw f1"><span class="nm">ember</span></div>
+            <div class="sw f2"><span class="nm">deep</span></div>
+            <div class="sw f3"><span class="nm">flame</span></div>
+            <div class="sw f4"><span class="nm">bright</span></div>
+            <div class="sw fe"><span class="nm">error</span></div>
+          </div>
+          <p class="subcap">error sits inside the brand family — last swatch ≈ "deep"</p>
+
+          <p class="caption">Happy path</p>
+          <div class="popup">
+            <div class="ticket-top"><span class="brand">MISE · NO. 00427</span><span class="captured">2026-06-09 · 14:32</span></div>
+            <div class="source"><span class="url">instagram.com/p/C9xK2</span><span class="badge">🎬 8 frames</span></div>
+            <h2 class="title">Gochujang-Glazed Pork Belly</h2>
+            <p class="subtitle">slow-rendered, sharply-sauced, served over rice with a soft egg.</p>
+            <div class="facts"><span class="fact">SERVES <strong>4</strong></span><span class="fact">HANDS-ON <strong>25m</strong></span><span class="fact">TOTAL <strong>2h 10m</strong></span></div>
+            <h3 class="section-h">Ingredients</h3>
+            <ul class="ingredients">
+              <li><span class="qty">800 g</span><span>pork belly, skin-on</span></li>
+              <li><span class="qty">3 tbsp</span><span>gochujang paste</span></li>
+              <li><span class="qty">2 tbsp</span><span>honey or maltose</span></li>
+            </ul>
+            <div class="ticket-bottom"><span>2026-06-09 · 14:32</span><span><span class="glyph">✶</span> mise.app</span></div>
+          </div>
+          <div class="fire-row"><button class="fire-btn">FIRE · save .md</button><button class="prep-btn">Prep</button></div>
+
+          <p class="caption">Error state</p>
+          <div class="popup">
+            <div class="ticket-top"><span class="brand">MISE · NO. 00428</span><span class="captured">2026-06-09 · 14:36</span></div>
+            <div class="source"><span class="url">gourmettraveller.com.au/…</span><span class="badge" style="background:transparent;color:var(--ink-dim);border:1px solid var(--ink-dim);padding:2px 6px 1px;">no frames</span></div>
+            <div class="stamp err">
+              <svg class="pmark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M7 8 L11 12 M13 9 L17 13 M9 16 L12 13"/></svg>
+              <h2>KITCHEN ERROR</h2>
+            </div>
+            <div class="callout error">
+              <div class="hdr"><span class="lbl"><svg class="ico" viewBox="0 0 24 24"><path d="M12 9v4M12 17h.01M10.3 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.7 3.86a2 2 0 0 0-3.42 0z"/></svg>COULDN'T READ PAGE</span><span class="code">ERR · 422</span></div>
+              <div class="body">No recipe found behind the paywall. Try the original video, or paste the text into Prep.</div>
+            </div>
+            <div class="fire-row"><button class="fire-btn">RETRY · re-fire</button><button class="prep-btn">Prep</button></div>
+          </div>
+
+          <p class="caption">Fire button — default / hover / pressed</p>
+          <div class="btn-states">
+            <button class="fire-btn">FIRE</button>
+            <button class="fire-btn hover">FIRE</button>
+            <button class="fire-btn press">FIRE</button>
+          </div>
+
+          <div class="ondark"><span class="big">✶</span><span>✶ glyph on dark hero<br>3.12:1 — fails AA-small</span></div>
+
+          <p class="rationale">
+            <strong>The problem.</strong> Brand and error are the same red, separated only by ~0.08 L. On the error card the red stamp, red callout border, and (if present) the red Fire/Retry button all read as one undifferentiated alarm — the eye can't separate <span class="tag">"this is Mise's action colour"</span> from <span class="tag">"this is what went wrong."</span> One-accent discipline is intact, but the accent is overloaded across two opposite meanings.
+          </p>
+        </div>
+
+        <!-- ═══════════ RIGHT — BLUE FLAME ═══════════ -->
+        <div class="col sys-blue">
+          <div class="col-head">
+            <span class="ttl"><span class="id">PROPOSED</span><span>Gas-flame blue brand</span></span>
+            <span class="verdict good">✓ blue brand · red error — 207° apart, maximally distinct</span>
+          </div>
+
+          <div class="swatches">
+            <div class="sw f1"><span class="nm">ember</span></div>
+            <div class="sw f2"><span class="nm">deep</span></div>
+            <div class="sw f3"><span class="nm">flame</span></div>
+            <div class="sw f4"><span class="nm">bright</span></div>
+            <div class="sw fe"><span class="nm">error</span></div>
+          </div>
+          <p class="subcap">error red lives outside the blue family — fully its own signal</p>
+
+          <p class="caption">Happy path</p>
+          <div class="popup">
+            <div class="ticket-top"><span class="brand">MISE · NO. 00427</span><span class="captured">2026-06-09 · 14:32</span></div>
+            <div class="source"><span class="url">instagram.com/p/C9xK2</span><span class="badge">🎬 8 frames</span></div>
+            <h2 class="title">Gochujang-Glazed Pork Belly</h2>
+            <p class="subtitle">slow-rendered, sharply-sauced, served over rice with a soft egg.</p>
+            <div class="facts"><span class="fact">SERVES <strong>4</strong></span><span class="fact">HANDS-ON <strong>25m</strong></span><span class="fact">TOTAL <strong>2h 10m</strong></span></div>
+            <h3 class="section-h">Ingredients</h3>
+            <ul class="ingredients">
+              <li><span class="qty">800 g</span><span>pork belly, skin-on</span></li>
+              <li><span class="qty">3 tbsp</span><span>gochujang paste</span></li>
+              <li><span class="qty">2 tbsp</span><span>honey or maltose</span></li>
+            </ul>
+            <div class="ticket-bottom"><span>2026-06-09 · 14:32</span><span><span class="glyph">✶</span> mise.app</span></div>
+          </div>
+          <div class="fire-row"><button class="fire-btn">FIRE · save .md</button><button class="prep-btn">Prep</button></div>
+
+          <p class="caption">Error state</p>
+          <div class="popup">
+            <div class="ticket-top"><span class="brand">MISE · NO. 00428</span><span class="captured">2026-06-09 · 14:36</span></div>
+            <div class="source"><span class="url">gourmettraveller.com.au/…</span><span class="badge" style="background:transparent;color:var(--ink-dim);border:1px solid var(--ink-dim);padding:2px 6px 1px;">no frames</span></div>
+            <div class="stamp err">
+              <svg class="pmark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M7 8 L11 12 M13 9 L17 13 M9 16 L12 13"/></svg>
+              <h2>KITCHEN ERROR</h2>
+            </div>
+            <div class="callout error">
+              <div class="hdr"><span class="lbl"><svg class="ico" viewBox="0 0 24 24"><path d="M12 9v4M12 17h.01M10.3 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.7 3.86a2 2 0 0 0-3.42 0z"/></svg>COULDN'T READ PAGE</span><span class="code">ERR · 422</span></div>
+              <div class="body">No recipe found behind the paywall. Try the original video, or paste the text into Prep.</div>
+            </div>
+            <div class="fire-row"><button class="fire-btn">RETRY · re-fire</button><button class="prep-btn">Prep</button></div>
+          </div>
+
+          <p class="caption">Fire button — default / hover / pressed</p>
+          <div class="btn-states">
+            <button class="fire-btn">FIRE</button>
+            <button class="fire-btn hover">FIRE</button>
+            <button class="fire-btn press">FIRE</button>
+          </div>
+
+          <div class="ondark"><span class="big">✶</span><span>✶ glyph on dark hero<br>3.68:1 — beats the red's 3.12</span></div>
+
+          <p class="rationale">
+            <strong>The resolution.</strong> Blue Fire button + blue ✶ on the error card, red stamp + red callout = the eye instantly parts <span class="tag">brand-action (blue)</span> from <span class="tag">failure (red)</span>. The blue is a <strong>specific cobalt-cyan</strong> (hue 238°, drifting to 232° cyan at the hot bright edge) — a lit burner's flame ring, deliberately <em>not</em> the indigo-purple SaaS-blue cluster (Linear/Stripe/Tailwind ~255–280°). Authentic to the brief: pro service-line burners run blue because blue is the hottest flame. "Fire"/"Fired" still holds — gas flame is fire. Logo is monochrome, so the accent recolour never touches the mark — a cheap pivot.
+          </p>
+        </div>
+
+      </div>
+    </div>
+  </body>
+</html>

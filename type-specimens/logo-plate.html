@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Mise — Logo: plate + mono-M directions</title>
+    <style>
+      @font-face {
+        font-family: "Departure Mono";
+        src: url("./fonts/DepartureMono-Regular.woff2") format("woff2");
+        font-weight: 400; font-style: normal; font-display: swap;
+      }
+      @font-face {
+        font-family: "Commit Mono";
+        src: url("./fonts/CommitMono-400-Regular.otf") format("opentype");
+        font-weight: 400; font-style: normal; font-display: swap;
+      }
+
+      :root {
+        --font-display: "Departure Mono", ui-monospace, Menlo, monospace;
+        --font-mono: "Commit Mono", ui-monospace, Menlo, monospace;
+
+        --ink-900: oklch(0.100 0 0);
+        --ink-800: oklch(0.150 0 0);
+        --ink-700: oklch(0.200 0 0);
+        --ink-600: oklch(0.280 0 0);
+        --paper-50:  oklch(0.985 0 0);
+        --paper-100: oklch(0.965 0 0);
+        --paper-200: oklch(0.920 0 0);
+        --paper-muted: oklch(0.620 0 0);
+        --paper-dim: oklch(0.780 0 0);
+        --rule-ink: oklch(0.280 0 0);
+        --flame: oklch(0.533 0.212 30.4);
+
+        --s-sm: 8px; --s-md: 12px; --s-lg: 16px; --s-xl: 24px; --s-2xl: 32px; --s-3xl: 48px; --s-4xl: 64px;
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; background: var(--ink-700); color: var(--paper-100); font-family: var(--font-mono); -webkit-font-smoothing: antialiased; }
+      .page { max-width: 1180px; margin: 0 auto; padding: clamp(24px,5vw,56px) clamp(16px,4vw,40px) 120px; }
+
+      .page-head { border-bottom: 1px solid var(--rule-ink); padding-bottom: var(--s-xl); margin-bottom: var(--s-xl); display: grid; grid-template-columns: 1fr auto; gap: var(--s-lg); align-items: baseline; }
+      .page-head h1 { font-family: var(--font-display); font-weight: 400; font-size: clamp(20px,3vw,32px); line-height: 1.05; letter-spacing: 0.02em; text-transform: uppercase; margin: 0; }
+      .page-head .slug { font-family: var(--font-mono); font-size: 11px; color: var(--paper-muted); letter-spacing: 0.1em; text-transform: uppercase; }
+      .page-head .slug .g { color: var(--flame); margin-right: 6px; }
+      nav.specnav { margin: 0 0 36px; font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; }
+      nav.specnav a { color: var(--paper-dim); text-decoration: none; }
+      nav.specnav a.here { color: var(--paper-100); border-bottom: 1px solid var(--flame); padding-bottom: 2px; }
+      nav.specnav .sep { color: var(--paper-muted); margin: 0 10px; }
+      .lead { max-width: 74ch; font-size: 13px; line-height: 1.6; color: var(--paper-dim); margin-bottom: var(--s-4xl); }
+      .lead em { font-style: normal; color: var(--paper-100); }
+
+      .dir { margin-bottom: var(--s-4xl); padding-bottom: var(--s-3xl); border-bottom: 1px solid var(--rule-ink); }
+      .dir-head { display: flex; align-items: baseline; gap: var(--s-md); margin-bottom: var(--s-xl); }
+      .dir-head .id { font-family: var(--font-display); font-size: 13px; letter-spacing: 0.14em; color: var(--flame); text-transform: uppercase; }
+      .dir-head .nm { font-family: var(--font-display); font-size: 13px; letter-spacing: 0.14em; color: var(--paper-100); text-transform: uppercase; }
+      .dir-head .sub { font-family: var(--font-mono); font-size: 11px; color: var(--paper-muted); letter-spacing: 0.04em; margin-left: auto; }
+
+      .row { display: flex; gap: var(--s-xl); flex-wrap: wrap; align-items: flex-end; margin-bottom: var(--s-xl); }
+
+      /* tiles */
+      .tile { display: grid; place-items: center; }
+      .tile.ink { background: var(--ink-800); }
+      .tile.ink  .mark { color: var(--paper-100); }
+      .tile.paper { background: var(--paper-100); }
+      .tile.paper .mark { color: var(--ink-900); }
+      .hero { width: 200px; height: 200px; border: 1px solid var(--rule-ink); }
+      .hero .mark { width: 64%; }
+      .cap { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--paper-muted); margin-top: 6px; text-align: center; }
+
+      .ladder { display: flex; gap: var(--s-lg); align-items: flex-end; }
+      .ladder .step { text-align: center; }
+      .ladder .tile { border: 1px solid var(--rule-ink); }
+      .ladder .tile .mark { width: 78%; }
+      .sz-128 { width: 128px; height: 128px; }
+      .sz-48 { width: 48px; height: 48px; }
+      .sz-32 { width: 32px; height: 32px; }
+      .sz-16 { width: 16px; height: 16px; }
+
+      .mark svg { display: block; width: 100%; height: auto; shape-rendering: crispEdges; }
+
+      /* lockup */
+      .lockup { display: flex; align-items: center; gap: 14px; padding: 16px 20px; }
+      .lockup.ink { background: var(--ink-800); border: 1px solid var(--rule-ink); }
+      .lockup.paper { background: var(--paper-100); border: 1px solid var(--rule-ink); }
+      .lockup .mark { width: 46px; flex-shrink: 0; }
+      .lockup .wm { display: flex; flex-direction: column; gap: 2px; }
+      .lockup .wm .name { font-family: var(--font-display); font-size: 30px; line-height: 1; letter-spacing: 0.04em; }
+      .lockup .wm .tag { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; }
+      .lockup.ink .name { color: var(--paper-100); } .lockup.ink .tag { color: var(--paper-muted); }
+      .lockup.paper .name { color: var(--ink-900); } .lockup.paper .tag { color: var(--paper-muted); }
+
+      .notes { display: grid; grid-template-columns: 90px 1fr; gap: 6px 16px; max-width: 76ch; margin-top: var(--s-lg); }
+      .notes dt { font-family: var(--font-display); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--flame); }
+      .notes dd { margin: 0; font-family: var(--font-mono); font-size: 12px; line-height: 1.55; color: var(--paper-dim); }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <header class="page-head">
+        <h1>Mise — Logo: plate + mono-M</h1>
+        <span class="slug"><span class="g">✶</span> crit · plate directions · 2026-06-08</span>
+      </header>
+      <nav class="specnav">
+        <a href="./index.html">Specimen</a><span class="sep">·</span>
+        <a href="./popup-motion.html">Motion</a><span class="sep">·</span>
+        <a class="here" href="./logo-plate.html">Logo: plate+M</a>
+      </nav>
+      <p class="lead">
+        Reopening the mark. The <em>Mono-M</em> direction was rejected last round for one reason — <em>"a lone M is the most generic mark shape there is."</em>
+        A plate is the fix: it makes the brand-DNA M unmistakably <em>food</em>. Three relationships below, all drawn on the same coarse pixel grid as the Fire / Weeds / Off-Menu icons, with the single flame pixel kept in the M's valley. Shown on ink and paper, down the MV3 icon ladder, and in lockup.
+      </p>
+
+      <section class="dir" id="dirA"></section>
+      <section class="dir" id="dirB"></section>
+      <section class="dir" id="dirC"></section>
+    </main>
+
+    <script>
+      // ── pixel-M (7×7), Departure-Mono-ish, flame (2) in the central valley ──
+      const MGLYPH = [
+        "1.....1",
+        "11...11",
+        "1.1.1.1",
+        "1..2..1",
+        "1.....1",
+        "1.....1",
+        "1.....1",
+      ];
+      const grid = (w, h) => Array.from({ length: h }, () => Array(w).fill(0));
+      function stampM(g, ox, oy) {
+        for (let r = 0; r < MGLYPH.length; r++)
+          for (let c = 0; c < 7; c++) {
+            const ch = MGLYPH[r][c];
+            if (ch !== ".") g[oy + r][ox + c] = ch === "2" ? 2 : 1;
+          }
+      }
+      // pixel ring / disc on a square grid of size N
+      function forEachCell(N, fn) { for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) fn(x, y); }
+      function svg(g) {
+        const h = g.length, w = g[0].length;
+        let rects = "";
+        for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+          const v = g[y][x];
+          if (!v) continue;
+          const fill = v === 2 ? "var(--flame)" : "currentColor";
+          rects += `<rect x="${x}" y="${y}" width="1" height="1" fill="${fill}"/>`;
+        }
+        return `<svg viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Mise">${rects}</svg>`;
+      }
+
+      // ── A: TOP-DOWN — M plated inside a pixel rim ──
+      function buildA() {
+        const N = 15, g = grid(N, N), c = (N - 1) / 2;
+        forEachCell(N, (x, y) => {
+          const d = Math.hypot(x - c, y - c);
+          if (Math.round(d) === 6) g[y][x] = 1; // single-pixel rim
+        });
+        stampM(g, c - 3, c - 3); // M centred (7×7)
+        return g;
+      }
+      // ── B: SIDE — M served on a profile plate ──
+      function buildB() {
+        const W = 13, H = 10, g = grid(W, H);
+        stampM(g, 3, 0);                       // M up top, cols3-9 rows0-6
+        for (let x = 0; x <= 12; x++) g[8][x] = 1;   // rim line, full width
+        for (let x = 3; x <= 9; x++) g[9][x] = 1;    // foot, narrower
+        return g;
+      }
+      // ── C: KNOCKOUT — M reversed out of a solid plate ──
+      function buildC() {
+        const N = 15, g = grid(N, N), c = (N - 1) / 2;
+        forEachCell(N, (x, y) => { if (Math.hypot(x - c, y - c) <= 7.3) g[y][x] = 1; }); // solid disc
+        // knock the M out (holes), keep its valley as a flame pixel
+        for (let r = 0; r < 7; r++) for (let k = 0; k < 7; k++) {
+          const ch = MGLYPH[r][k];
+          if (ch === "1") g[c - 3 + r][c - 3 + k] = 0;       // hole
+          if (ch === "2") g[c - 3 + r][c - 3 + k] = 2;       // flame in valley
+        }
+        return g;
+      }
+
+      const DIRS = [
+        { el: "dirA", id: "A", nm: "Top-down · plated", sub: "M inside the rim",
+          g: buildA(),
+          decision: "Ben's literal idea — a plate seen from above, the M plated dead-centre. Rim and M share one grid; flame holds the valley.",
+          tension: "A ring with a letter inside edges toward the generic 'monogram-in-a-circle' badge. Does the pixel rim + flame read specifically as a plate, or just an enclosed M?" },
+        { el: "dirB", id: "B", nm: "Side · served", sub: "M on a profile plate",
+          g: buildB(),
+          decision: "The M served on a plate seen in profile — the most unmistakably 'a plate', most dining. Foot + rim line read as tableware at a glance.",
+          tension: "The profile plate is thin; at 16px it can collapse to a line under the M. The M sits above the plate rather than 'on' it — relationship is implied, not locked." },
+        { el: "dirC", id: "C", nm: "Knockout · stamped", sub: "M reversed out of the plate",
+          g: buildC(),
+          decision: "M reversed out of a solid plate — a filled disc, stamp-like, ties to the FIRED stamp and ticket world. Boldest, most 'mark-like'. Flame dot sits in the M void.",
+          tension: "Knockout needs size to breathe; at 16px the thin M voids can clog into a blob. Strongest as an app icon, riskiest as a favicon." },
+      ];
+
+      for (const d of DIRS) {
+        const mk = `<span class="mark">${svg(d.g)}</span>`;
+        document.getElementById(d.el).innerHTML = `
+          <div class="dir-head"><span class="id">${d.id}</span><span class="nm">${d.nm}</span><span class="sub">${d.sub}</span></div>
+          <div class="row">
+            <div><div class="tile ink hero">${mk}</div><div class="cap">on ink</div></div>
+            <div><div class="tile paper hero">${mk}</div><div class="cap">on paper</div></div>
+            <div class="ladder">
+              <div class="step"><div class="tile ink sz-128">${mk}</div><div class="cap">128</div></div>
+              <div class="step"><div class="tile ink sz-48">${mk}</div><div class="cap">48</div></div>
+              <div class="step"><div class="tile ink sz-32">${mk}</div><div class="cap">32</div></div>
+              <div class="step"><div class="tile ink sz-16">${mk}</div><div class="cap">16</div></div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="lockup ink">${mk}<div class="wm"><span class="name">MISE</span><span class="tag">Own your recipes</span></div></div>
+            <div class="lockup paper">${mk}<div class="wm"><span class="name">MISE</span><span class="tag">Fire · The Pass · Prep</span></div></div>
+          </div>
+          <dl class="notes">
+            <dt>Decision</dt><dd>${d.decision}</dd>
+            <dt>Tension</dt><dd>${d.tension}</dd>
+          </dl>`;
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,64 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+# Unanchored so nested workspaces (extension/) are covered too.
+node_modules/
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# env files (can opt-in for committing if needed)
+.env*
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+.superpowers/
+
+# scratch + tool trails
+.scratch/
+.playwright-mcp/
+
+# Mise extension build output
+extension/dist/
+
+# render:states output — regenerated on every run, never edited by hand
+extension/.render/
+
+# Secrets. api_key.txt sat untracked and unignored in the repo root until
+# 2026-08-20 — one `git add -A` away from being published.
+api_key.txt
+*.key
+.env
+.env.*
+
+# Local build output from the old embed build; never committed
+extension/.embed/
